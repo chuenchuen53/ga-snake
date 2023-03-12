@@ -1,0 +1,135 @@
+import Position, { IPosition } from "./Position";
+import Snake, { ISnake } from "./Snake";
+import { Direction, SnakeAction } from "./typing";
+import { utils } from "./utils";
+
+export interface ProvidedInitialStatus {
+  snake: ISnake;
+  food: IPosition;
+  gameOver: boolean;
+  moves: number;
+  movesForNoFood: number;
+}
+
+export interface Options {
+  worldWidth: number;
+  worldHeight: number;
+  providedInitialStatus?: ProvidedInitialStatus;
+}
+
+export default class SnakeGame {
+  public worldWidth: number;
+  public worldHeight: number;
+  public allPositions: Position[];
+  public snake: Snake;
+  public food: Position;
+  public gameOver: boolean;
+  public moves: number;
+  public movesForNoFood: number;
+  public maxTurnOfNoFood: number;
+
+  constructor(options: Options) {
+    this.worldWidth = options.worldWidth;
+    this.worldHeight = options.worldHeight;
+
+    this.allPositions = new Array(this.worldWidth * this.worldHeight);
+    for (let i = 0; i < this.worldWidth; i++) {
+      for (let j = 0; j < this.worldHeight; j++) {
+        this.allPositions[i * this.worldHeight + j] = new Position(i, j);
+      }
+    }
+
+    if (options.providedInitialStatus) {
+      this.snake = Snake.fromPlainObj(options.providedInitialStatus.snake);
+      this.food = Position.fromPlainObj(options.providedInitialStatus.food);
+      this.gameOver = options.providedInitialStatus.gameOver;
+      this.moves = options.providedInitialStatus.moves;
+      this.movesForNoFood = options.providedInitialStatus.movesForNoFood;
+      this.maxTurnOfNoFood = 0;
+      this.updateMaxTurnOfNoFood();
+    } else {
+      this.snake = this.getInitSnake();
+      this.food = this.getRandomFoodPosition();
+      this.gameOver = false;
+      this.moves = 0;
+      this.movesForNoFood = 0;
+      this.maxTurnOfNoFood = 0;
+      this.updateMaxTurnOfNoFood();
+    }
+  }
+
+  public reset() {
+    this.snake = this.getInitSnake();
+    this.food = this.getRandomFoodPosition();
+    this.gameOver = false;
+    this.moves = 0;
+    this.movesForNoFood = 0;
+    this.maxTurnOfNoFood = 0;
+    this.updateMaxTurnOfNoFood();
+  }
+
+  public suicide() {
+    if (this.gameOver) throw new Error("suicide() is called when game is over");
+
+    this.moves++;
+    this.gameOver = true;
+  }
+
+  public checkOutOfBounds(position: Position): Boolean {
+    return position.x < 0 || position.x >= this.worldWidth || position.y < 0 || position.y >= this.worldHeight;
+  }
+
+  public getRandomFoodPosition(): Position {
+    const snakeOccupied = new Array(this.worldWidth * this.worldHeight).fill(false);
+    for (let position of this.snake.positions) {
+      snakeOccupied[position.x * this.worldHeight + position.y] = true;
+    }
+    const availablePositions = this.allPositions.filter((_, index) => !snakeOccupied[index]);
+    return utils.randomItemFromArray(availablePositions);
+  }
+
+  public snakeMove(action: SnakeAction) {
+    if (this.gameOver) throw new Error("snakeMove() is called when game is over");
+
+    this.moves++;
+    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMove(action);
+    const eatFood = this.food.isEqual(newHeadPositionAndDirection.position);
+    if (eatFood) {
+      this.snake.moveWithFoodEaten(newHeadPositionAndDirection);
+      this.movesForNoFood = 0;
+
+      if (this.snake.positions.length >= this.worldWidth * this.worldHeight) {
+        this.gameOver = true;
+      } else {
+        this.food = this.getRandomFoodPosition();
+        this.updateMaxTurnOfNoFood();
+      }
+    } else {
+      this.movesForNoFood++;
+
+      if (this.snake.checkCollisionAfterMove(newHeadPositionAndDirection.position) || this.checkOutOfBounds(newHeadPositionAndDirection.position)) {
+        this.gameOver = true;
+      } else {
+        this.snake.move(newHeadPositionAndDirection);
+        if (this.movesForNoFood >= this.maxTurnOfNoFood) this.gameOver = true;
+      }
+    }
+  }
+
+  private updateMaxTurnOfNoFood(): void {
+    const snakeLength = this.snake.positions.length;
+    if (snakeLength < 0.2 * (this.worldWidth * this.worldHeight)) {
+      this.maxTurnOfNoFood = Math.max(Math.ceil(0.5 * (this.worldWidth * this.worldHeight)));
+    } else if (snakeLength < 0.5 * (this.worldWidth * this.worldHeight)) {
+      this.maxTurnOfNoFood = this.worldWidth * this.worldHeight;
+    } else {
+      this.maxTurnOfNoFood = 2 * this.worldWidth * this.worldHeight;
+    }
+  }
+
+  private getInitSnake() {
+    const position = new Position(Math.floor(this.worldWidth / 2), Math.floor(this.worldHeight / 2));
+    const direction = utils.randomItemFromEnum(Direction);
+    return new Snake([position], direction);
+  }
+}
