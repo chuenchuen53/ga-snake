@@ -1,27 +1,29 @@
 import React, { useEffect } from "react";
-import { SnakeAction } from "snake-game/typing";
+import { Direction } from "snake-game/typing";
 import { SnakeGameUi } from "./SnakeGameUi";
-import type SnakeGame from "snake-game/SnakeGame";
+import type { Action } from "@reduxjs/toolkit";
+import type { ISnakeGame } from "snake-game/SnakeGame";
 
 interface Props {
-  snakeGame: SnakeGame;
+  snakeGame: ISnakeGame;
+  snakeMove: (direction: Direction) => Action;
 }
 
-export const ManualSnakeGame = ({ snakeGame }: Props) => {
-  const snakeMove = (snakeAction: SnakeAction) => snakeGame.snakeMove(snakeAction);
-
+export const ManualSnakeGame = ({ snakeGame, snakeMove }: Props) => {
   useEffect(() => {
     const keydownHandler = (event: KeyboardEvent) => {
-      console.log(event.key);
       switch (event.key) {
         case "ArrowUp":
-          snakeMove(SnakeAction.FRONT);
+          snakeMove(Direction.UP);
+          break;
+        case "ArrowDown":
+          snakeMove(Direction.DOWN);
           break;
         case "ArrowLeft":
-          snakeMove(SnakeAction.TURN_LEFT);
+          snakeMove(Direction.LEFT);
           break;
         case "ArrowRight":
-          snakeMove(SnakeAction.TURN_RIGHT);
+          snakeMove(Direction.RIGHT);
           break;
         default:
           break;

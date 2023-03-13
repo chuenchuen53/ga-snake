@@ -75,79 +75,103 @@ describe("test suite for Snake", () => {
     expect(snake.checkCollisionAfterMove(down)).toBe(true);
   });
 
-  it("getHeadPositionAndDirectionAfterMove test 1", () => {
+  it("getHeadPositionAndDirectionAfterMoveBySnakeAction test 1", () => {
     const snake = new Snake([new Position(1, 1)], Direction.UP);
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.FRONT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.FRONT)).toStrictEqual({
       position: new Position(1, 0),
       direction: Direction.UP,
     });
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.TURN_LEFT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.TURN_LEFT)).toStrictEqual({
       position: new Position(0, 1),
       direction: Direction.LEFT,
     });
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.TURN_RIGHT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.TURN_RIGHT)).toStrictEqual({
       position: new Position(2, 1),
       direction: Direction.RIGHT,
     });
   });
 
-  it("getHeadPositionAndDirectionAfterMove test 2", () => {
+  it("getHeadPositionAndDirectionAfterMoveBySnakeAction test 2", () => {
     const snake = new Snake([new Position(1, 1)], Direction.DOWN);
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.FRONT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.FRONT)).toStrictEqual({
       position: new Position(1, 2),
       direction: Direction.DOWN,
     });
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.TURN_LEFT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.TURN_LEFT)).toStrictEqual({
       position: new Position(2, 1),
       direction: Direction.RIGHT,
     });
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.TURN_RIGHT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.TURN_RIGHT)).toStrictEqual({
       position: new Position(0, 1),
       direction: Direction.LEFT,
     });
   });
 
-  it("getHeadPositionAndDirectionAfterMove test 3", () => {
+  it("getHeadPositionAndDirectionAfterMoveBySnakeAction test 3", () => {
     const snake = new Snake([new Position(1, 1)], Direction.LEFT);
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.FRONT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.FRONT)).toStrictEqual({
       position: new Position(0, 1),
       direction: Direction.LEFT,
     });
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.TURN_LEFT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.TURN_LEFT)).toStrictEqual({
       position: new Position(1, 2),
       direction: Direction.DOWN,
     });
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.TURN_RIGHT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.TURN_RIGHT)).toStrictEqual({
       position: new Position(1, 0),
       direction: Direction.UP,
     });
   });
 
-  it("getHeadPositionAndDirectionAfterMove test 4", () => {
+  it("getHeadPositionAndDirectionAfterMoveBySnakeAction test 4", () => {
     const snake = new Snake([new Position(1, 1)], Direction.RIGHT);
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.FRONT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.FRONT)).toStrictEqual({
       position: new Position(2, 1),
       direction: Direction.RIGHT,
     });
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.TURN_LEFT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.TURN_LEFT)).toStrictEqual({
       position: new Position(1, 0),
       direction: Direction.UP,
     });
 
-    expect(snake.getHeadPositionAndDirectionAfterMove(SnakeAction.TURN_RIGHT)).toStrictEqual({
+    expect(snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.TURN_RIGHT)).toStrictEqual({
       position: new Position(1, 2),
       direction: Direction.DOWN,
+    });
+  });
+
+  it("getHeadPositionAndDirectionAfterMoveByDirection test 1", () => {
+    const snake = new Snake([new Position(1, 1)], Direction.UP);
+
+    expect(snake.getHeadPositionAndDirectionAfterMoveByDirection(Direction.UP)).toStrictEqual({
+      position: new Position(1, 0),
+      direction: Direction.UP,
+    });
+
+    expect(snake.getHeadPositionAndDirectionAfterMoveByDirection(Direction.LEFT)).toStrictEqual({
+      position: new Position(0, 1),
+      direction: Direction.LEFT,
+    });
+
+    expect(snake.getHeadPositionAndDirectionAfterMoveByDirection(Direction.DOWN)).toStrictEqual({
+      position: new Position(1, 2),
+      direction: Direction.DOWN,
+    });
+
+    expect(snake.getHeadPositionAndDirectionAfterMoveByDirection(Direction.RIGHT)).toStrictEqual({
+      position: new Position(2, 1),
+      direction: Direction.RIGHT,
     });
   });
 
@@ -155,7 +179,7 @@ describe("test suite for Snake", () => {
     for (const direction of utils.enumToArray(Direction)) {
       for (const snakeAction of utils.enumToArray(SnakeAction)) {
         const snake = new Snake([new Position(1, 1)], direction);
-        const positionAndDirection = snake.getHeadPositionAndDirectionAfterMove(snakeAction);
+        const positionAndDirection = snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(snakeAction);
         snake.move(positionAndDirection);
         expect(snake.positions.length).toBe(1);
         expect(snake.positions).toStrictEqual([positionAndDirection.position]);
@@ -167,7 +191,7 @@ describe("test suite for Snake", () => {
   it("move test 2", () => {
     const positions = [new Position(1, 1), new Position(1, 2), new Position(2, 2), new Position(2, 1)];
     const snake = new Snake(positions, Direction.UP);
-    const positionAndDirection = snake.getHeadPositionAndDirectionAfterMove(SnakeAction.FRONT);
+    const positionAndDirection = snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.FRONT);
     snake.move(positionAndDirection);
     expect(snake.positions.length).toBe(4);
     expect(snake.positions).toStrictEqual([positionAndDirection.position, positions[0], positions[1], positions[2]]);
@@ -178,7 +202,7 @@ describe("test suite for Snake", () => {
     for (const direction of utils.enumToArray(Direction)) {
       for (const snakeAction of utils.enumToArray(SnakeAction)) {
         const snake = new Snake([new Position(1, 1)], direction);
-        const positionAndDirection = snake.getHeadPositionAndDirectionAfterMove(snakeAction);
+        const positionAndDirection = snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(snakeAction);
         snake.moveWithFoodEaten(positionAndDirection);
         expect(snake.positions.length).toBe(2);
         expect(snake.positions).toStrictEqual([positionAndDirection.position, new Position(1, 1)]);
@@ -190,7 +214,7 @@ describe("test suite for Snake", () => {
   it("moveWithFoodEaten test 2", () => {
     const positions = [new Position(1, 1), new Position(1, 2), new Position(2, 2), new Position(2, 1)];
     const snake = new Snake(positions, Direction.UP);
-    const positionAndDirection = snake.getHeadPositionAndDirectionAfterMove(SnakeAction.FRONT);
+    const positionAndDirection = snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(SnakeAction.FRONT);
     snake.moveWithFoodEaten(positionAndDirection);
     expect(snake.positions.length).toBe(5);
     expect(snake.positions).toStrictEqual([positionAndDirection.position, positions[0], positions[1], positions[2], positions[3]]);

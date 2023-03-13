@@ -2,7 +2,8 @@ import Position from "./Position";
 import Snake from "./Snake";
 import { Direction } from "./typing";
 import { utils } from "./utils";
-import type { SnakeAction } from "./typing";
+import { oppositeDirection } from "./oppositeDirection";
+import type { SnakeAction, PositionAndDirection } from "./typing";
 import type { ISnake } from "./Snake";
 import type { IPosition } from "./Position";
 
@@ -33,6 +34,20 @@ export interface ISnakeGame {
 }
 
 export default class SnakeGame implements ISnakeGame {
+  public static clone(snakeGame: SnakeGame): SnakeGame {
+    return new SnakeGame({
+      worldWidth: snakeGame.worldWidth,
+      worldHeight: snakeGame.worldHeight,
+      providedInitialStatus: {
+        snake: snakeGame.snake.toPlainObject(),
+        food: snakeGame.food.toPlainObject(),
+        gameOver: snakeGame.gameOver,
+        moves: snakeGame.moves,
+        movesForNoFood: snakeGame.movesForNoFood,
+      },
+    });
+  }
+
   public worldWidth: number;
   public worldHeight: number;
   public allPositions: Position[];
@@ -101,6 +116,7 @@ export default class SnakeGame implements ISnakeGame {
     if (this.gameOver) throw new Error("suicide() is called when game is over");
 
     this.moves++;
+    this.movesForNoFood++;
     this.gameOver = true;
   }
 
@@ -117,11 +133,38 @@ export default class SnakeGame implements ISnakeGame {
     return utils.randomItemFromArray(availablePositions);
   }
 
-  public snakeMove(action: SnakeAction) {
-    if (this.gameOver) throw new Error("snakeMove() is called when game is over");
+  public snakeMoveBySnakeAction(action: SnakeAction) {
+    if (this.gameOver) throw new Error("snakeMoveBySnakeAction() is called when game is over");
 
+    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(action);
+    this.snakeMove(newHeadPositionAndDirection);
+  }
+
+  public snakeMoveByDirection(direction: Direction) {
+    if (this.gameOver) throw new Error("snakeMoveByDirection() is called when game is over");
+
+    if (this.snake.direction === oppositeDirection(direction)) {
+      this.suicide();
+      return;
+    }
+
+    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveByDirection(direction);
+    this.snakeMove(newHeadPositionAndDirection);
+  }
+
+  public snakeMoveByDirectionWithSuicidePrevention(direction: Direction) {
+    if (this.gameOver) throw new Error("snakeMoveByDirectionWithSuicidePrevention() is called when game is over");
+
+    if (this.snake.direction === oppositeDirection(direction)) {
+      return;
+    }
+
+    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveByDirection(direction);
+    this.snakeMove(newHeadPositionAndDirection);
+  }
+
+  private snakeMove(newHeadPositionAndDirection: PositionAndDirection) {
     this.moves++;
-    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMove(action);
     const eatFood = this.food.isEqual(newHeadPositionAndDirection.position);
     if (eatFood) {
       this.snake.moveWithFoodEaten(newHeadPositionAndDirection);

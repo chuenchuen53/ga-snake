@@ -1,8 +1,19 @@
+import { oppositeDirection } from "../oppositeDirection";
 import Position from "../Position";
 import SnakeGame from "../SnakeGame";
 import { Direction, SnakeAction } from "../typing";
+import { utils } from "../utils";
 
 describe("test suite for SnakeGame", () => {
+  it("static clone test", () => {
+    const options = { worldWidth: 3, worldHeight: 3 };
+    const snakeGame = new SnakeGame(options);
+    const snakeGameClone = SnakeGame.clone(snakeGame);
+
+    expect(snakeGameClone === snakeGame).toBe(false);
+    expect(snakeGameClone).toStrictEqual(snakeGame);
+  });
+
   it("constructor test", () => {
     const options = { worldWidth: 3, worldHeight: 3 };
     const snakeGame = new SnakeGame(options);
@@ -182,12 +193,15 @@ describe("test suite for SnakeGame", () => {
     const snakeGame1 = new SnakeGame(options);
     snakeGame1.suicide();
     expect(snakeGame1.moves).toBe(1);
+    expect(snakeGame1.movesForNoFood).toBe(1);
     expect(snakeGame1.gameOver).toBe(true);
 
     const snakeGame2 = new SnakeGame(options);
-    snakeGame2.snakeMove(SnakeAction.FRONT);
+    snakeGame2.snakeMoveBySnakeAction(SnakeAction.FRONT);
+    const movesForNoFoodBeforeSuicide = snakeGame2.movesForNoFood;
     snakeGame2.suicide();
     expect(snakeGame2.moves).toBe(2);
+    expect(snakeGame2.movesForNoFood).toBe(movesForNoFoodBeforeSuicide + 1);
     expect(snakeGame2.gameOver).toBe(true);
   });
 
@@ -200,8 +214,7 @@ describe("test suite for SnakeGame", () => {
   });
 
   it("checkOutOfBounds test 1", () => {
-    const options = { worldWidth: 3, worldHeight: 3 };
-    const snakeGame = new SnakeGame(options);
+    const snakeGame = new SnakeGame({ worldWidth: 3, worldHeight: 3 });
 
     expect(snakeGame.checkOutOfBounds(new Position(-1, 0))).toBe(true);
     expect(snakeGame.checkOutOfBounds(new Position(-1, -1))).toBe(true);
@@ -306,32 +319,114 @@ describe("test suite for SnakeGame", () => {
     getRandomFoodPositionHelper(snakeGame);
   });
 
-  it("snakeMove test 1", () => {
-    for (let i = 0; i < 100; i++) {
-      const snakeGame = new SnakeGame({ worldWidth: 3, worldHeight: 3 });
-      const food = snakeGame.food;
-      const headPositionAndDirectionAfterMove = snakeGame.snake.getHeadPositionAndDirectionAfterMove(SnakeAction.FRONT);
+  it("snakeMoveBySnakeAction test", () => {
+    for (const snakeAction of utils.enumToArray(SnakeAction)) {
+      const snakeGame = new SnakeGame({ worldWidth: 5, worldHeight: 5 });
+      const getHeadPositionAndDirectionAfterMoveBySnakeActionSpy = jest.spyOn(snakeGame.snake, "getHeadPositionAndDirectionAfterMoveBySnakeAction");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- use type-casting to access the private method
+      const snakeMoveSpy = jest.spyOn(snakeGame as any, "snakeMove");
 
-      const moveSpy = jest.spyOn(snakeGame.snake, "move");
-      const moveWithFoodEatenSpy = jest.spyOn(snakeGame.snake, "moveWithFoodEaten");
-
-      snakeGame.snakeMove(SnakeAction.FRONT);
-      if (headPositionAndDirectionAfterMove.position.isEqual(food)) {
-        expect(moveSpy).toHaveBeenCalledTimes(0);
-        expect(moveWithFoodEatenSpy).toHaveBeenCalledTimes(1);
-        expect(moveWithFoodEatenSpy).toHaveBeenCalledWith(headPositionAndDirectionAfterMove);
-        expect(snakeGame.movesForNoFood).toBe(0);
-      } else {
-        expect(moveWithFoodEatenSpy).toHaveBeenCalledTimes(0);
-        expect(moveSpy).toHaveBeenCalledTimes(1);
-        expect(moveSpy).toHaveBeenCalledWith(headPositionAndDirectionAfterMove);
-        expect(snakeGame.movesForNoFood).toBe(1);
-      }
-      expect(snakeGame.moves).toBe(1);
+      snakeGame.snakeMoveBySnakeAction(snakeAction);
+      expect(getHeadPositionAndDirectionAfterMoveBySnakeActionSpy).toBeCalledWith(snakeAction);
+      expect(snakeMoveSpy).toBeCalledTimes(1);
     }
   });
 
-  it("snakeMove test out of bounds", () => {
+  it("snakeMoveBySnakeAction test toThrowError", () => {
+    const snakeGame = new SnakeGame({ worldWidth: 2, worldHeight: 2 });
+    snakeGame.suicide();
+    expect(() => snakeGame.snakeMoveBySnakeAction(SnakeAction.FRONT)).toThrowError("snakeMoveBySnakeAction() is called when game is over");
+  });
+
+  it("snakeMoveByDirection test", () => {
+    const allDirection = utils.enumToArray(Direction);
+
+    for (const direction of allDirection) {
+      const snakeGame = new SnakeGame({
+        worldWidth: 5,
+        worldHeight: 5,
+        providedInitialStatus: {
+          snake: {
+            positions: [new Position(2, 2)],
+            direction: Direction.UP,
+          },
+          food: new Position(0, 0),
+          moves: 0,
+          movesForNoFood: 0,
+          gameOver: false,
+        },
+      });
+
+      const getHeadPositionAndDirectionAfterMoveByDirectionSpy = jest.spyOn(snakeGame.snake, "getHeadPositionAndDirectionAfterMoveByDirection");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- use type-casting to access the private method
+      const snakeMoveSpy = jest.spyOn(snakeGame as any, "snakeMove");
+      const suicideSpy = jest.spyOn(snakeGame, "suicide");
+
+      snakeGame.snakeMoveByDirection(direction);
+
+      if (direction === oppositeDirection(Direction.UP)) {
+        expect(getHeadPositionAndDirectionAfterMoveByDirectionSpy).toBeCalledTimes(0);
+        expect(snakeMoveSpy).toBeCalledTimes(0);
+        expect(suicideSpy).toBeCalledTimes(1);
+      } else {
+        expect(getHeadPositionAndDirectionAfterMoveByDirectionSpy).toBeCalledWith(direction);
+        expect(snakeMoveSpy).toBeCalledTimes(1);
+        expect(suicideSpy).toBeCalledTimes(0);
+      }
+    }
+  });
+
+  it("snakeMoveByDirection test toThrowError", () => {
+    const snakeGame = new SnakeGame({ worldWidth: 2, worldHeight: 2 });
+    snakeGame.suicide();
+    expect(() => snakeGame.snakeMoveByDirection(Direction.UP)).toThrowError("snakeMoveByDirection() is called when game is over");
+  });
+
+  it("snakeMoveByDirectionWithSuicidePrevention test", () => {
+    const allDirection = utils.enumToArray(Direction);
+
+    for (const direction of allDirection) {
+      const snakeGame = new SnakeGame({
+        worldWidth: 5,
+        worldHeight: 5,
+        providedInitialStatus: {
+          snake: {
+            positions: [new Position(2, 2)],
+            direction: Direction.UP,
+          },
+          food: new Position(0, 0),
+          moves: 0,
+          movesForNoFood: 0,
+          gameOver: false,
+        },
+      });
+
+      const getHeadPositionAndDirectionAfterMoveByDirectionSpy = jest.spyOn(snakeGame.snake, "getHeadPositionAndDirectionAfterMoveByDirection");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- use type-casting to access the private method
+      const snakeMoveSpy = jest.spyOn(snakeGame as any, "snakeMove");
+      const suicideSpy = jest.spyOn(snakeGame, "suicide");
+
+      snakeGame.snakeMoveByDirectionWithSuicidePrevention(direction);
+
+      if (direction === oppositeDirection(Direction.UP)) {
+        expect(getHeadPositionAndDirectionAfterMoveByDirectionSpy).toBeCalledTimes(0);
+        expect(snakeMoveSpy).toBeCalledTimes(0);
+        expect(suicideSpy).toBeCalledTimes(0);
+      } else {
+        expect(getHeadPositionAndDirectionAfterMoveByDirectionSpy).toBeCalledWith(direction);
+        expect(snakeMoveSpy).toBeCalledTimes(1);
+        expect(suicideSpy).toBeCalledTimes(0);
+      }
+    }
+  });
+
+  it("snakeMoveByDirectionWithSuicidePrevention test toThrowError", () => {
+    const snakeGame = new SnakeGame({ worldWidth: 2, worldHeight: 2 });
+    snakeGame.suicide();
+    expect(() => snakeGame.snakeMoveByDirectionWithSuicidePrevention(Direction.UP)).toThrowError("snakeMoveByDirectionWithSuicidePrevention() is called when game is over");
+  });
+
+  it("snakeMoveBySnakeAction test out of bounds", () => {
     const snakeGame = new SnakeGame({
       worldWidth: 3,
       worldHeight: 3,
@@ -346,13 +441,13 @@ describe("test suite for SnakeGame", () => {
         gameOver: false,
       },
     });
-    snakeGame.snakeMove(SnakeAction.FRONT);
+    snakeGame.snakeMoveBySnakeAction(SnakeAction.FRONT);
     expect(snakeGame.moves).toBe(11);
     expect(snakeGame.movesForNoFood).toBe(3);
     expect(snakeGame.gameOver).toBe(true);
   });
 
-  it("snakeMove test eat self", () => {
+  it("snakeMoveBySnakeAction test eat self", () => {
     const snakeGame = new SnakeGame({
       worldWidth: 3,
       worldHeight: 3,
@@ -373,13 +468,13 @@ describe("test suite for SnakeGame", () => {
         gameOver: false,
       },
     });
-    snakeGame.snakeMove(SnakeAction.TURN_LEFT);
+    snakeGame.snakeMoveBySnakeAction(SnakeAction.TURN_LEFT);
     expect(snakeGame.moves).toBe(11);
     expect(snakeGame.movesForNoFood).toBe(3);
     expect(snakeGame.gameOver).toBe(true);
   });
 
-  it("snakeMove test eat food and reach max length", () => {
+  it("snakeMoveBySnakeAction test eat food and reach max length", () => {
     const snakeGame = new SnakeGame({
       worldWidth: 2,
       worldHeight: 2,
@@ -398,14 +493,14 @@ describe("test suite for SnakeGame", () => {
         gameOver: false,
       },
     });
-    snakeGame.snakeMove(SnakeAction.TURN_RIGHT);
+    snakeGame.snakeMoveBySnakeAction(SnakeAction.TURN_RIGHT);
     expect(snakeGame.moves).toBe(11);
     expect(snakeGame.movesForNoFood).toBe(0);
     expect(snakeGame.gameOver).toBe(true);
     expect(snakeGame.snake.positions.length).toBe(4);
   });
 
-  it("snakeMove test exceed maxTurnOfNoFood", () => {
+  it("snakeMoveBySnakeAction test exceed maxTurnOfNoFood", () => {
     const snakeGame = new SnakeGame({
       worldWidth: 3,
       worldHeight: 3,
@@ -420,17 +515,11 @@ describe("test suite for SnakeGame", () => {
         gameOver: false,
       },
     });
-    snakeGame.snakeMove(SnakeAction.FRONT);
+    snakeGame.snakeMoveBySnakeAction(SnakeAction.FRONT);
     expect(snakeGame.moves).toBe(1000);
     expect(snakeGame.movesForNoFood).toBe(1000);
     expect(snakeGame.gameOver).toBe(true);
     expect(snakeGame.snake.positions.length).toBe(1);
-  });
-
-  it("snakeMove test toThrowError", () => {
-    const snakeGame = new SnakeGame({ worldWidth: 2, worldHeight: 2 });
-    snakeGame.suicide();
-    expect(() => snakeGame.snakeMove(SnakeAction.FRONT)).toThrowError("snakeMove() is called when game is over");
   });
 });
 

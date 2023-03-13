@@ -6,7 +6,7 @@ import { WorldGrid } from "./WorldGrid";
 import { FoodImage } from "./FoodImage";
 import { Snake } from "./Snake";
 import { Background } from "./Background";
-import type SnakeGame from "snake-game/SnakeGame";
+import type { ISnakeGame } from "snake-game/SnakeGame";
 
 const worldBackgroundColor = "#f2f2f2";
 const snakeFillColor = "#1aa4f4";
@@ -14,7 +14,7 @@ const snakeStrokeColor = "#000000";
 const gridStrokeColor = "#00ee00";
 
 interface Props {
-  snakeGame: SnakeGame;
+  snakeGame: ISnakeGame;
 }
 
 export const SnakeGameUi = observer(({ snakeGame }: Props) => {
