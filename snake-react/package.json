@@ -10,6 +10,8 @@
     "@reduxjs/toolkit": "1.9.3",
     "@types/react-redux": "7.1.25",
     "konva": "8.4.2",
+    "mobx": "6.8.0",
+    "mobx-react": "7.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-konva": "18.2.5",
