@@ -29,6 +29,30 @@ describe("test suite for Snake", () => {
     expect(typeof snake.checkCollisionAfterMove(new Position(0, 0))).toBe("boolean");
   });
 
+  it("toPlainObject test", () => {
+    const snake = new Snake([new Position(0, 1), new Position(1, 1), new Position(1, 2)], Direction.LEFT);
+    const plainObj = snake.toPlainObject();
+    expect(plainObj instanceof Snake).toBe(false);
+    expect(plainObj).toStrictEqual({
+      positions: [
+        { x: 0, y: 1 },
+        { x: 1, y: 1 },
+        { x: 1, y: 2 },
+      ],
+      direction: Direction.LEFT,
+    });
+    expect(JSON.stringify(plainObj)).toBe(
+      JSON.stringify({
+        positions: [
+          { x: 0, y: 1 },
+          { x: 1, y: 1 },
+          { x: 1, y: 2 },
+        ],
+        direction: Direction.LEFT,
+      })
+    );
+  });
+
   it("checkCollisionAfterMove test 1", () => {
     const snake = new Snake([new Position(0, 0)], Direction.DOWN);
     // this case wont happen in the game, as (0, 0) is not adjacent to the snake head
@@ -131,7 +155,7 @@ describe("test suite for Snake", () => {
     for (const direction of utils.enumToArray(Direction)) {
       for (const snakeAction of utils.enumToArray(SnakeAction)) {
         const snake = new Snake([new Position(1, 1)], direction);
-        let positionAndDirection = snake.getHeadPositionAndDirectionAfterMove(snakeAction);
+        const positionAndDirection = snake.getHeadPositionAndDirectionAfterMove(snakeAction);
         snake.move(positionAndDirection);
         expect(snake.positions.length).toBe(1);
         expect(snake.positions).toStrictEqual([positionAndDirection.position]);
@@ -154,7 +178,7 @@ describe("test suite for Snake", () => {
     for (const direction of utils.enumToArray(Direction)) {
       for (const snakeAction of utils.enumToArray(SnakeAction)) {
         const snake = new Snake([new Position(1, 1)], direction);
-        let positionAndDirection = snake.getHeadPositionAndDirectionAfterMove(snakeAction);
+        const positionAndDirection = snake.getHeadPositionAndDirectionAfterMove(snakeAction);
         snake.moveWithFoodEaten(positionAndDirection);
         expect(snake.positions.length).toBe(2);
         expect(snake.positions).toStrictEqual([positionAndDirection.position, new Position(1, 1)]);

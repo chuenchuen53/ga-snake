@@ -10,6 +10,17 @@ describe("test suite for Position", () => {
     expect(typeof position.isEqual(new Position(0, 0))).toBe("boolean");
   });
 
+  it("toPlainObject test", () => {
+    const position = new Position(1, 2);
+    const plainObj = position.toPlainObject();
+    expect(plainObj instanceof Position).toBe(false);
+    expect(plainObj).toStrictEqual({
+      x: 1,
+      y: 2,
+    });
+    expect(JSON.stringify(plainObj)).toBe(JSON.stringify({ x: 1, y: 2 }));
+  });
+
   it("isEqual test 1", () => {
     const position = new Position(1, 2);
     expect(position.isEqual(new Position(1, 2))).toBe(true);

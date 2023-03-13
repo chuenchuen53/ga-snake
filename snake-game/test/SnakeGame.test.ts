@@ -76,6 +76,63 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame.maxTurnOfNoFood).toBeGreaterThan(0);
   });
 
+  it("toPlainObject test", () => {
+    const snakeGame = new SnakeGame({
+      worldWidth: 3,
+      worldHeight: 3,
+      providedInitialStatus: {
+        snake: {
+          positions: [
+            { x: 1, y: 1 },
+            { x: 2, y: 1 },
+            { x: 2, y: 2 },
+            { x: 1, y: 2 },
+          ],
+          direction: Direction.LEFT,
+        },
+        food: { x: 0, y: 0 },
+        moves: 10,
+        movesForNoFood: 2,
+        gameOver: false,
+      },
+    });
+    const plainObj = snakeGame.toPlainObject();
+
+    const expectedPlainObject = {
+      worldWidth: 3,
+      worldHeight: 3,
+      allPositions: [
+        { x: 0, y: 0 },
+        { x: 0, y: 1 },
+        { x: 0, y: 2 },
+        { x: 1, y: 0 },
+        { x: 1, y: 1 },
+        { x: 1, y: 2 },
+        { x: 2, y: 0 },
+        { x: 2, y: 1 },
+        { x: 2, y: 2 },
+      ],
+      snake: {
+        positions: [
+          { x: 1, y: 1 },
+          { x: 2, y: 1 },
+          { x: 2, y: 2 },
+          { x: 1, y: 2 },
+        ],
+        direction: Direction.LEFT,
+      },
+      food: { x: snakeGame.food.x, y: snakeGame.food.y },
+      gameOver: false,
+      moves: 10,
+      movesForNoFood: 2,
+      maxTurnOfNoFood: snakeGame.maxTurnOfNoFood,
+    };
+
+    expect(plainObj instanceof SnakeGame).toBe(false);
+    expect(plainObj).toStrictEqual(expectedPlainObject);
+    expect(JSON.stringify(plainObj)).toBe(JSON.stringify(expectedPlainObject));
+  });
+
   it("reset test", () => {
     const options = {
       worldWidth: 3,
@@ -394,7 +451,7 @@ function getRandomFoodPositionHelper(snakeGame: SnakeGame) {
   const idealAvg = Math.floor(simulateTimes / allowablePositions.length);
   const lowerBound = Math.floor(idealAvg * (1 - allowAbleDiffRatio));
   const upperBound = Math.floor(idealAvg * (1 + allowAbleDiffRatio));
-  for (let count of countArr) {
+  for (const count of countArr) {
     expect(count).toBeGreaterThanOrEqual(lowerBound);
     expect(count).toBeLessThanOrEqual(upperBound);
   }

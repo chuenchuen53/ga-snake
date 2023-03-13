@@ -1,5 +1,6 @@
-import Position, { IPosition } from "./Position";
+import Position from "./Position";
 import { Direction, SnakeAction } from "./typing";
+import type { IPosition } from "./Position";
 
 interface ActionMapSecondLayerObject {
   direction: Direction;
@@ -53,16 +54,16 @@ export default class Snake implements ISnake {
     },
   };
 
+  public static fromPlainObj(obj: ISnake): Snake {
+    return new Snake(obj.positions.map(Position.fromPlainObj), obj.direction);
+  }
+
   private _positions: Position[];
   private _direction: Direction;
 
   constructor(positions: Position[], direction: Direction) {
     this._positions = positions.slice();
     this._direction = direction;
-  }
-
-  static fromPlainObj(obj: ISnake): Snake {
-    return new Snake(obj.positions.map(Position.fromPlainObj), obj.direction);
   }
 
   public get positions(): Position[] {
@@ -76,12 +77,19 @@ export default class Snake implements ISnake {
     this._direction = value;
   }
 
+  public toPlainObject(): ISnake {
+    return {
+      positions: this.positions.map((position) => position.toPlainObject()),
+      direction: this.direction,
+    };
+  }
+
   /**
    *
    * @param position new position of the head (assume this position is not the food position)
    * @returns true if the new position is occupied by the snake
    */
-  public checkCollisionAfterMove(position: Position): Boolean {
+  public checkCollisionAfterMove(position: Position): boolean {
     // ignore the tail as it will move
     const lastIndex = this.positions.length - 1;
     if (this.positions[lastIndex].x === position.x && this.positions[lastIndex].y === position.y) {

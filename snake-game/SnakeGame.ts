@@ -1,7 +1,10 @@
-import Position, { IPosition } from "./Position";
-import Snake, { ISnake } from "./Snake";
-import { Direction, SnakeAction } from "./typing";
+import Position from "./Position";
+import Snake from "./Snake";
+import { Direction } from "./typing";
 import { utils } from "./utils";
+import type { SnakeAction } from "./typing";
+import type { ISnake } from "./Snake";
+import type { IPosition } from "./Position";
 
 export interface ProvidedInitialStatus {
   snake: ISnake;
@@ -17,7 +20,19 @@ export interface Options {
   providedInitialStatus?: ProvidedInitialStatus;
 }
 
-export default class SnakeGame {
+export interface ISnakeGame {
+  worldWidth: number;
+  worldHeight: number;
+  allPositions: IPosition[];
+  snake: ISnake;
+  food: IPosition;
+  gameOver: boolean;
+  moves: number;
+  movesForNoFood: number;
+  maxTurnOfNoFood: number;
+}
+
+export default class SnakeGame implements ISnakeGame {
   public worldWidth: number;
   public worldHeight: number;
   public allPositions: Position[];
@@ -58,6 +73,20 @@ export default class SnakeGame {
     }
   }
 
+  public toPlainObject(): ISnakeGame {
+    return {
+      worldWidth: this.worldWidth,
+      worldHeight: this.worldHeight,
+      allPositions: this.allPositions.map((position) => position.toPlainObject()),
+      snake: this.snake.toPlainObject(),
+      food: this.food.toPlainObject(),
+      gameOver: this.gameOver,
+      moves: this.moves,
+      movesForNoFood: this.movesForNoFood,
+      maxTurnOfNoFood: this.maxTurnOfNoFood,
+    };
+  }
+
   public reset() {
     this.snake = this.getInitSnake();
     this.food = this.getRandomFoodPosition();
@@ -75,13 +104,13 @@ export default class SnakeGame {
     this.gameOver = true;
   }
 
-  public checkOutOfBounds(position: Position): Boolean {
+  public checkOutOfBounds(position: Position): boolean {
     return position.x < 0 || position.x >= this.worldWidth || position.y < 0 || position.y >= this.worldHeight;
   }
 
   public getRandomFoodPosition(): Position {
     const snakeOccupied = new Array(this.worldWidth * this.worldHeight).fill(false);
-    for (let position of this.snake.positions) {
+    for (const position of this.snake.positions) {
       snakeOccupied[position.x * this.worldHeight + position.y] = true;
     }
     const availablePositions = this.allPositions.filter((_, index) => !snakeOccupied[index]);
