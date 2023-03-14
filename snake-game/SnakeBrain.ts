@@ -3,7 +3,7 @@ import { utils } from "./utils";
 import { Direction } from "./typing";
 import type { ActivationFunction } from "./CalcUtils";
 
-type LayerShape = number[];
+export type LayerShape = number[];
 
 interface ProvidedWeightAndBias {
   weightArr: number[][][];
@@ -18,6 +18,8 @@ interface Options {
 }
 
 export default class SnakeBrain {
+  public static readonly OUTPUT_LAYER_LENGTH = 4;
+
   public static readonly actionMap = Object.freeze({
     0: Direction.UP,
     1: Direction.DOWN,
@@ -29,7 +31,7 @@ export default class SnakeBrain {
   private static readonly MAX_WEIGHT = 1;
   private static readonly MIN_BIAS = -1;
   private static readonly MAX_BIAS = 1;
-  private static readonly OUTPUT_LENGTH = 4;
+
 
   public static crossOverNumber(a: number, b: number): number {
     return Math.random() < 0.5 ? a : b;
@@ -62,7 +64,7 @@ export default class SnakeBrain {
     if (this.weightArr.length !== this.biasesArr.length) return false;
     if (this.weightArr.length !== this.layerShapes.length) return false;
     if (this.weightArr[0][0].length !== this.inputLength) return false;
-    if (this.weightArr[this.weightArr.length - 1].length !== SnakeBrain.OUTPUT_LENGTH) return false;
+    if (this.weightArr[this.weightArr.length - 1].length !== SnakeBrain.OUTPUT_LAYER_LENGTH) return false;
     if (!this.weightArr.flat(2).every((x) => x >= SnakeBrain.MIN_WEIGHT && x <= SnakeBrain.MAX_WEIGHT)) return false;
     if (!this.biasesArr.flat(2).every((x) => x >= SnakeBrain.MIN_BIAS && x <= SnakeBrain.MAX_BIAS)) return false;
 
@@ -131,7 +133,7 @@ export default class SnakeBrain {
 
     if (this.layerShapes[0][1] !== this.inputLength) return false;
 
-    if (this.layerShapes[numOfLayer - 1][0] !== SnakeBrain.OUTPUT_LENGTH) return false;
+    if (this.layerShapes[numOfLayer - 1][0] !== SnakeBrain.OUTPUT_LAYER_LENGTH) return false;
 
     for (let i = 1; i < numOfLayer; i++) {
       if (this.layerShapes[i][1] !== this.layerShapes[i - 1][0]) return false;

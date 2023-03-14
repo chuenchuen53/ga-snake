@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "test-dev": "jest --watchAll",
-    "coverage": "jest --coverage"
+    "coverage": "jest --coverage",
+    "tryModel": "ts-node ./scripts/tryModel.ts"
   },
   "dependencies": {
     "react-konva": "18.2.5",
