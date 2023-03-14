@@ -15,12 +15,12 @@ function hiddenLayerActivation(x: number[], type: ActivationFunction): number[] 
   }
 }
 
-function multiplication(a: number[][], b: number[]) {
-  return a.map((x) => x.reduce((acc, cur, idx) => acc + cur * b[idx], 0));
-}
-
 function addition(a: number[], b: number[]) {
   return a.map((x, i) => x + b[i]);
+}
+
+function multiplication(a: number[][], b: number[]) {
+  return a.map((x) => x.reduce((acc, cur, idx) => acc + cur * b[idx], 0));
 }
 
 function computeOneLayer(W: number[][], X: number[], B: number[]): number[] {
@@ -92,23 +92,6 @@ function upperQuartileOfArray(arr: number[]) {
   return sorted[mid];
 }
 
-function modeOfArray(arr: number[]): number | null {
-  const counts = arr.reduce((a, b) => {
-    a[b] = (a[b] || 0) + 1;
-    return a;
-  }, {});
-  const maxCount = Math.max(...(Object.values(counts) as any));
-  if (maxCount === 0 || maxCount === 1) {
-    return null;
-  }
-  const modes = Object.keys(counts).filter((x) => counts[x] === maxCount);
-  if (modes.length) {
-    return parseFloat(modes[0]);
-  } else {
-    return null;
-  }
-}
-
 function skewnessOfArray(arr: number[]) {
   const mean = meanOfArray(arr);
   const sd = sdOfArray(arr);
@@ -130,7 +113,6 @@ function describeArray(arr: number[]) {
     lowerQuartile: lowerQuartileOfArray(arr),
     median: medianOfArray(arr),
     upperQuartile: upperQuartileOfArray(arr),
-    mode: modeOfArray(arr),
     skewness: skewnessOfArray(arr),
     kurtosis: kurtosisOfArray(arr),
   };
@@ -144,7 +126,6 @@ const stats = Object.freeze({
   lowerQuartileOfArray,
   medianOfArray,
   upperQuartileOfArray,
-  modeOfArray,
   skewnessOfArray,
   kurtosisOfArray,
   describeArray,
