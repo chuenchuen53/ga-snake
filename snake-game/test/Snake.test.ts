@@ -53,6 +53,34 @@ describe("test suite for Snake", () => {
     );
   });
 
+  it("head test 1", () => {
+    const snake = new Snake([new Position(0, 1)], Direction.LEFT);
+    expect(snake.head.isEqual(new Position(0, 1))).toBe(true);
+  });
+
+  it("head test 2", () => {
+    const snake = new Snake([new Position(0, 1), new Position(1, 1), new Position(1, 2)], Direction.LEFT);
+    expect(snake.head.isEqual(new Position(0, 1))).toBe(true);
+  });
+
+  it("positionInSnake test 1", () => {
+    const snake = new Snake([new Position(0, 1)], Direction.LEFT);
+    expect(snake.positionInSnake(new Position(0, 1))).toBe(true);
+    expect(snake.positionInSnake(new Position(1, 1))).toBe(false);
+    expect(snake.positionInSnake(new Position(1, 2))).toBe(false);
+  });
+
+  it("positionInSnake test 2", () => {
+    const snake = new Snake([new Position(0, 1), new Position(1, 1), new Position(1, 2)], Direction.LEFT);
+    expect(snake.positionInSnake(new Position(0, 1))).toBe(true);
+    expect(snake.positionInSnake(new Position(1, 1))).toBe(true);
+    expect(snake.positionInSnake(new Position(1, 2))).toBe(true);
+    expect(snake.positionInSnake(new Position(0, 2))).toBe(false);
+    expect(snake.positionInSnake(new Position(2, 2))).toBe(false);
+    expect(snake.positionInSnake(new Position(2, 1))).toBe(false);
+    expect(snake.positionInSnake(new Position(2, 0))).toBe(false);
+  });
+
   it("checkCollisionAfterMove test 1", () => {
     const snake = new Snake([new Position(0, 0)], Direction.DOWN);
     // this case wont happen in the game, as (0, 0) is not adjacent to the snake head

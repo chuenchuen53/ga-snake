@@ -83,6 +83,14 @@ export default class Snake implements ISnake {
     };
   }
 
+  public get head(): Position {
+    return this.positions[0];
+  }
+
+  public positionInSnake(position: Position): boolean {
+    return this.positions.some((x) => x.isEqual(position));
+  }
+
   /**
    *
    * @param position new position of the head (assume this position is not the food position)
@@ -91,11 +99,11 @@ export default class Snake implements ISnake {
   public checkCollisionAfterMove(position: Position): boolean {
     // ignore the tail as it will move
     const lastIndex = this.positions.length - 1;
-    if (this.positions[lastIndex].x === position.x && this.positions[lastIndex].y === position.y) {
+    if (this.positions[lastIndex].isEqual(position)) {
       return false;
     }
 
-    return this.positions.some(({ x, y }) => x === position.x && y === position.y);
+    return this.positions.some((x) => x.isEqual(position));
   }
 
   public getHeadPositionAndDirectionAfterMoveBySnakeAction(action: SnakeAction): PositionAndDirection {

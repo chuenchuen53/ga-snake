@@ -4,23 +4,31 @@ export interface IPosition {
 }
 
 export default class Position implements IPosition {
+  public get x(): number {
+    return this._x;
+  }
+
+  public get y(): number {
+    return this._y;
+  }
+
   public static fromPlainObj(obj: IPosition): Position {
     return new Position(obj.x, obj.y);
   }
 
-  public readonly x: number;
-  public readonly y: number;
+  protected _x: number;
+  protected _y: number;
 
   constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
+    this._x = x;
+    this._y = y;
   }
 
   public toPlainObject(): IPosition {
-    return { x: this.x, y: this.y };
+    return { x: this._x, y: this._y };
   }
 
   public isEqual(other: Position): boolean {
-    return this.x === other.x && this.y === other.y;
+    return this._x === other._x && this._y === other._y;
   }
 }
