@@ -38,7 +38,7 @@ type Population = IPopulation[];
 
 export default class GaModel {
   public static fitness(moves: number, snakeLength: number): number {
-    return moves + (Math.pow(2, snakeLength) + 500 * Math.pow(snakeLength, 2.1)) - Math.pow(0.25 * moves, 1.3) * Math.pow(snakeLength, 1.2);
+    return (moves + (Math.pow(2, snakeLength) + 500 * Math.pow(snakeLength, 2.1)) - Math.pow(0.25 * moves, 1.3) * Math.pow(snakeLength, 1.2)) / 1e100;
   }
 
   public static spinRouletteWheel(options: IPopulation[]): IPopulation {
@@ -50,7 +50,7 @@ export default class GaModel {
       }
       randomNum -= options[i].fitness;
     }
-    throw new Error("Invalid roulette wheel");
+    return options[options.length - 1];
   }
 
   public readonly worldWidth: number;
