@@ -1,6 +1,7 @@
 import SnakeGame from "snake-game/SnakeGame";
 import InputLayer from "../InputLayer";
 import SnakeBrain from "../SnakeBrain";
+import type { GameRecord } from "snake-game/SnakeGame";
 import type { WorkerData, WorkerResult } from "./typing";
 
 let snakeGame: SnakeGame = new SnakeGame({ worldWidth: 20, worldHeight: 20 });
@@ -26,7 +27,7 @@ export default function workerFunc(workerData: WorkerData): WorkerResult {
 
   const snakeLengthArr: number[] = [];
   const movesArr: number[] = [];
-  const gameRecordArr: string[] = [];
+  const gameRecordArr: GameRecord[] = [];
 
   for (let i = 0; i < playTimes; i++) {
     snakeGame.reset();
@@ -37,7 +38,7 @@ export default function workerFunc(workerData: WorkerData): WorkerResult {
 
     snakeLengthArr.push(snakeGame.snake.positions.length);
     movesArr.push(snakeGame.moves);
-    gameRecordArr.push(snakeGame.gameRecord);
+    gameRecordArr.push(snakeGame.exportGameRecord());
   }
 
   return { snakeLengthArr, movesArr, gameRecordArr };

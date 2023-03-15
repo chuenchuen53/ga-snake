@@ -1,3 +1,4 @@
+import type { GameRecord } from "snake-game/SnakeGame";
 import type { ISnakeBrain } from "../SnakeBrain";
 
 export interface WorkerData {
@@ -10,5 +11,5 @@ export interface WorkerData {
 export interface WorkerResult {
   snakeLengthArr: number[];
   movesArr: number[];
-  gameRecordArr: string[];
+  gameRecordArr: GameRecord[];
 }

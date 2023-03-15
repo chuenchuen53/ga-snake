@@ -1,9 +1,12 @@
 import { utils } from "snake-game/utils";
+import SnakeGame from "snake-game/SnakeGame";
 import InputLayer from "./InputLayer";
 import { CalcUtils } from "./CalcUtils";
 import SnakeBrain from "./SnakeBrain";
 import { generateLayerShape } from "./generateLayerShape";
 import MultiThreadGames from "./MultiThreadGames";
+import type { ISnakeBrain } from "./SnakeBrain";
+import type { GameRecord } from "snake-game/SnakeGame";
 import type { ActivationFunction } from "./CalcUtils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,18 +26,35 @@ export interface Options {
     mutationAmount: number;
     trialTimes: number;
   };
+  providedSnakeBrains?: ISnakeBrain[];
 }
 
-interface IPopulation {
+export type ExportedGaModel = {
+  worldWidth: number;
+  worldHeight: number;
+  hiddenLayersLength: number[];
+  hiddenLayerActivationFunction: ActivationFunction;
+  populationSize: number;
+  surviveRate: number;
+  mutationRate: number;
+  mutationAmount: number;
+  trialTimes: number;
+  generation: number;
+  population: IndividualPlainObject[];
+};
+
+interface Individual {
   snakeBrain: SnakeBrain;
   snakeLength: number;
   moves: number;
   fitness: number;
   survive: boolean;
-  gameRecords: string;
+  gameRecord: GameRecord | null;
 }
 
-type Population = IPopulation[];
+type IndividualPlainObject = Omit<Individual, "snakeBrain"> & { snakeBrain: ISnakeBrain };
+
+type Population = Individual[];
 
 export default class GaModel {
   public static fitness(moves: number, snakeLength: number, maxPossibleSnakeLength = 400): number {
@@ -57,7 +77,7 @@ export default class GaModel {
     return moveScore - cyclicPenalty + lengthScore1 + lengthScore2;
   }
 
-  public static spinRouletteWheel(options: IPopulation[]): IPopulation {
+  public static spinRouletteWheel(options: Individual[]): Individual {
     const totalScore = options.reduce((acc, option) => acc + option.fitness, 0);
     let randomNum = Math.random() * totalScore;
     for (let i = 0; i < options.length; i++) {
@@ -105,21 +125,40 @@ export default class GaModel {
     const inputLayerLength = InputLayer.inputLayerLength;
     const layerShapes = generateLayerShape(inputLayerLength, ...this.hiddenLayersLength, SnakeBrain.OUTPUT_LAYER_LENGTH);
 
-    this.population = Array(this.populationSize)
-      .fill(null)
-      .map(() => ({
+    if (option.providedSnakeBrains) {
+      if (this.populationSize !== option.providedSnakeBrains.length) throw Error("Provided snake brains length not equal to population size.");
+      this.population = option.providedSnakeBrains.map((x) => ({
         snakeBrain: new SnakeBrain({
-          inputLength: inputLayerLength,
-          layerShapes,
-          hiddenLayerActivationFunction: this.hiddenLayerActivationFunction,
+          inputLength: x.inputLength,
+          layerShapes: x.layerShapes,
+          hiddenLayerActivationFunction: x.hiddenLayerActivationFunction,
+          providedWeightAndBias: {
+            weightArr: x.weightArr,
+            biasesArr: x.biasesArr,
+          },
         }),
         fitness: 0,
         snakeLength: 1,
         moves: 0,
         survive: true,
-        gameRecords: "",
+        gameRecord: null,
       }));
-
+    } else {
+      this.population = Array(this.populationSize)
+        .fill(null)
+        .map(() => ({
+          snakeBrain: new SnakeBrain({
+            inputLength: inputLayerLength,
+            layerShapes,
+            hiddenLayerActivationFunction: this.hiddenLayerActivationFunction,
+          }),
+          fitness: 0,
+          snakeLength: 1,
+          moves: 0,
+          survive: true,
+          gameRecord: null,
+        }));
+    }
     this.multiThreadGames = new MultiThreadGames();
   }
 
@@ -147,19 +186,36 @@ export default class GaModel {
     };
   }
 
-  public exportModal() {
-    return JSON.stringify(this);
+  public exportModel(): ExportedGaModel {
+    return {
+      worldWidth: this.worldWidth,
+      worldHeight: this.worldHeight,
+      hiddenLayersLength: this.hiddenLayersLength,
+      hiddenLayerActivationFunction: this.hiddenLayerActivationFunction,
+      populationSize: this.populationSize,
+      surviveRate: this.surviveRate,
+      mutationRate: this.mutationRate,
+      mutationAmount: this.mutationAmount,
+      trialTimes: this.trialTimes,
+      generation: this.generation,
+      population: this.population.map((x) => ({
+        snakeBrain: x.snakeBrain.toPlainObject(),
+        fitness: x.fitness,
+        snakeLength: x.snakeLength,
+        moves: x.moves,
+        survive: x.survive,
+        gameRecord: x.gameRecord ? SnakeGame.cloneGameRecord(x.gameRecord) : null,
+      })),
+    };
   }
 
-  public async evolve(exportModal: boolean): Promise<{
+  public async evolve(exportModel: boolean): Promise<{
     generation: number;
-    population: Population;
-    finalBestPlayer: IPopulation;
-    bestSnakeBrain: SnakeBrain;
-    bestGame: string;
-    gaPlayer?: string;
+    bestIndividual: IndividualPlainObject;
+    timeSpent: number;
+    exportedGaModel?: ExportedGaModel;
   }> {
-    const tempTime = new Date().getTime();
+    const startTime = new Date().getTime();
 
     await this.evaluate();
     this.select();
@@ -168,35 +224,42 @@ export default class GaModel {
 
     const generation = this.generation;
     const finalBestPlayer = this.population[0];
-    const bestSnakeBrain = finalBestPlayer.snakeBrain;
-    const bestGame = finalBestPlayer.gameRecords;
-    const population = this.population;
+
+    const bestIndividual: IndividualPlainObject = {
+      snakeBrain: finalBestPlayer.snakeBrain.toPlainObject(),
+      fitness: finalBestPlayer.fitness,
+      snakeLength: finalBestPlayer.snakeLength,
+      moves: finalBestPlayer.moves,
+      survive: finalBestPlayer.survive,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- gameRecord will not be null after evaluate()
+      gameRecord: SnakeGame.cloneGameRecord(finalBestPlayer.gameRecord!),
+    };
+
+    const timeSpent = (new Date().getTime() - startTime) / 1000;
 
     const print = {
       generation,
       highestFitness: finalBestPlayer.fitness,
-      meanFitness: population.reduce((acc, cur) => acc + cur.fitness, 0) / population.length,
+      meanFitness: this.population.reduce((acc, cur) => acc + cur.fitness, 0) / this.population.length,
       bestSnakeLength: finalBestPlayer.snakeLength,
-      meanSnakeLength: population.reduce((acc, cur) => acc + cur.snakeLength, 0) / population.length,
+      meanSnakeLength: this.population.reduce((acc, cur) => acc + cur.snakeLength, 0) / this.population.length,
       bestMoves: finalBestPlayer.moves,
-      meanMoves: population.reduce((acc, cur) => acc + cur.moves, 0) / population.length,
-      time: (new Date().getTime() - tempTime) / 1000,
+      meanMoves: this.population.reduce((acc, cur) => acc + cur.moves, 0) / this.population.length,
+      time: timeSpent,
     };
 
     tempPrint.push(print);
     console.table(tempPrint);
 
-    if (exportModal) {
+    if (exportModel) {
       return {
         generation,
-        population,
-        finalBestPlayer,
-        bestSnakeBrain,
-        bestGame,
-        gaPlayer: this.exportModal(),
+        bestIndividual,
+        timeSpent,
+        exportedGaModel: this.exportModel(),
       };
     } else {
-      return { generation, population, finalBestPlayer, bestSnakeBrain, bestGame };
+      return { generation, bestIndividual, timeSpent };
     }
   }
 
@@ -218,7 +281,7 @@ export default class GaModel {
       p.snakeLength = CalcUtils.stats.meanOfArray(snakeLengthArr);
       p.moves = CalcUtils.stats.meanOfArray(movesArr);
       p.fitness = CalcUtils.stats.meanOfArray(fitnessArr);
-      p.gameRecords = gameRecordArr[CalcUtils.indexOfMaxValueInArray(fitnessArr)];
+      p.gameRecord = gameRecordArr[CalcUtils.indexOfMaxValueInArray(fitnessArr)];
     }
   }
 
@@ -240,7 +303,7 @@ export default class GaModel {
     });
   }
 
-  private pickParentIdx(childIdx: number, anotherParent?: IPopulation): IPopulation {
+  private pickParentIdx(childIdx: number, anotherParent?: Individual): Individual {
     const anotherParentIdx = anotherParent ? this.population.findIndex((p) => p === anotherParent) : -1;
     const filteredPopulation = this.population.filter((p, idx) => idx !== childIdx && idx !== anotherParentIdx);
     return GaModel.spinRouletteWheel(filteredPopulation);

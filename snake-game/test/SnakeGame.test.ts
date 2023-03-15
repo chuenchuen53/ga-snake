@@ -3,6 +3,7 @@ import Position from "../Position";
 import SnakeGame from "../SnakeGame";
 import { Direction, SnakeAction } from "../typing";
 import { utils } from "../utils";
+import type { MoveRecordRow } from "../SnakeGame";
 
 describe("test suite for SnakeGame", () => {
   it("static clone test", () => {
@@ -15,8 +16,7 @@ describe("test suite for SnakeGame", () => {
   });
 
   it("constructor test", () => {
-    const options = { worldWidth: 3, worldHeight: 3 };
-    const snakeGame = new SnakeGame(options);
+    const snakeGame = new SnakeGame({ worldWidth: 3, worldHeight: 3 });
 
     expect(snakeGame.worldWidth).toBe(3);
     expect(snakeGame.worldHeight).toBe(3);
@@ -41,7 +41,7 @@ describe("test suite for SnakeGame", () => {
   });
 
   it("constructor test for providedInitialStatus", () => {
-    const options = {
+    const snakeGame = new SnakeGame({
       worldWidth: 3,
       worldHeight: 3,
       providedInitialStatus: {
@@ -58,9 +58,12 @@ describe("test suite for SnakeGame", () => {
         moves: 10,
         movesForNoFood: 2,
         gameOver: false,
+        initialSnakePosition: { x: 1, y: 1 },
+        initialSnakeDirection: Direction.UP,
+        initialFoodPosition: { x: 0, y: 0 },
+        moveRecord: new Array(10).fill({ move: 0 }),
       },
-    };
-    const snakeGame = new SnakeGame(options);
+    });
 
     expect(snakeGame.worldWidth).toBe(3);
     expect(snakeGame.worldHeight).toBe(3);
@@ -105,6 +108,10 @@ describe("test suite for SnakeGame", () => {
         moves: 10,
         movesForNoFood: 2,
         gameOver: false,
+        initialSnakePosition: { x: 1, y: 1 },
+        initialSnakeDirection: Direction.UP,
+        initialFoodPosition: { x: 0, y: 0 },
+        moveRecord: new Array(10).fill({ move: 0 }),
       },
     });
     const plainObj = snakeGame.toPlainObject();
@@ -137,6 +144,10 @@ describe("test suite for SnakeGame", () => {
       moves: 10,
       movesForNoFood: 2,
       maxTurnOfNoFood: snakeGame.maxTurnOfNoFood,
+      initialSnakePosition: { x: 1, y: 1 },
+      initialSnakeDirection: Direction.UP,
+      initialFoodPosition: { x: 0, y: 0 },
+      moveRecord: new Array(10).fill({ move: 0 }),
     };
 
     expect(plainObj instanceof SnakeGame).toBe(false);
@@ -145,7 +156,7 @@ describe("test suite for SnakeGame", () => {
   });
 
   it("reset test", () => {
-    const options = {
+    const snakeGame = new SnakeGame({
       worldWidth: 3,
       worldHeight: 3,
       providedInitialStatus: {
@@ -162,9 +173,12 @@ describe("test suite for SnakeGame", () => {
         moves: 10,
         movesForNoFood: 2,
         gameOver: false,
+        initialSnakePosition: { x: 1, y: 1 },
+        initialSnakeDirection: Direction.UP,
+        initialFoodPosition: { x: 0, y: 0 },
+        moveRecord: new Array(10).fill({ move: 0 }),
       },
-    };
-    const snakeGame = new SnakeGame(options);
+    });
     snakeGame.reset();
     expect(snakeGame.worldWidth).toBe(3);
     expect(snakeGame.worldHeight).toBe(3);
@@ -186,6 +200,10 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame.moves).toBe(0);
     expect(snakeGame.movesForNoFood).toBe(0);
     expect(snakeGame.maxTurnOfNoFood).toBeGreaterThan(0);
+    expect(snakeGame.initialSnakePosition).toStrictEqual(snakeGame.snake.head.toPlainObject());
+    expect(snakeGame.initialSnakeDirection).toBe(snakeGame.snake.direction);
+    expect(snakeGame.initialFoodPosition).toStrictEqual(snakeGame.food.toPlainObject());
+    expect(snakeGame.moveRecord.length).toBe(0);
   });
 
   it("suicide test 1", () => {
@@ -195,6 +213,8 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame1.moves).toBe(1);
     expect(snakeGame1.movesForNoFood).toBe(1);
     expect(snakeGame1.gameOver).toBe(true);
+    expect(snakeGame1.moveRecord.length).toBe(1);
+    expect(snakeGame1.moveRecord[0]).toStrictEqual({ move: -1 });
 
     const snakeGame2 = new SnakeGame(options);
     snakeGame2.snakeMoveBySnakeAction(SnakeAction.FRONT);
@@ -203,6 +223,8 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame2.moves).toBe(2);
     expect(snakeGame2.movesForNoFood).toBe(movesForNoFoodBeforeSuicide + 1);
     expect(snakeGame2.gameOver).toBe(true);
+    expect(snakeGame2.moveRecord.length).toBe(2);
+    expect(snakeGame2.moveRecord[1]).toStrictEqual({ move: -1 });
   });
 
   it("suicide test toThrowError", () => {
@@ -275,7 +297,7 @@ describe("test suite for SnakeGame", () => {
   });
 
   it("getRandomFoodPosition test 2", () => {
-    const options = {
+    const snakeGame = new SnakeGame({
       worldWidth: 2,
       worldHeight: 2,
       providedInitialStatus: {
@@ -290,14 +312,17 @@ describe("test suite for SnakeGame", () => {
         moves: 10,
         movesForNoFood: 2,
         gameOver: false,
+        initialSnakePosition: { x: 1, y: 1 },
+        initialSnakeDirection: Direction.UP,
+        initialFoodPosition: { x: 0, y: 0 },
+        moveRecord: new Array(10).fill({ move: 0 }),
       },
-    };
-    const snakeGame = new SnakeGame(options);
+    });
     getRandomFoodPositionHelper(snakeGame);
   });
 
   it("getRandomFoodPosition test 3", () => {
-    const options = {
+    const snakeGame = new SnakeGame({
       worldWidth: 3,
       worldHeight: 2,
       providedInitialStatus: {
@@ -313,9 +338,12 @@ describe("test suite for SnakeGame", () => {
         moves: 10,
         movesForNoFood: 3,
         gameOver: false,
+        initialSnakePosition: { x: 1, y: 1 },
+        initialSnakeDirection: Direction.UP,
+        initialFoodPosition: { x: 0, y: 0 },
+        moveRecord: new Array(10).fill({ move: 0 }),
       },
-    };
-    const snakeGame = new SnakeGame(options);
+    });
     getRandomFoodPositionHelper(snakeGame);
   });
 
@@ -329,6 +357,7 @@ describe("test suite for SnakeGame", () => {
       snakeGame.snakeMoveBySnakeAction(snakeAction);
       expect(getHeadPositionAndDirectionAfterMoveBySnakeActionSpy).toBeCalledWith(snakeAction);
       expect(snakeMoveSpy).toBeCalledTimes(1);
+      expect(snakeGame.moveRecord.length).toBe(1);
     }
   });
 
@@ -354,6 +383,10 @@ describe("test suite for SnakeGame", () => {
           moves: 0,
           movesForNoFood: 0,
           gameOver: false,
+          initialSnakePosition: { x: 1, y: 1 },
+          initialSnakeDirection: Direction.UP,
+          initialFoodPosition: { x: 0, y: 0 },
+          moveRecord: [],
         },
       });
 
@@ -368,10 +401,12 @@ describe("test suite for SnakeGame", () => {
         expect(getHeadPositionAndDirectionAfterMoveByDirectionSpy).toBeCalledTimes(0);
         expect(snakeMoveSpy).toBeCalledTimes(0);
         expect(suicideSpy).toBeCalledTimes(1);
+        expect(snakeGame.moveRecord.length).toBe(1);
       } else {
         expect(getHeadPositionAndDirectionAfterMoveByDirectionSpy).toBeCalledWith(direction);
         expect(snakeMoveSpy).toBeCalledTimes(1);
         expect(suicideSpy).toBeCalledTimes(0);
+        expect(snakeGame.moveRecord.length).toBe(1);
       }
     }
   });
@@ -398,6 +433,10 @@ describe("test suite for SnakeGame", () => {
           moves: 0,
           movesForNoFood: 0,
           gameOver: false,
+          initialSnakePosition: { x: 1, y: 1 },
+          initialSnakeDirection: Direction.UP,
+          initialFoodPosition: { x: 0, y: 0 },
+          moveRecord: [],
         },
       });
 
@@ -412,10 +451,12 @@ describe("test suite for SnakeGame", () => {
         expect(getHeadPositionAndDirectionAfterMoveByDirectionSpy).toBeCalledTimes(0);
         expect(snakeMoveSpy).toBeCalledTimes(0);
         expect(suicideSpy).toBeCalledTimes(0);
+        expect(snakeGame.moveRecord.length).toBe(0);
       } else {
         expect(getHeadPositionAndDirectionAfterMoveByDirectionSpy).toBeCalledWith(direction);
         expect(snakeMoveSpy).toBeCalledTimes(1);
         expect(suicideSpy).toBeCalledTimes(0);
+        expect(snakeGame.moveRecord.length).toBe(1);
       }
     }
   });
@@ -439,6 +480,10 @@ describe("test suite for SnakeGame", () => {
         moves: 10,
         movesForNoFood: 2,
         gameOver: false,
+        initialSnakePosition: { x: 1, y: 1 },
+        initialSnakeDirection: Direction.UP,
+        initialFoodPosition: { x: 0, y: 0 },
+        moveRecord: new Array(10).fill({ move: 0 }),
       },
     });
     snakeGame.snakeMoveBySnakeAction(SnakeAction.FRONT);
@@ -466,6 +511,10 @@ describe("test suite for SnakeGame", () => {
         moves: 10,
         movesForNoFood: 2,
         gameOver: false,
+        initialSnakePosition: { x: 1, y: 1 },
+        initialSnakeDirection: Direction.UP,
+        initialFoodPosition: { x: 0, y: 0 },
+        moveRecord: new Array(10).fill({ move: 0 }),
       },
     });
     snakeGame.snakeMoveBySnakeAction(SnakeAction.TURN_LEFT);
@@ -491,6 +540,10 @@ describe("test suite for SnakeGame", () => {
         moves: 10,
         movesForNoFood: 2,
         gameOver: false,
+        initialSnakePosition: { x: 1, y: 1 },
+        initialSnakeDirection: Direction.UP,
+        initialFoodPosition: { x: 0, y: 0 },
+        moveRecord: new Array(10).fill({ move: 0 }),
       },
     });
     snakeGame.snakeMoveBySnakeAction(SnakeAction.TURN_RIGHT);
@@ -513,6 +566,10 @@ describe("test suite for SnakeGame", () => {
         moves: 999,
         movesForNoFood: 999,
         gameOver: false,
+        initialSnakePosition: { x: 1, y: 1 },
+        initialSnakeDirection: Direction.UP,
+        initialFoodPosition: { x: 0, y: 0 },
+        moveRecord: new Array(999).fill({ move: 0 }),
       },
     });
     snakeGame.snakeMoveBySnakeAction(SnakeAction.FRONT);
@@ -520,6 +577,62 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame.movesForNoFood).toBe(1000);
     expect(snakeGame.gameOver).toBe(true);
     expect(snakeGame.snake.positions.length).toBe(1);
+  });
+
+  it("moveRecord test 1", () => {
+    const snakeGame = new SnakeGame({
+      worldWidth: 3,
+      worldHeight: 3,
+      providedInitialStatus: {
+        snake: {
+          positions: [
+            { x: 1, y: 1 },
+            { x: 2, y: 1 },
+            { x: 2, y: 2 },
+            { x: 1, y: 2 },
+          ],
+          direction: Direction.LEFT,
+        },
+        food: { x: 0, y: 0 },
+        moves: 10,
+        movesForNoFood: 2,
+        gameOver: false,
+        initialSnakePosition: { x: 1, y: 1 },
+        initialSnakeDirection: Direction.UP,
+        initialFoodPosition: { x: 0, y: 0 },
+        moveRecord: new Array(10).fill({ move: 0 }),
+      },
+    });
+
+    const expectedMoveRecord: MoveRecordRow[] = new Array(10).fill({ move: 0 });
+
+    snakeGame.snakeMoveByDirection(Direction.DOWN); //1,2
+    expectedMoveRecord.push({ move: 1 });
+    expect(snakeGame.moveRecord).toStrictEqual(expectedMoveRecord);
+
+    snakeGame.snakeMoveByDirection(Direction.LEFT); //0,2
+    expectedMoveRecord.push({ move: 2 });
+    expect(snakeGame.moveRecord).toStrictEqual(expectedMoveRecord);
+
+    snakeGame.snakeMoveByDirection(Direction.UP); //0,1
+    expectedMoveRecord.push({ move: 0 });
+    expect(snakeGame.moveRecord).toStrictEqual(expectedMoveRecord);
+
+    snakeGame.snakeMoveByDirection(Direction.RIGHT); //1,1
+    expectedMoveRecord.push({ move: 3 });
+    expect(snakeGame.moveRecord).toStrictEqual(expectedMoveRecord);
+
+    snakeGame.snakeMoveByDirection(Direction.UP); //1,0
+    expectedMoveRecord.push({ move: 0 });
+    expect(snakeGame.moveRecord).toStrictEqual(expectedMoveRecord);
+
+    snakeGame.snakeMoveByDirection(Direction.LEFT); //0,0 eat food
+    expectedMoveRecord.push({ move: 2, fx: snakeGame.food.x, fy: snakeGame.food.y });
+    expect(snakeGame.moveRecord).toStrictEqual(expectedMoveRecord);
+
+    snakeGame.snakeMoveByDirection(Direction.RIGHT); //suicide
+    expectedMoveRecord.push({ move: -1 });
+    expect(snakeGame.moveRecord).toStrictEqual(expectedMoveRecord);
   });
 });
 

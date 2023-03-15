@@ -7,7 +7,8 @@
     "test": "jest",
     "test-dev": "jest --watchAll",
     "coverage": "jest --coverage",
-    "tryModel": "tsc && node ./build/scripts/tryModel.js"
+    "build": "tsc --project tsconfig.build.json",
+    "tryModel": "npm run build && node ./build/scripts/tryModel.js"
   },
   "dependencies": {
     "piscina": "3.2.0",

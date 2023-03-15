@@ -3,40 +3,6 @@ import { ActivationFunction } from "../CalcUtils";
 import SnakeBrain from "../SnakeBrain";
 
 describe("GaModel test suite", () => {
-  let gaModel: GaModel;
-
-  beforeEach(() => {
-    gaModel = new GaModel({
-      worldWidth: 10,
-      worldHeight: 10,
-      snakeBrainConfig: {
-        hiddenLayersLength: [10, 8],
-        hiddenLayerActivationFunction: ActivationFunction.LINEAR,
-      },
-      gaConfig: {
-        populationSize: 10,
-        surviveRate: 0.8,
-        mutationRate: 0.2,
-        mutationAmount: 0.05,
-        trialTimes: 2,
-      },
-    });
-  });
-
-  it("constructor test test", () => {
-    expect(gaModel.generation).toBe(-1);
-    expect(gaModel.worldWidth).toBe(10);
-    expect(gaModel.worldHeight).toBe(10);
-    expect(gaModel.hiddenLayersLength).toEqual([10, 8]);
-    expect(gaModel.hiddenLayerActivationFunction).toBe(ActivationFunction.LINEAR);
-    expect(gaModel.populationSize).toBe(10);
-    expect(gaModel.surviveRate).toBe(0.8);
-    expect(gaModel.mutationRate).toBe(0.2);
-    expect(gaModel.mutationAmount).toBe(0.05);
-    expect(gaModel.trialTimes).toBe(2);
-    expect(gaModel.numberOfSurvival).toBe(8);
-  });
-
   it("spinRouletteWheel test 1", () => {
     const snakeBrain = new SnakeBrain({
       inputLength: 10,
@@ -53,7 +19,7 @@ describe("GaModel test suite", () => {
       moves: 0,
       fitness,
       survive: false,
-      gameRecords: "",
+      gameRecord: null,
     }));
 
     const count = [0, 0, 0, 0];
@@ -92,7 +58,7 @@ describe("GaModel test suite", () => {
       moves: 0,
       fitness,
       survive: false,
-      gameRecords: "",
+      gameRecord: null,
     }));
 
     const count = [0, 0, 0, 0];

@@ -14,6 +14,10 @@ const game1 = new SnakeGame({
     gameOver: false,
     moves: 0,
     movesForNoFood: 0,
+    initialSnakePosition: { x: 10, y: 10 },
+    initialSnakeDirection: Direction.UP,
+    initialFoodPosition: { x: 0, y: 0 },
+    moveRecord: [],
   },
 });
 
@@ -32,6 +36,10 @@ const game2 = new SnakeGame({
     gameOver: false,
     moves: 1000,
     movesForNoFood: 0,
+    initialSnakePosition: { x: 10, y: 10 },
+    initialSnakeDirection: Direction.UP,
+    initialFoodPosition: { x: 0, y: 0 },
+    moveRecord: [],
   },
 });
 
@@ -50,6 +58,10 @@ const game3 = new SnakeGame({
     gameOver: false,
     moves: 1800,
     movesForNoFood: 0,
+    initialSnakePosition: { x: 10, y: 10 },
+    initialSnakeDirection: Direction.UP,
+    initialFoodPosition: { x: 0, y: 0 },
+    moveRecord: [],
   },
 });
 
