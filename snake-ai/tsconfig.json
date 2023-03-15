@@ -3,7 +3,9 @@
     "strict": true,
     "module": "CommonJS",
     "target": "ESNext",
-    "lib": ["ESNext"],
+    "lib": [
+      "ESNext"
+    ],
     "sourceMap": true,
     "allowJs": true,
     "esModuleInterop": true,
@@ -15,5 +17,10 @@
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true
   },
-  "exclude": ["node_modules", "build", "scripts", "jest.config.js", "coverage/"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "jest.config.js",
+    "coverage/"
+  ]
 }

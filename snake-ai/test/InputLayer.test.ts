@@ -1,5 +1,5 @@
-import SnakeGame from "../SnakeGame";
-import { Direction } from "../typing";
+import SnakeGame from "snake-game/SnakeGame";
+import { Direction } from "snake-game/typing";
 import InputLayer, { slopeMap4 } from "../InputLayer";
 
 const game1 = new SnakeGame({

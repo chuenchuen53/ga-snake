@@ -1,7 +1,7 @@
-import { Direction } from "./typing";
-import { utils } from "./utils";
-import Position from "./Position";
-import type SnakeGame from "./SnakeGame";
+import { Direction } from "snake-game/typing";
+import { utils } from "snake-game/utils";
+import Position from "snake-game/Position";
+import type SnakeGame from "snake-game/SnakeGame";
 
 interface RelativePosition {
   dx: number;

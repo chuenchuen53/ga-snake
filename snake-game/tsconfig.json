@@ -15,5 +15,6 @@
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true
   },
-  "exclude": ["node_modules", "build", "scripts", "jest.config.js", "coverage/"]
+  "exclude": ["node_modules", "build",
+    "../snake-ai/scripts", "jest.config.js", "coverage/"]
 }

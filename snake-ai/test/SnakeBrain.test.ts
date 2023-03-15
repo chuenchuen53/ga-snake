@@ -1,6 +1,6 @@
+import { Direction } from "snake-game/typing";
 import SnakeBrain from "../SnakeBrain";
 import { ActivationFunction } from "../CalcUtils";
-import { Direction } from "../typing";
 
 describe("test suite for SnakeBrain", () => {
   describe("constructor test suite", () => {

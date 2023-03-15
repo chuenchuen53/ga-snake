@@ -1,8 +1,8 @@
-import SnakeBrain from "./SnakeBrain";
-import { CalcUtils } from "./CalcUtils";
-import SnakeGame from "./SnakeGame";
+import SnakeGame from "snake-game/SnakeGame";
+import { utils } from "snake-game/utils";
 import InputLayer from "./InputLayer";
-import { utils } from "./utils";
+import { CalcUtils } from "./CalcUtils";
+import SnakeBrain from "./SnakeBrain";
 import { generateLayerShape } from "./generateLayerShape";
 import type { ActivationFunction } from "./CalcUtils";
 
@@ -25,14 +25,16 @@ export interface Options {
   };
 }
 
-type Population = {
+interface IPopulation {
   snakeBrain: SnakeBrain;
   snakeLength: number;
   moves: number;
   fitness: number;
   survive: boolean;
   gameRecords: string;
-}[];
+}
+
+type Population = IPopulation[];
 
 export default class GaModel {
   public static fitness(game: SnakeGame): number {
@@ -137,7 +139,7 @@ export default class GaModel {
 
   public evolveMultipleTimes(
     times: number,
-    exportModal: boolean,
+    exportModal: boolean
   ): {
     generation: number;
     population: Population;

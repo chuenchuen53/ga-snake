@@ -15,8 +15,8 @@ export const SETTINGS: Setting = {
       hiddenLayerActivationFunction: ActivationFunction.LINEAR,
     },
     gaConfig: {
-      populationSize: 2000,
-      surviveRate: 0.7,
+      populationSize: 1000,
+      surviveRate: 0.5,
       mutationRate: 0.1,
       mutationAmount: 0.2,
       trialTimes: 1,

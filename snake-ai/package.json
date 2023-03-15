@@ -1,11 +1,12 @@
 {
-  "name": "snake-game",
+  "name": "snake-ai",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
     "test": "jest",
     "test-dev": "jest --watchAll",
-    "coverage": "jest --coverage"
+    "coverage": "jest --coverage",
+    "tryModel": "ts-node ./scripts/tryModel.ts"
   }
 }

@@ -1,6 +1,6 @@
+import { utils } from "snake-game/utils";
+import { Direction } from "snake-game/typing";
 import { CalcUtils } from "./CalcUtils";
-import { utils } from "./utils";
-import { Direction } from "./typing";
 import type { ActivationFunction } from "./CalcUtils";
 
 export type LayerShape = number[];
@@ -31,7 +31,6 @@ export default class SnakeBrain {
   private static readonly MAX_WEIGHT = 1;
   private static readonly MIN_BIAS = -1;
   private static readonly MAX_BIAS = 1;
-
 
   public static crossOverNumber(a: number, b: number): number {
     return Math.random() < 0.5 ? a : b;
