@@ -114,4 +114,14 @@ describe("GaModel test suite", () => {
       expect(ratio[i]).toBeLessThan(idealRatio[i] + tolerance);
     }
   });
+
+  it("fitness test 1", () => {
+    // assume worldWidth = 20, worldHeight = 20, max possible snake length = 400
+    // ensure fitness is less than max possible number / 1e8
+    const moves = 1000;
+    const snakeLength = 400;
+
+    const fitness = GaModel.fitness(moves, snakeLength);
+    expect(fitness).toBeLessThan(Number.MAX_VALUE / 1e8);
+  });
 });

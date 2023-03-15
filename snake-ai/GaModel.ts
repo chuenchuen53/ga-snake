@@ -37,8 +37,24 @@ interface IPopulation {
 type Population = IPopulation[];
 
 export default class GaModel {
-  public static fitness(moves: number, snakeLength: number): number {
-    return (moves + (Math.pow(2, snakeLength) + 500 * Math.pow(snakeLength, 2.1)) - Math.pow(0.25 * moves, 1.3) * Math.pow(snakeLength, 1.2)) / 1e100;
+  public static fitness(moves: number, snakeLength: number, maxPossibleSnakeLength = 400): number {
+    if (snakeLength === 0) return 0;
+
+    const movesPerFood = moves / snakeLength;
+    const ratioOfLength = snakeLength / maxPossibleSnakeLength;
+
+    // for short snake
+    const moveScore = moves * 10;
+    const cyclicPenalty = moves * 6 * (1 - snakeLength / maxPossibleSnakeLength) ** 2;
+
+    // for long snake, encourage fast eat food
+    const lengthBaseScore = (snakeLength - 1) ** (2 + 6 * ratioOfLength) * maxPossibleSnakeLength;
+    const lengthScore1 = lengthBaseScore * movesPerFood;
+
+    // for long snake with survival more important
+    const lengthScore2 = lengthBaseScore * moves * (1 - snakeLength / maxPossibleSnakeLength) ** 2;
+
+    return moveScore - cyclicPenalty + lengthScore1 + lengthScore2;
   }
 
   public static spinRouletteWheel(options: IPopulation[]): IPopulation {
@@ -196,7 +212,7 @@ export default class GaModel {
 
       const fitnessArr: number[] = [];
       for (let j = 0; j < this.trialTimes; j++) {
-        fitnessArr.push(GaModel.fitness(snakeLengthArr[j], movesArr[j]));
+        fitnessArr.push(GaModel.fitness(movesArr[j], snakeLengthArr[j]));
       }
 
       p.snakeLength = CalcUtils.stats.meanOfArray(snakeLengthArr);
