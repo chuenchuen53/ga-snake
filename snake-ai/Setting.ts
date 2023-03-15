@@ -6,7 +6,7 @@ export const SETTINGS: Setting = {
   backupPopulation: true,
   backupPopulationInterval: 50,
   backupPopulationMaxLengthIncrement: 30,
-  evolveTimes: 1000,
+  evolveTimes: 2000,
   gaPlayerConfig: {
     worldWidth: 20,
     worldHeight: 20,
@@ -15,7 +15,7 @@ export const SETTINGS: Setting = {
       hiddenLayerActivationFunction: ActivationFunction.LINEAR,
     },
     gaConfig: {
-      populationSize: 1000,
+      populationSize: 2000,
       surviveRate: 0.5,
       mutationRate: 0.1,
       mutationAmount: 0.2,

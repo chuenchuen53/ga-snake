@@ -10,6 +10,7 @@
     "tryModel": "tsc && node ./build/scripts/tryModel.js"
   },
   "dependencies": {
-    "piscina": "3.2.0"
+    "piscina": "3.2.0",
+    "snake-game": "workspace:*"
   }
 }

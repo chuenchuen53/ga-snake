@@ -6,7 +6,7 @@ import type { WorkerData, WorkerResult } from "./typing";
 let snakeGame: SnakeGame = new SnakeGame({ worldWidth: 20, worldHeight: 20 });
 let inputLayer: InputLayer = new InputLayer(snakeGame);
 
-export default async function workerFunc(workerData: WorkerData): Promise<WorkerResult> {
+export default function workerFunc(workerData: WorkerData): WorkerResult {
   const { worldWidth, worldHeight, playTimes, snakeBrainPlainObject } = workerData;
 
   if (worldWidth !== snakeGame.worldWidth || worldHeight !== snakeGame.worldHeight) {

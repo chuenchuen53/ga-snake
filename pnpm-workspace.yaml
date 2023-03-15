@@ -1,0 +1,4 @@
+packages:
+  - "snake-ai"
+  - "snake-game"
+  - "snake-react"

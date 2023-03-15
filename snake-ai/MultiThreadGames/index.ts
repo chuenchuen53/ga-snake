@@ -4,7 +4,7 @@ import type SnakeBrain from "../SnakeBrain";
 import type { WorkerData, WorkerResult } from "./typing";
 
 // todo
-const numOfThreads = 10;
+const numOfThreads = 15;
 
 export default class MultiThreadGames {
   private piscina: Piscina;

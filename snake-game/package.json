@@ -1,8 +1,10 @@
 {
   "name": "snake-game",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
+  "exports": {
+    "./*": "./build/*.js"
+  },
   "scripts": {
     "test": "jest",
     "test-dev": "jest --watchAll",

@@ -41,6 +41,18 @@ export default class GaModel {
     return moves + (Math.pow(2, snakeLength) + 500 * Math.pow(snakeLength, 2.1)) - Math.pow(0.25 * moves, 1.3) * Math.pow(snakeLength, 1.2);
   }
 
+  public static spinRouletteWheel(options: IPopulation[]): IPopulation {
+    const totalScore = options.reduce((acc, option) => acc + option.fitness, 0);
+    let randomNum = Math.random() * totalScore;
+    for (let i = 0; i < options.length; i++) {
+      if (randomNum < options[i].fitness) {
+        return options[i];
+      }
+      randomNum -= options[i].fitness;
+    }
+    throw new Error("Invalid roulette wheel");
+  }
+
   public readonly worldWidth: number;
   public readonly worldHeight: number;
   public readonly hiddenLayersLength: number[];
@@ -55,7 +67,6 @@ export default class GaModel {
   private readonly _numberOfSurvival: number;
 
   private readonly population: Population;
-  private accumulatedSurvivalFitnessArr: number[];
 
   private readonly multiThreadGames: MultiThreadGames;
 
@@ -74,8 +85,6 @@ export default class GaModel {
     this._numberOfSurvival = Math.floor(this.populationSize * this.surviveRate);
 
     if (this._numberOfSurvival < 2) throw Error("Survival less than 2, please increase survive rate or population size.");
-
-    this.accumulatedSurvivalFitnessArr = [];
 
     const inputLayerLength = InputLayer.inputLayerLength;
     const layerShapes = generateLayerShape(inputLayerLength, ...this.hiddenLayersLength, SnakeBrain.OUTPUT_LAYER_LENGTH);
@@ -126,27 +135,20 @@ export default class GaModel {
     return JSON.stringify(this);
   }
 
-  public async evolve(): Promise<void> {
-    await this.evaluate();
-    this.select();
-    this.crossover();
-    this.mutate();
-  }
-
-  public async evolveMultipleTimes(
-    times: number,
-    exportModal: boolean
-  ): Promise<{
+  public async evolve(exportModal: boolean): Promise<{
     generation: number;
     population: Population;
-    finalBestPlayer: Population[number];
+    finalBestPlayer: IPopulation;
     bestSnakeBrain: SnakeBrain;
     bestGame: string;
     gaPlayer?: string;
   }> {
-    for (let i = 0; i < times; i++) {
-      await this.evolve();
-    }
+    const tempTime = new Date().getTime();
+
+    await this.evaluate();
+    this.select();
+    this.crossover();
+    this.mutate();
 
     const generation = this.generation;
     const finalBestPlayer = this.population[0];
@@ -162,10 +164,10 @@ export default class GaModel {
       meanSnakeLength: population.reduce((acc, cur) => acc + cur.snakeLength, 0) / population.length,
       bestMoves: finalBestPlayer.moves,
       meanMoves: population.reduce((acc, cur) => acc + cur.moves, 0) / population.length,
+      time: (new Date().getTime() - tempTime) / 1000,
     };
 
     tempPrint.push(print);
-
     console.table(tempPrint);
 
     if (exportModal) {
@@ -204,49 +206,28 @@ export default class GaModel {
     }
   }
 
-  private getRouletteWheel(actualNumberOfSurvival: number) {
-    this.accumulatedSurvivalFitnessArr = [this.population[0].fitness];
-    // skip the first one as it's already in the array when initialize
-    for (let i = 1; i < actualNumberOfSurvival; i++) {
-      this.accumulatedSurvivalFitnessArr.push(this.population[i].fitness + this.accumulatedSurvivalFitnessArr[i - 1]);
-    }
-  }
-
   private select() {
     // sort descending (highest fitness first)
     this.population.sort((a, b) => b.fitness - a.fitness);
     this.population.forEach((p, index) => {
       p.survive = index < this._numberOfSurvival;
     });
-    const actualNumberOfSurvival = this.population.reduce((acc, cur) => acc + (cur.survive ? 1 : 0), 0);
-    this.getRouletteWheel(actualNumberOfSurvival);
   }
 
   private crossover() {
     this.population.forEach((p, childIdx) => {
       if (this.population[childIdx].survive) return;
 
-      const parent1Idx = this.pickParentIdx(childIdx);
-      const parent2Idx = this.pickParentIdx(childIdx, parent1Idx);
-      const parent1 = this.population[parent1Idx].snakeBrain;
-      const parent2 = this.population[parent2Idx].snakeBrain;
-      p.snakeBrain.crossOver(parent1, parent2);
+      const parent1 = this.pickParentIdx(childIdx);
+      const parent2 = this.pickParentIdx(childIdx, parent1);
+      p.snakeBrain.crossOver(parent1.snakeBrain, parent2.snakeBrain);
     });
   }
 
-  private pickParentIdx(childIdx: number, excludingIdx = -1): number {
-    const survivalTotalFitness = this.accumulatedSurvivalFitnessArr[this.accumulatedSurvivalFitnessArr.length - 1];
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const rand = utils.randomUniform(0, survivalTotalFitness);
-      const idx = this.accumulatedSurvivalFitnessArr.findIndex((f) => f >= rand);
-      if (idx === -1) {
-        throw Error("never happen");
-      }
-      if (idx !== childIdx && idx !== excludingIdx) {
-        return idx;
-      }
-    }
+  private pickParentIdx(childIdx: number, anotherParent?: IPopulation): IPopulation {
+    const anotherParentIdx = anotherParent ? this.population.findIndex((p) => p === anotherParent) : -1;
+    const filteredPopulation = this.population.filter((p, idx) => idx !== childIdx && idx !== anotherParentIdx);
+    return GaModel.spinRouletteWheel(filteredPopulation);
   }
 
   private mutate() {

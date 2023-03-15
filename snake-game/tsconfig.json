@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
     "strict": true,
-    "module": "ESNext",
+    "module": "CommonJS",
     "target": "ESNext",
-    "lib": ["ESNext"],
+    "lib": [
+      "ESNext"
+    ],
     "sourceMap": true,
     "allowJs": true,
     "esModuleInterop": true,
@@ -13,8 +15,14 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "outDir": "build/"
   },
-  "exclude": ["node_modules", "build",
-    "../snake-ai/scripts", "jest.config.js", "coverage/"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "../snake-ai/scripts",
+    "jest.config.js",
+    "coverage/"
+  ]
 }
