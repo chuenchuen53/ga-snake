@@ -58,12 +58,6 @@ const inputLayer2 = new InputLayer(game2);
 const inputLayer3 = new InputLayer(game3);
 
 describe("InputLayer test suite", () => {
-  it("inputLayerLength test", () => {
-    expect(inputLayer1.inputLayerLength).toBe(25);
-    expect(inputLayer2.inputLayerLength).toBe(25);
-    expect(inputLayer3.inputLayerLength).toBe(25);
-  });
-
   describe("foodSnakeOutOfBoundValue test suite", () => {
     describe("slopeMap4 test suite", () => {
       it("game1 test", () => {

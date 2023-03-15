@@ -37,7 +37,7 @@ describe("GaModel test suite", () => {
   });
 
   it("evolveMultipleTimes test", () => {
-    const evolveSpy = jest.spyOn(gaModel, "evolve").mockImplementation(() => {
+    const evolveSpy = jest.spyOn(gaModel, "evolve").mockImplementation(async () => {
       return;
     });
 

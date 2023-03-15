@@ -17,6 +17,7 @@
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true
   },
+  "outDir": "build/",
   "exclude": [
     "node_modules",
     "build",

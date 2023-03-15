@@ -31,6 +31,7 @@ export interface ISnakeGame {
   moves: number;
   movesForNoFood: number;
   maxTurnOfNoFood: number;
+  gameRecord: string;
 }
 
 export default class SnakeGame implements ISnakeGame {
@@ -57,6 +58,7 @@ export default class SnakeGame implements ISnakeGame {
   public moves: number;
   public movesForNoFood: number;
   public maxTurnOfNoFood: number;
+  public gameRecord = "todo"; // todo
 
   constructor(options: Options) {
     this.worldWidth = options.worldWidth;
@@ -99,6 +101,7 @@ export default class SnakeGame implements ISnakeGame {
       moves: this.moves,
       movesForNoFood: this.movesForNoFood,
       maxTurnOfNoFood: this.maxTurnOfNoFood,
+      gameRecord: this.gameRecord,
     };
   }
 

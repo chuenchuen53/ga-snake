@@ -17,7 +17,15 @@ interface Options {
   providedWeightAndBias?: ProvidedWeightAndBias;
 }
 
-export default class SnakeBrain {
+export interface ISnakeBrain {
+  inputLength: number;
+  layerShapes: LayerShape[];
+  readonly hiddenLayerActivationFunction: ActivationFunction;
+  weightArr: number[][][];
+  biasesArr: number[][];
+}
+
+export default class SnakeBrain implements ISnakeBrain {
   public static readonly OUTPUT_LAYER_LENGTH = 4;
 
   public static readonly actionMap = Object.freeze({
@@ -56,6 +64,16 @@ export default class SnakeBrain {
       this.weightArr = this.layerShapes.map((x) => this.generateRandomLayerWeight(x));
       this.biasesArr = this.layerShapes.map((x) => this.generateRandomLayerBiases(x));
     }
+  }
+
+  public toPlainObject(): ISnakeBrain {
+    return {
+      inputLength: this.inputLength,
+      layerShapes: this.layerShapes,
+      hiddenLayerActivationFunction: this.hiddenLayerActivationFunction,
+      weightArr: this.weightArr,
+      biasesArr: this.biasesArr,
+    };
   }
 
   public validateWeightAndBias(): boolean {

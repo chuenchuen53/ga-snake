@@ -1,9 +1,9 @@
-import SnakeGame from "snake-game/SnakeGame";
 import { utils } from "snake-game/utils";
 import InputLayer from "./InputLayer";
 import { CalcUtils } from "./CalcUtils";
 import SnakeBrain from "./SnakeBrain";
 import { generateLayerShape } from "./generateLayerShape";
+import MultiThreadGames from "./MultiThreadGames";
 import type { ActivationFunction } from "./CalcUtils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,10 +37,7 @@ interface IPopulation {
 type Population = IPopulation[];
 
 export default class GaModel {
-  public static fitness(game: SnakeGame): number {
-    const { moves, snake } = game;
-    const snakeLength = snake.positions.length;
-
+  public static fitness(moves: number, snakeLength: number): number {
     return moves + (Math.pow(2, snakeLength) + 500 * Math.pow(snakeLength, 2.1)) - Math.pow(0.25 * moves, 1.3) * Math.pow(snakeLength, 1.2);
   }
 
@@ -56,11 +53,11 @@ export default class GaModel {
 
   private _generation: number;
   private readonly _numberOfSurvival: number;
-  private readonly game: SnakeGame;
-  private generateInputLayer: InputLayer;
 
   private readonly population: Population;
   private accumulatedSurvivalFitnessArr: number[];
+
+  private readonly multiThreadGames: MultiThreadGames;
 
   constructor(option: Options) {
     this._generation = -1;
@@ -80,17 +77,14 @@ export default class GaModel {
 
     this.accumulatedSurvivalFitnessArr = [];
 
-    this.game = new SnakeGame({ worldWidth: this.worldWidth, worldHeight: this.worldHeight });
-    this.generateInputLayer = new InputLayer(this.game);
-
-    const inputLength = this.generateInputLayer.inputLayerLength;
-    const layerShapes = generateLayerShape(inputLength, ...this.hiddenLayersLength, SnakeBrain.OUTPUT_LAYER_LENGTH);
+    const inputLayerLength = InputLayer.inputLayerLength;
+    const layerShapes = generateLayerShape(inputLayerLength, ...this.hiddenLayersLength, SnakeBrain.OUTPUT_LAYER_LENGTH);
 
     this.population = Array(this.populationSize)
       .fill(null)
       .map(() => ({
         snakeBrain: new SnakeBrain({
-          inputLength,
+          inputLength: inputLayerLength,
           layerShapes,
           hiddenLayerActivationFunction: this.hiddenLayerActivationFunction,
         }),
@@ -100,6 +94,8 @@ export default class GaModel {
         survive: true,
         gameRecords: "",
       }));
+
+    this.multiThreadGames = new MultiThreadGames();
   }
 
   public get generation() {
@@ -130,26 +126,26 @@ export default class GaModel {
     return JSON.stringify(this);
   }
 
-  public evolve() {
-    this.evaluate();
+  public async evolve(): Promise<void> {
+    await this.evaluate();
     this.select();
     this.crossover();
     this.mutate();
   }
 
-  public evolveMultipleTimes(
+  public async evolveMultipleTimes(
     times: number,
     exportModal: boolean
-  ): {
+  ): Promise<{
     generation: number;
     population: Population;
     finalBestPlayer: Population[number];
     bestSnakeBrain: SnakeBrain;
     bestGame: string;
     gaPlayer?: string;
-  } {
+  }> {
     for (let i = 0; i < times; i++) {
-      this.evolve();
+      await this.evolve();
     }
 
     const generation = this.generation;
@@ -186,34 +182,25 @@ export default class GaModel {
     }
   }
 
-  private evaluate(): void {
+  private async evaluate(): Promise<void> {
     this._generation++;
+
+    const promise = this.population.map((p) => this.multiThreadGames.playGames(this.worldWidth, this.worldHeight, this.trialTimes, p.snakeBrain));
+    const result = await Promise.all(promise);
 
     for (let i = 0; i < this.population.length; i++) {
       const p = this.population[i];
-      const gameArr: string[] = [];
-      const snakeLengthArr: number[] = [];
-      const movesArr: number[] = [];
+      const { snakeLengthArr, movesArr, gameRecordArr } = result[i];
+
       const fitnessArr: number[] = [];
-
       for (let j = 0; j < this.trialTimes; j++) {
-        this.game.reset();
-        do {
-          const direction = p.snakeBrain.compute(this.generateInputLayer.compute());
-          this.game.snakeMoveByDirection(direction);
-        } while (!this.game.gameOver);
-
-        // todo
-        gameArr.push(j.toString());
-        snakeLengthArr.push(this.game.snake.positions.length);
-        movesArr.push(this.game.moves);
-        fitnessArr.push(GaModel.fitness(this.game));
+        fitnessArr.push(GaModel.fitness(snakeLengthArr[j], movesArr[j]));
       }
 
       p.snakeLength = CalcUtils.stats.meanOfArray(snakeLengthArr);
       p.moves = CalcUtils.stats.meanOfArray(movesArr);
       p.fitness = CalcUtils.stats.meanOfArray(fitnessArr);
-      p.gameRecords = gameArr[CalcUtils.indexOfMaxValueInArray(fitnessArr)];
+      p.gameRecords = gameRecordArr[CalcUtils.indexOfMaxValueInArray(fitnessArr)];
     }
   }
 
