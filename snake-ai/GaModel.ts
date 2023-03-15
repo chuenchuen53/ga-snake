@@ -22,7 +22,8 @@ export interface Options {
   gaConfig: {
     populationSize: number;
     surviveRate: number;
-    mutationRate: number;
+    populationMutationRate: number;
+    geneMutationRate: number;
     mutationAmount: number;
     trialTimes: number;
   };
@@ -36,7 +37,8 @@ export type ExportedGaModel = {
   hiddenLayerActivationFunction: ActivationFunction;
   populationSize: number;
   surviveRate: number;
-  mutationRate: number;
+  populationMutationRate: number;
+  geneMutationRate: number;
   mutationAmount: number;
   trialTimes: number;
   generation: number;
@@ -95,7 +97,8 @@ export default class GaModel {
   public readonly hiddenLayerActivationFunction: ActivationFunction;
   public readonly populationSize: number;
   public readonly surviveRate: number;
-  public readonly mutationRate: number;
+  public readonly populationMutationRate: number;
+  public readonly geneMutationRate: number;
   public readonly mutationAmount: number;
   public readonly trialTimes: number;
 
@@ -115,7 +118,8 @@ export default class GaModel {
     this.hiddenLayerActivationFunction = option.snakeBrainConfig.hiddenLayerActivationFunction;
     this.populationSize = option.gaConfig.populationSize;
     this.surviveRate = option.gaConfig.surviveRate;
-    this.mutationRate = option.gaConfig.mutationRate;
+    this.populationMutationRate = option.gaConfig.populationMutationRate;
+    this.geneMutationRate = option.gaConfig.geneMutationRate;
     this.mutationAmount = option.gaConfig.mutationAmount;
     this.trialTimes = option.gaConfig.trialTimes;
     this._numberOfSurvival = Math.floor(this.populationSize * this.surviveRate);
@@ -179,7 +183,7 @@ export default class GaModel {
       hiddenLayerActivationFunction: this.hiddenLayerActivationFunction,
       populationSize: this.populationSize,
       surviveRate: this.surviveRate,
-      mutationRate: this.mutationRate,
+      mutationRate: this.geneMutationRate,
       mutationAmount: this.mutationAmount,
       trialTimes: this.trialTimes,
       _numberOfSurvival: this._numberOfSurvival,
@@ -194,7 +198,8 @@ export default class GaModel {
       hiddenLayerActivationFunction: this.hiddenLayerActivationFunction,
       populationSize: this.populationSize,
       surviveRate: this.surviveRate,
-      mutationRate: this.mutationRate,
+      populationMutationRate: this.populationMutationRate,
+      geneMutationRate: this.geneMutationRate,
       mutationAmount: this.mutationAmount,
       trialTimes: this.trialTimes,
       generation: this.generation,
@@ -310,13 +315,22 @@ export default class GaModel {
   }
 
   private mutate() {
+    const best5PercentIndex = Math.floor(this._numberOfSurvival * 0.05);
+
+    // e.g. assume populationMutationRate be 0.5, population size be 100, target mutation is 50
+    // protect the best 5% from mutating -> 95 * 0.5 / 0.95 = 50
+    // the formula is
+    // ((p * 0.95) * x) / p = r
+    // x = r / 0.95
+    // where p is population size, x is population mutation rate, r is target mutation rate
+    const mutationRateForRand = this.populationMutationRate / 0.95;
+
     this.population.forEach((p, index) => {
       // prevent the best 5% from mutating
-      if (index < this._numberOfSurvival * 0.05) return;
+      if (index < best5PercentIndex) return;
 
-      // todo the first rate should be separate from the second rate for fine control
-      if (utils.randomBool(this.mutationRate)) {
-        p.snakeBrain.mutate(this.mutationRate, this.mutationAmount);
+      if (utils.randomBool(mutationRateForRand)) {
+        p.snakeBrain.mutate(this.geneMutationRate, this.mutationAmount);
       }
     });
   }

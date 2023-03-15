@@ -17,7 +17,8 @@ export const SETTINGS: Setting = {
     gaConfig: {
       populationSize: 2000,
       surviveRate: 0.5,
-      mutationRate: 0.1,
+      populationMutationRate: 0.1,
+      geneMutationRate: 0.5,
       mutationAmount: 0.2,
       trialTimes: 1,
     },
@@ -41,7 +42,8 @@ interface Setting {
     gaConfig: {
       populationSize: number;
       surviveRate: number;
-      mutationRate: number;
+      populationMutationRate: number;
+      geneMutationRate: number;
       mutationAmount: number;
       trialTimes: number;
     };
