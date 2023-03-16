@@ -1,15 +1,10 @@
-import dotenv from "dotenv";
-
 import express from "express";
 import cors from "cors";
 import { routes } from "./routes";
-
-dotenv.config();
-
-if (!process.env.SNAKE_REACT_ORIGIN) throw new Error("SNAKE_REACT_ORIGIN is not defined in env");
+import AppEnv from "./AppEnv";
 
 const corsOptions = {
-  origin: process.env.SNAKE_REACT_ORIGIN,
+  origin: AppEnv.SNAKE_REACT_ORIGIN,
   optionsSuccessStatus: 200,
 };
 

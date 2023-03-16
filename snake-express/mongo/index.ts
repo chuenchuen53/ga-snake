@@ -1,29 +1,27 @@
-import dotenv from "dotenv";
-import * as mongoDB from "mongodb";
+import mongoose from "mongoose";
+import AppEnv from "../AppEnv";
+import { GaModel } from "./GaModel";
+import { EvolveResult } from "./EvolveResult";
 
-dotenv.config();
-if (!process.env.MONGODB_NAME || !process.env.MONGODB_CONN_STRING) {
-  throw Error("MONGODB_NAME and MONGODB_CONN_STRING are required");
+export class AppDb {
+  private static instance: AppDb;
+
+  public static getInstance(): AppDb {
+    if (!AppDb.instance) AppDb.instance = new AppDb();
+    return AppDb.instance;
+  }
+
+  public readonly GaModel = GaModel;
+  public readonly EvolveResult = EvolveResult;
+
+  private constructor() {}
+
+  public async connect(): Promise<void> {
+    console.log("[INFO]: database start connecting...");
+    await mongoose.connect(AppEnv.MONGODB_CONN_STRING, {
+      dbName: AppEnv.DATABASE_NAME,
+      bufferCommands: false,
+    });
+    console.log("[INFO]: database connected");
+  }
 }
-
-export interface DbCollections {
-  timeId: mongoDB.Collection;
-  snakeBrain: mongoDB.Collection;
-  gameRecord: mongoDB.Collection;
-  generationStats: mongoDB.Collection;
-  population: mongoDB.Collection;
-}
-
-console.log("[INFO]: mongoClient start connecting...");
-export const mongoClient = new mongoDB.MongoClient(process.env.MONGODB_CONN_STRING);
-export const dbCollections: DbCollections = {} as DbCollections;
-mongoClient.connect().then(async () => {
-  console.log("[INFO]: mongoClient.connected");
-  const db = mongoClient.db(process.env.MONGODB_NAME);
-
-  dbCollections["timeId"] = db.collection("timeId");
-  dbCollections["snakeBrain"] = db.collection("snakeBrain");
-  dbCollections["gameRecord"] = db.collection("gameRecord");
-  dbCollections["generationStats"] = db.collection("generationStats");
-  dbCollections["population"] = db.collection("population");
-});

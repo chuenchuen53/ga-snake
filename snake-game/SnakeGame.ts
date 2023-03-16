@@ -171,7 +171,7 @@ export default class SnakeGame implements ISnakeGame {
       initialSnakePosition: { ...this.initialSnakePosition },
       initialSnakeDirection: this.initialSnakeDirection,
       initialFoodPosition: { ...this.initialFoodPosition },
-      moveRecord: this.moveRecord,
+      moveRecord: this.moveRecord.map((x) => ({ ...x })),
     };
   }
 

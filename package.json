@@ -2,10 +2,6 @@
   "name": "ga-snake",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "snake-game",
-    "snake-ai"
-  ],
   "devDependencies": {
     "@types/jest": "29.4.0",
     "@types/node": "18.15.0",

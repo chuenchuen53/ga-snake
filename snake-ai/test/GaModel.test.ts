@@ -87,7 +87,7 @@ describe("GaModel test suite", () => {
     const moves = 1000;
     const snakeLength = 400;
 
-    const fitness = GaModel.fitness(moves, snakeLength);
+    const fitness = GaModel.fitness(moves, snakeLength, 400);
     expect(fitness).toBeLessThan(Number.MAX_VALUE / 1e8);
   });
 });
