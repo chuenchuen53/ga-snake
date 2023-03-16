@@ -18,8 +18,9 @@
     "express": "4.18.2",
     "mongodb": "5.1.0",
     "mongoose": "7.0.2",
+    "snake-ai": "workspace:*",
     "snake-game": "workspace:*",
-    "snake-ai": "workspace:*"
+    "zod": "3.21.4"
   },
   "devDependencies": {
     "@types/cors": "2.8.13",

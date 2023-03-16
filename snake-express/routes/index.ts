@@ -1,5 +1,5 @@
 import express from "express";
-import { snakeRoutes } from "../routers/snakeRoutes";
+import { trainingRoutes } from "../routers/trainingRoutes";
 
 export const routes = express.Router();
-routes.use("/snake", snakeRoutes);
+routes.use("/training", trainingRoutes);
