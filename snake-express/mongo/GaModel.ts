@@ -1,16 +1,14 @@
 import mongoose, { Schema } from "mongoose";
 import { ActivationFunction } from "snake-ai/CalcUtils";
-import { individualSchema } from "./Individual";
-import type { InferSchemaType, ObjectId } from "mongoose";
+import type { InferSchemaType, Types } from "mongoose";
 import type { ExportedGaModel } from "snake-ai/GaModel";
 
-export type IGaModel = Omit<ExportedGaModel, "parentModelId"> & {
-  parentModelId?: ObjectId;
-  evolveResult: ObjectId[];
+export type IGaModel = Omit<ExportedGaModel, "population"> & {
+  populationHistory: Types.ObjectId[];
+  evolveResultHistory: Types.ObjectId[];
 };
 
 export const gaModelSchema = new Schema<IGaModel>({
-  parentModelId: Schema.Types.ObjectId,
   worldWidth: { type: Number, required: true },
   worldHeight: { type: Number, required: true },
   hiddenLayersLength: { type: [Number], required: true },
@@ -22,8 +20,8 @@ export const gaModelSchema = new Schema<IGaModel>({
   mutationAmount: { type: Number, required: true },
   trialTimes: { type: Number, required: true },
   generation: { type: Number, required: true },
-  population: { type: [individualSchema], required: true },
-  evolveResult: { type: [Schema.Types.ObjectId], required: true },
+  populationHistory: { type: [Schema.Types.ObjectId], required: true, ref: "Population" },
+  evolveResultHistory: { type: [Schema.Types.ObjectId], required: true, ref: "EvolveResult" },
 });
 
 export const GaModel = mongoose.model("GaModel", gaModelSchema);

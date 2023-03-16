@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { individualSchema } from "./Individual";
-import type { EvolveResult as IEvolveResult } from "snake-ai/GaModel";
 import type { InferSchemaType } from "mongoose";
+import type { EvolveResult as IEvolveResult } from "snake-ai/GaModel";
 import type { BaseStats } from "snake-ai/CalcUtils";
 
 const baseStatsSchema = new Schema<BaseStats>(
@@ -13,8 +13,6 @@ const baseStatsSchema = new Schema<BaseStats>(
     lowerQuartile: { type: Number, required: true },
     median: { type: Number, required: true },
     upperQuartile: { type: Number, required: true },
-    skewness: { type: Number, required: true },
-    kurtosis: { type: Number, required: true },
   },
   { _id: false }
 );

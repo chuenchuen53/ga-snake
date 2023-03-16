@@ -107,14 +107,4 @@ describe("CalcUtils", () => {
     expect(CalcUtils.upperQuartileOfArray(statsSampleArr1)).toBeCloseTo(487);
     expect(CalcUtils.upperQuartileOfArray(statsSampleArr2)).toBeCloseTo(0.46510193);
   });
-
-  test("stats.skewnessOfArray", () => {
-    expect(CalcUtils.skewnessOfArray(statsSampleArr1)).toBeCloseTo(0.26751891981020914);
-    expect(CalcUtils.skewnessOfArray(statsSampleArr2)).toBeCloseTo(-0.16122713469950117);
-  });
-
-  test("stats.kurtosisOfArray", () => {
-    expect(CalcUtils.kurtosisOfArray(statsSampleArr1)).toBeCloseTo(-1.3440077183584165);
-    expect(CalcUtils.kurtosisOfArray(statsSampleArr2)).toBeCloseTo(-1.3944844118598168);
-  });
 });

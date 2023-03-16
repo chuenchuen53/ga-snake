@@ -6,8 +6,8 @@ import SnakeBrain from "./SnakeBrain";
 import { generateLayerShape } from "./generateLayerShape";
 import MultiThreadGames from "./MultiThreadGames";
 import type { ISnakeBrain } from "./SnakeBrain";
-import type { GameRecord } from "snake-game/SnakeGame";
 import type { ActivationFunction, BaseStats } from "./CalcUtils";
+import type { GameRecord } from "snake-game/SnakeGame";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tempPrint: any = [];
@@ -28,14 +28,12 @@ export interface Options {
     trialTimes: number;
   };
   providedInfo?: {
-    parentModelId: string;
     generation: number;
     snakeBrains: ISnakeBrain[];
   };
 }
 
 export type ExportedGaModel = {
-  parentModelId: string;
   worldWidth: number;
   worldHeight: number;
   hiddenLayersLength: number[];
@@ -61,7 +59,7 @@ interface Individual {
 
 export type IndividualPlainObject = Omit<Individual, "snakeBrain"> & { snakeBrain: ISnakeBrain };
 
-type Population = Individual[];
+export type Population = Individual[];
 
 export interface EvolveResult {
   generation: number;
@@ -107,7 +105,6 @@ export default class GaModel implements ExportedGaModel {
     return options[options.length - 1];
   }
 
-  public readonly parentModelId: string;
   public readonly worldWidth: number;
   public readonly worldHeight: number;
   public readonly hiddenLayersLength: number[];
@@ -141,9 +138,8 @@ export default class GaModel implements ExportedGaModel {
     const layerShapes = generateLayerShape(inputLayerLength, ...this.hiddenLayersLength, SnakeBrain.OUTPUT_LAYER_LENGTH);
 
     if (option.providedInfo) {
-      const { parentModelId, generation, snakeBrains } = option.providedInfo;
+      const { generation, snakeBrains } = option.providedInfo;
       if (this.populationSize !== snakeBrains.length) throw Error("Provided snake brains length not equal to population size.");
-      this.parentModelId = parentModelId;
       this._generation = generation;
       this.population = snakeBrains.map((x) => ({
         snakeBrain: new SnakeBrain({
@@ -162,7 +158,6 @@ export default class GaModel implements ExportedGaModel {
         gameRecord: null,
       }));
     } else {
-      this.parentModelId = "0";
       this._generation = -1;
       this.population = Array(this.populationSize)
         .fill(null)
@@ -196,7 +191,6 @@ export default class GaModel implements ExportedGaModel {
 
   public exportModel(): ExportedGaModel {
     return {
-      parentModelId: this.parentModelId,
       worldWidth: this.worldWidth,
       worldHeight: this.worldHeight,
       hiddenLayersLength: this.hiddenLayersLength,

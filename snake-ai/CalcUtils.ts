@@ -12,8 +12,6 @@ export interface BaseStats {
   lowerQuartile: number;
   median: number;
   upperQuartile: number;
-  skewness: number;
-  kurtosis: number;
 }
 
 function hiddenLayerActivation(x: number[], type: ActivationFunction): number[] {
@@ -104,18 +102,6 @@ function upperQuartileOfArray(arr: number[]) {
   return sorted[mid];
 }
 
-function skewnessOfArray(arr: number[]) {
-  const mean = meanOfArray(arr);
-  const sd = sdOfArray(arr);
-  return arr.reduce((a, b) => a + Math.pow(b - mean, 3), 0) / arr.length / Math.pow(sd, 3);
-}
-
-function kurtosisOfArray(arr: number[]) {
-  const mean = meanOfArray(arr);
-  const sd = sdOfArray(arr);
-  return arr.reduce((a, b) => a + Math.pow(b - mean, 4), 0) / arr.length / Math.pow(sd, 4) - 3;
-}
-
 function statsOfArray(arr: number[]): BaseStats {
   return {
     min: minOfArray(arr),
@@ -125,8 +111,6 @@ function statsOfArray(arr: number[]): BaseStats {
     lowerQuartile: lowerQuartileOfArray(arr),
     median: medianOfArray(arr),
     upperQuartile: upperQuartileOfArray(arr),
-    skewness: skewnessOfArray(arr),
-    kurtosis: kurtosisOfArray(arr),
   };
 }
 
@@ -144,7 +128,5 @@ export const CalcUtils = Object.freeze({
   lowerQuartileOfArray,
   medianOfArray,
   upperQuartileOfArray,
-  skewnessOfArray,
-  kurtosisOfArray,
   statsOfArray,
 });

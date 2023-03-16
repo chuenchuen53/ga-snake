@@ -4,7 +4,7 @@ import { Direction } from "snake-game/typing";
 import type { ISnakeBrain } from "snake-ai/SnakeBrain";
 import type { IPosition } from "snake-game/Position";
 import type { IndividualPlainObject } from "snake-ai/GaModel";
-import type { MoveRecordRow, GameRecord } from "snake-game/SnakeGame";
+import type { GameRecord, MoveRecordRow } from "snake-game/SnakeGame";
 
 export const snakeBrainSchema = new Schema<ISnakeBrain>(
   {
@@ -51,7 +51,7 @@ export const individualSchema = new Schema<IndividualPlainObject>(
     moves: { type: Number, required: true },
     fitness: { type: Number, required: true },
     survive: { type: Boolean, required: true },
-    gameRecord: { type: gameRecordSchema, required: true },
+    gameRecord: { type: gameRecordSchema, default: null },
   },
   { _id: false }
 );

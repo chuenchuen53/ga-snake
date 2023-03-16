@@ -58,8 +58,8 @@ describe("check GaModel", () => {
       mutationAmount: 0.5,
       trialTimes: 1,
       generation: -1,
-      population: [individual, individual, individual, individual],
-      evolveResult: [],
+      populationHistory: [individual, individual, individual, individual],
+      evolveResultHistory: [],
     };
 
     const gaModel2 = new model(gaModel);

@@ -7,7 +7,7 @@
     "test": "jest",
     "test-dev": "jest --watchAll",
     "coverage": "jest --coverage",
-    "start": "ts-node-dev app.ts"
+    "start": "ts-node-dev --max-old-space-size=8192 app.ts"
   },
   "keywords": [],
   "author": "",
