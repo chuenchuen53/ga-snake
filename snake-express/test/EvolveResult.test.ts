@@ -47,6 +47,41 @@ describe("check evolveResultSchema", () => {
         },
       },
       timeSpent: 10,
+      overallStats: {
+        fitness: {
+          min: 0,
+          max: 1,
+          mean: 2,
+          sd: 3,
+          lowerQuartile: 4,
+          median: 5,
+          upperQuartile: 6,
+          skewness: 7,
+          kurtosis: 8,
+        },
+        snakeLength: {
+          min: 10,
+          max: 11,
+          mean: 12,
+          sd: 13,
+          lowerQuartile: 14,
+          median: 15,
+          upperQuartile: 16,
+          skewness: 17,
+          kurtosis: 18,
+        },
+        moves: {
+          min: 20,
+          max: 21,
+          mean: 22,
+          sd: 23,
+          lowerQuartile: 24,
+          median: 25,
+          upperQuartile: 26,
+          skewness: 27,
+          kurtosis: 28,
+        },
+      },
     };
 
     const evolveResult2 = new model(evolveResult1);

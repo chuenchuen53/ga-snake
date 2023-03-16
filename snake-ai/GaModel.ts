@@ -7,7 +7,7 @@ import { generateLayerShape } from "./generateLayerShape";
 import MultiThreadGames from "./MultiThreadGames";
 import type { ISnakeBrain } from "./SnakeBrain";
 import type { GameRecord } from "snake-game/SnakeGame";
-import type { ActivationFunction } from "./CalcUtils";
+import type { ActivationFunction, BaseStats } from "./CalcUtils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tempPrint: any = [];
@@ -67,6 +67,11 @@ export interface EvolveResult {
   generation: number;
   bestIndividual: IndividualPlainObject;
   timeSpent: number;
+  overallStats: {
+    fitness: BaseStats;
+    snakeLength: BaseStats;
+    moves: BaseStats;
+  };
 }
 
 export default class GaModel implements ExportedGaModel {
@@ -235,6 +240,12 @@ export default class GaModel implements ExportedGaModel {
       gameRecord: SnakeGame.cloneGameRecord(finalBestPlayer.gameRecord!),
     };
 
+    const overallStats = {
+      fitness: CalcUtils.statsOfArray(this.population.map((x) => x.fitness)),
+      snakeLength: CalcUtils.statsOfArray(this.population.map((x) => x.snakeLength)),
+      moves: CalcUtils.statsOfArray(this.population.map((x) => x.moves)),
+    };
+
     const timeSpent = (new Date().getTime() - startTime) / 1000;
 
     const print = {
@@ -251,7 +262,7 @@ export default class GaModel implements ExportedGaModel {
     tempPrint.push(print);
     console.table(tempPrint);
 
-    return { generation, bestIndividual, timeSpent };
+    return { generation, bestIndividual, timeSpent, overallStats };
   }
 
   private async evaluate(): Promise<void> {
@@ -269,9 +280,9 @@ export default class GaModel implements ExportedGaModel {
         fitnessArr.push(GaModel.fitness(movesArr[j], snakeLengthArr[j], this._maxPossibleSnakeLength));
       }
 
-      p.snakeLength = CalcUtils.stats.meanOfArray(snakeLengthArr);
-      p.moves = CalcUtils.stats.meanOfArray(movesArr);
-      p.fitness = CalcUtils.stats.meanOfArray(fitnessArr);
+      p.snakeLength = CalcUtils.meanOfArray(snakeLengthArr);
+      p.moves = CalcUtils.meanOfArray(movesArr);
+      p.fitness = CalcUtils.meanOfArray(fitnessArr);
       p.gameRecord = gameRecordArr[CalcUtils.indexOfMaxValueInArray(fitnessArr)];
     }
   }

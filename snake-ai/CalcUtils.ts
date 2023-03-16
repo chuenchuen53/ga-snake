@@ -4,6 +4,18 @@ export enum ActivationFunction {
   RELU = "RELU",
 }
 
+export interface BaseStats {
+  min: number;
+  max: number;
+  mean: number;
+  sd: number;
+  lowerQuartile: number;
+  median: number;
+  upperQuartile: number;
+  skewness: number;
+  kurtosis: number;
+}
+
 function hiddenLayerActivation(x: number[], type: ActivationFunction): number[] {
   switch (type) {
     case ActivationFunction.LINEAR:
@@ -104,7 +116,7 @@ function kurtosisOfArray(arr: number[]) {
   return arr.reduce((a, b) => a + Math.pow(b - mean, 4), 0) / arr.length / Math.pow(sd, 4) - 3;
 }
 
-function describeArray(arr: number[]) {
+function statsOfArray(arr: number[]): BaseStats {
   return {
     min: minOfArray(arr),
     max: maxOfArray(arr),
@@ -118,19 +130,6 @@ function describeArray(arr: number[]) {
   };
 }
 
-const stats = Object.freeze({
-  minOfArray,
-  maxOfArray,
-  meanOfArray,
-  sdOfArray,
-  lowerQuartileOfArray,
-  medianOfArray,
-  upperQuartileOfArray,
-  skewnessOfArray,
-  kurtosisOfArray,
-  describeArray,
-});
-
 export const CalcUtils = Object.freeze({
   multiplication,
   addition,
@@ -138,5 +137,14 @@ export const CalcUtils = Object.freeze({
   computeMultipleLayer,
   indexOfMaxValueInArray,
   minmax,
-  stats,
+  minOfArray,
+  meanOfArray,
+  maxOfArray,
+  sdOfArray,
+  lowerQuartileOfArray,
+  medianOfArray,
+  upperQuartileOfArray,
+  skewnessOfArray,
+  kurtosisOfArray,
+  statsOfArray,
 });

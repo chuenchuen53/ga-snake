@@ -65,56 +65,56 @@ describe("CalcUtils", () => {
   });
 
   test("stats.minOfArray", () => {
-    expect(CalcUtils.stats.minOfArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toBe(1);
-    expect(CalcUtils.stats.minOfArray([6, 7, 8, 9, 10, 1, 2, 3, 4, 5])).toBe(1);
-    expect(CalcUtils.stats.minOfArray([-6, -7, -8, -9, -10, -1, -2, -3, -4, -5])).toBe(-10);
-    expect(CalcUtils.stats.minOfArray(statsSampleArr1)).toBe(-781);
-    expect(CalcUtils.stats.minOfArray(statsSampleArr2)).toBe(-0.93352642);
+    expect(CalcUtils.minOfArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toBe(1);
+    expect(CalcUtils.minOfArray([6, 7, 8, 9, 10, 1, 2, 3, 4, 5])).toBe(1);
+    expect(CalcUtils.minOfArray([-6, -7, -8, -9, -10, -1, -2, -3, -4, -5])).toBe(-10);
+    expect(CalcUtils.minOfArray(statsSampleArr1)).toBe(-781);
+    expect(CalcUtils.minOfArray(statsSampleArr2)).toBe(-0.93352642);
   });
 
   test("stats.maxOfArray", () => {
-    expect(CalcUtils.stats.maxOfArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toBe(10);
-    expect(CalcUtils.stats.maxOfArray([6, 7, 8, 9, 10, 1, 2, 3, 4, 5])).toBe(10);
-    expect(CalcUtils.stats.maxOfArray([-6, -7, -8, -9, -10, -1, -2, -3, -4, -5])).toBe(-1);
-    expect(CalcUtils.stats.maxOfArray(statsSampleArr1)).toBe(877);
-    expect(CalcUtils.stats.maxOfArray(statsSampleArr2)).toBe(0.91963169);
+    expect(CalcUtils.maxOfArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toBe(10);
+    expect(CalcUtils.maxOfArray([6, 7, 8, 9, 10, 1, 2, 3, 4, 5])).toBe(10);
+    expect(CalcUtils.maxOfArray([-6, -7, -8, -9, -10, -1, -2, -3, -4, -5])).toBe(-1);
+    expect(CalcUtils.maxOfArray(statsSampleArr1)).toBe(877);
+    expect(CalcUtils.maxOfArray(statsSampleArr2)).toBe(0.91963169);
   });
 
   test("stats.meanOfArray", () => {
-    expect(CalcUtils.stats.meanOfArray(statsSampleArr1)).toBeCloseTo(-34.4);
-    expect(CalcUtils.stats.meanOfArray(statsSampleArr2)).toBeCloseTo(-0.026633349);
+    expect(CalcUtils.meanOfArray(statsSampleArr1)).toBeCloseTo(-34.4);
+    expect(CalcUtils.meanOfArray(statsSampleArr2)).toBeCloseTo(-0.026633349);
   });
 
   test("stats.sdOfArray", () => {
-    expect(CalcUtils.stats.sdOfArray(statsSampleArr1)).toBeCloseTo(583.433320954503);
-    expect(CalcUtils.stats.sdOfArray(statsSampleArr2)).toBeCloseTo(0.6224940164933749);
+    expect(CalcUtils.sdOfArray(statsSampleArr1)).toBeCloseTo(583.433320954503);
+    expect(CalcUtils.sdOfArray(statsSampleArr2)).toBeCloseTo(0.6224940164933749);
   });
 
   test("stats.lowerQuartileOfArray", () => {
-    expect(CalcUtils.stats.lowerQuartileOfArray(quartileSampleArr)).toBeCloseTo(15);
-    expect(CalcUtils.stats.lowerQuartileOfArray(statsSampleArr1)).toBeCloseTo(-470);
-    expect(CalcUtils.stats.lowerQuartileOfArray(statsSampleArr2)).toBeCloseTo(-0.55964653);
+    expect(CalcUtils.lowerQuartileOfArray(quartileSampleArr)).toBeCloseTo(15);
+    expect(CalcUtils.lowerQuartileOfArray(statsSampleArr1)).toBeCloseTo(-470);
+    expect(CalcUtils.lowerQuartileOfArray(statsSampleArr2)).toBeCloseTo(-0.55964653);
   });
 
   test("stats.medianOfArray", () => {
-    expect(CalcUtils.stats.medianOfArray(quartileSampleArr)).toBeCloseTo(41);
-    expect(CalcUtils.stats.medianOfArray(statsSampleArr1)).toBeCloseTo(-6);
-    expect(CalcUtils.stats.medianOfArray(statsSampleArr2)).toBeCloseTo(0.39450487);
+    expect(CalcUtils.medianOfArray(quartileSampleArr)).toBeCloseTo(41);
+    expect(CalcUtils.medianOfArray(statsSampleArr1)).toBeCloseTo(-6);
+    expect(CalcUtils.medianOfArray(statsSampleArr2)).toBeCloseTo(0.39450487);
   });
 
   test("stats.upperQuartileOfArray", () => {
-    expect(CalcUtils.stats.upperQuartileOfArray(quartileSampleArr)).toBeCloseTo(43);
-    expect(CalcUtils.stats.upperQuartileOfArray(statsSampleArr1)).toBeCloseTo(487);
-    expect(CalcUtils.stats.upperQuartileOfArray(statsSampleArr2)).toBeCloseTo(0.46510193);
+    expect(CalcUtils.upperQuartileOfArray(quartileSampleArr)).toBeCloseTo(43);
+    expect(CalcUtils.upperQuartileOfArray(statsSampleArr1)).toBeCloseTo(487);
+    expect(CalcUtils.upperQuartileOfArray(statsSampleArr2)).toBeCloseTo(0.46510193);
   });
 
   test("stats.skewnessOfArray", () => {
-    expect(CalcUtils.stats.skewnessOfArray(statsSampleArr1)).toBeCloseTo(0.26751891981020914);
-    expect(CalcUtils.stats.skewnessOfArray(statsSampleArr2)).toBeCloseTo(-0.16122713469950117);
+    expect(CalcUtils.skewnessOfArray(statsSampleArr1)).toBeCloseTo(0.26751891981020914);
+    expect(CalcUtils.skewnessOfArray(statsSampleArr2)).toBeCloseTo(-0.16122713469950117);
   });
 
   test("stats.kurtosisOfArray", () => {
-    expect(CalcUtils.stats.kurtosisOfArray(statsSampleArr1)).toBeCloseTo(-1.3440077183584165);
-    expect(CalcUtils.stats.kurtosisOfArray(statsSampleArr2)).toBeCloseTo(-1.3944844118598168);
+    expect(CalcUtils.kurtosisOfArray(statsSampleArr1)).toBeCloseTo(-1.3440077183584165);
+    expect(CalcUtils.kurtosisOfArray(statsSampleArr2)).toBeCloseTo(-1.3944844118598168);
   });
 });
