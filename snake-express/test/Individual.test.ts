@@ -2,7 +2,7 @@ import { describe } from "node:test";
 import { Direction } from "snake-game/typing";
 import mongoose from "mongoose";
 import { ActivationFunction } from "snake-ai/CalcUtils";
-import { snakeBrainSchema, moveRecordRowSchema, positionSchema, gameRecordSchema, individualSchema } from "../mongo/Individual";
+import { snakeBrainSchema, moveRecordRowSchema, positionSchema, gameRecordSchema, embeddedIndividualSchema } from "../mongo/Individual";
 import type { IPosition } from "snake-game/Position";
 import type { GameRecord, MoveRecordRow } from "snake-game/SnakeGame";
 import type { ISnakeBrain } from "snake-ai/SnakeBrain";
@@ -72,7 +72,7 @@ describe("check Individual", () => {
   });
 
   test("check IndividualSchema", () => {
-    const model = mongoose.model("tempTestIndividual", individualSchema);
+    const model = mongoose.model("tempTestIndividual", embeddedIndividualSchema);
 
     const individual1: IndividualPlainObject = {
       snakeBrain: {

@@ -1,6 +1,7 @@
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { ActivationFunction } from "snake-ai/CalcUtils";
 import { Direction } from "snake-game/typing";
+import type { InferSchemaType} from "mongoose";
 import type { ISnakeBrain } from "snake-ai/SnakeBrain";
 import type { IPosition } from "snake-game/Position";
 import type { IndividualPlainObject } from "snake-ai/GaModel";
@@ -44,7 +45,7 @@ export const gameRecordSchema = new Schema<GameRecord>(
   { _id: false }
 );
 
-export const individualSchema = new Schema<IndividualPlainObject>(
+export const embeddedIndividualSchema = new Schema<IndividualPlainObject>(
   {
     snakeBrain: { type: snakeBrainSchema, required: true },
     snakeLength: { type: Number, required: true },
@@ -55,3 +56,15 @@ export const individualSchema = new Schema<IndividualPlainObject>(
   },
   { _id: false }
 );
+
+export const individualSchema = new Schema<IndividualPlainObject>({
+  snakeBrain: { type: snakeBrainSchema, required: true },
+  snakeLength: { type: Number, required: true },
+  moves: { type: Number, required: true },
+  fitness: { type: Number, required: true },
+  survive: { type: Boolean, required: true },
+  gameRecord: { type: gameRecordSchema, default: null },
+});
+
+export const Individual = mongoose.model("Individual", individualSchema);
+export type IndividualDocument = InferSchemaType<typeof Individual>;

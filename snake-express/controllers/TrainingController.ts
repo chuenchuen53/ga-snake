@@ -1,4 +1,4 @@
-import { evolveRequestSchema, initModelRequestSchema, toggleBackupPopulationRequestSchema } from "../api-typing/zod/training";
+import { evolveRequestSchema, initModelRequestSchema } from "../api-typing/zod/training";
 import type TrainingService from "../services/TrainingService";
 import type { Request, Response } from "express";
 import type { GetCurrentModelInfoResponse, InitModelResponse } from "../api-typing/training";
@@ -61,18 +61,26 @@ export default class TrainingController {
     }
   };
 
-  public togglePopulationModel = (req: Request, res: Response): void => {
+  public backupCurrentPopulation = async (req: Request, res: Response): Promise<void> => {
     try {
-      const bodyValidation = toggleBackupPopulationRequestSchema.safeParse(req.body);
-      if (!bodyValidation.success) {
-        res.status(400).json({ message: "bad request" });
-      } else {
-        const { backup } = bodyValidation.data;
-        this.service.toggleBackupPopulation(backup);
-        res.status(204).end();
+      if (!this.service.gaModel) {
+        res.status(400).json({ message: "model not exists" });
+        return;
       }
-    } catch (err) {
-      console.log("TrainingController ~ toggleBackupModel= ~ err", err);
+
+      await this.service.backupCurrentPopulation();
+      res.status(204).end();
+      // todo
+    } catch (err: any) {
+      if (err.message === "population already backup") {
+        res.status(400).json({ message: err.message });
+        return;
+      } else if (err.message === "previous backup still in progress") {
+        res.status(400).json({ message: err.message });
+        return;
+      }
+
+      console.log("TrainingController ~ backupCurrentPopulation= ~ err", err);
       res.status(500).json({ message: "internal server error" });
     }
   };

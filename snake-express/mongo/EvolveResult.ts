@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { individualSchema } from "./Individual";
+import { embeddedIndividualSchema } from "./Individual";
 import type { InferSchemaType } from "mongoose";
 import type { EvolveResult as IEvolveResult } from "snake-ai/GaModel";
 import type { BaseStats } from "snake-ai/CalcUtils";
@@ -19,7 +19,7 @@ const baseStatsSchema = new Schema<BaseStats>(
 
 export const evolveResultSchema = new Schema<IEvolveResult>({
   generation: { type: Number, required: true },
-  bestIndividual: { type: individualSchema, required: true },
+  bestIndividual: { type: embeddedIndividualSchema, required: true },
   timeSpent: { type: Number, required: true },
   overallStats: {
     fitness: { type: baseStatsSchema, required: true },

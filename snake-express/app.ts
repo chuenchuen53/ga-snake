@@ -15,17 +15,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors(corsOptions));
 
-const API_VERSION = "/api";
-app.use(API_VERSION, routes);
+app.use((req, res, next) => {
+  console.log(`[${new Date()}] Request: ${req.path}`);
+  next();
+});
 
 app.use("/hi", (req, res) => {
   res.send("Hello World!");
 });
 
-app.use((req, res, next) => {
-  console.log(`[${new Date()}] Request: ${req.path}`);
-  next();
-});
+const API_VERSION = "/api";
+app.use(API_VERSION, routes);
 
 // todo
 const db = AppDb.getInstance();
