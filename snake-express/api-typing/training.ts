@@ -1,4 +1,4 @@
-import type { evolveRequestSchema, initModelRequestSchema, toggleBackupPopulationRequestSchema } from "./zod/training";
+import type { evolveRequestSchema, initModelRequestSchema, toggleBackupPopulationWhenFinishRequestSchema } from "./zod/training";
 import type { z } from "zod";
 import type { EvolveResult, ExportedGaModel } from "snake-ai/GaModel";
 
@@ -10,9 +10,10 @@ export interface InitModelResponse {
 
 export type EvolveRequest = z.infer<typeof evolveRequestSchema>;
 
-export type ToggleBackupPopulationRequest = z.infer<typeof toggleBackupPopulationRequestSchema>;
+export type ToggleBackupPopulationRequest = z.infer<typeof toggleBackupPopulationWhenFinishRequestSchema>;
 
 export type GetCurrentModelInfoResponse = Omit<Omit<ExportedGaModel, "parentModelId">, "population"> & {
   id: string;
-  evolveResult: EvolveResult[];
+  evolveResultHistory: EvolveResult[];
+  populationHistory: { generation: number }[];
 };

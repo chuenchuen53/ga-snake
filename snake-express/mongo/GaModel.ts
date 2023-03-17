@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { ActivationFunction } from "snake-ai/CalcUtils";
-import type { InferSchemaType, Types } from "mongoose";
+import type { InferSchemaType, Types, Model } from "mongoose";
 import type { ExportedGaModel } from "snake-ai/GaModel";
 
 export type IGaModel = Omit<ExportedGaModel, "population"> & {
@@ -8,7 +8,7 @@ export type IGaModel = Omit<ExportedGaModel, "population"> & {
   evolveResultHistory: Types.ObjectId[];
 };
 
-export const gaModelSchema = new Schema<IGaModel>({
+export const gaModelSchema = new Schema<IGaModel, Model<IGaModel>>({
   worldWidth: { type: Number, required: true },
   worldHeight: { type: Number, required: true },
   hiddenLayersLength: { type: [Number], required: true },

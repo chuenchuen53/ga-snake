@@ -26,4 +26,8 @@ export default class MultiThreadGames {
     };
     return await this.piscina.run(workerData);
   }
+
+  public async destroy(): Promise<void> {
+    await this.piscina.destroy();
+  }
 }

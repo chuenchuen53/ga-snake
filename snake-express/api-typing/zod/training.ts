@@ -45,7 +45,7 @@ export const evolveRequestSchema = z.object({
   times: z.number().min(1),
 });
 
-export const toggleBackupPopulationRequestSchema = z.object({
+export const toggleBackupPopulationWhenFinishRequestSchema = z.object({
   backup: z.boolean(),
 });
 

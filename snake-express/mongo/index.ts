@@ -26,4 +26,8 @@ export class AppDb {
     });
     console.log("[INFO] database connected");
   }
+
+  public async close(): Promise<void> {
+    await mongoose.connection.close();
+  }
 }

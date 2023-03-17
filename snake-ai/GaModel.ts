@@ -118,6 +118,7 @@ export default class GaModel implements ExportedGaModel {
   public readonly population: Population;
 
   private _generation: number;
+  private _evolving: boolean;
   private readonly _numberOfSurvival: number;
   private readonly _maxPossibleSnakeLength: number;
   private readonly multiThreadGames: MultiThreadGames;
@@ -175,6 +176,7 @@ export default class GaModel implements ExportedGaModel {
         }));
     }
 
+    this._evolving = false;
     this.multiThreadGames = new MultiThreadGames();
     this._numberOfSurvival = Math.floor(this.populationSize * this.surviveRate);
     if (this._numberOfSurvival < 2) throw Error("Survival less than 2, please increase survive rate or population size.");
@@ -185,8 +187,8 @@ export default class GaModel implements ExportedGaModel {
     return this._generation;
   }
 
-  public get numberOfSurvival(): number {
-    return this._numberOfSurvival;
+  public get evolving(): boolean {
+    return this._evolving;
   }
 
   public exportModel(): ExportedGaModel {
@@ -214,6 +216,9 @@ export default class GaModel implements ExportedGaModel {
   }
 
   public async evolve(): Promise<EvolveResult> {
+    if (this._evolving) throw Error("evolving is still running.");
+
+    this._evolving = true;
     const startTime = new Date().getTime();
 
     await this.evaluate();
@@ -256,7 +261,14 @@ export default class GaModel implements ExportedGaModel {
     tempPrint.push(print);
     console.table(tempPrint);
 
+    this._evolving = false;
+
     return { generation, bestIndividual, timeSpent, overallStats };
+  }
+
+  public async destroy(): Promise<void> {
+    if (this._evolving) throw Error("evolving is still running.");
+    await this.multiThreadGames.destroy();
   }
 
   private async evaluate(): Promise<void> {
