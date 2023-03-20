@@ -1,4 +1,4 @@
-import { utils } from "snake-game/utils";
+import { Utils } from "snake-game/utils";
 import SnakeGame from "snake-game/SnakeGame";
 import InputLayer from "./InputLayer";
 import { CalcUtils } from "./CalcUtils";
@@ -326,7 +326,7 @@ export default class GaModel implements ExportedGaModel {
       // prevent the best 5% from mutating
       if (index < best5PercentIndex) return;
 
-      if (utils.randomBool(mutationRateForRand)) {
+      if (Utils.randomBool(mutationRateForRand)) {
         p.snakeBrain.mutate(this.geneMutationRate, this.mutationAmount);
       }
     });

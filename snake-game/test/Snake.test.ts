@@ -1,7 +1,7 @@
 import Position from "../Position";
 import Snake from "../Snake";
 import { Direction, SnakeAction } from "../typing";
-import { utils } from "../utils";
+import { Utils } from "../utils";
 
 describe("test suite for Snake", () => {
   it("fromPlainObj test", () => {
@@ -204,8 +204,8 @@ describe("test suite for Snake", () => {
   });
 
   it("move test 1", () => {
-    for (const direction of utils.enumToArray(Direction)) {
-      for (const snakeAction of utils.enumToArray(SnakeAction)) {
+    for (const direction of Utils.enumToArray(Direction)) {
+      for (const snakeAction of Utils.enumToArray(SnakeAction)) {
         const snake = new Snake([new Position(1, 1)], direction);
         const positionAndDirection = snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(snakeAction);
         snake.move(positionAndDirection);
@@ -227,8 +227,8 @@ describe("test suite for Snake", () => {
   });
 
   it("moveWithFoodEaten test 1", () => {
-    for (const direction of utils.enumToArray(Direction)) {
-      for (const snakeAction of utils.enumToArray(SnakeAction)) {
+    for (const direction of Utils.enumToArray(Direction)) {
+      for (const snakeAction of Utils.enumToArray(SnakeAction)) {
         const snake = new Snake([new Position(1, 1)], direction);
         const positionAndDirection = snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(snakeAction);
         snake.moveWithFoodEaten(positionAndDirection);

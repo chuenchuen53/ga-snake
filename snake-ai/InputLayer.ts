@@ -1,5 +1,5 @@
 import { Direction } from "snake-game/typing";
-import { utils } from "snake-game/utils";
+import { Utils } from "snake-game/utils";
 import Position from "snake-game/Position";
 import type SnakeGame from "snake-game/SnakeGame";
 
@@ -71,7 +71,7 @@ export default class InputLayer {
   }
 
   public compute(): number[] {
-    const result = utils.clone1dArr(this.template);
+    const result = Utils.clone1dArr(this.template);
 
     const foodSnakeOutOfBound = this.foodSnakeOutOfBoundValue(slopeMap4);
     const foodSnakeOutOfBoundStartIndex = 0;

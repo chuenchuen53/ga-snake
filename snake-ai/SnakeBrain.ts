@@ -1,4 +1,4 @@
-import { utils } from "snake-game/utils";
+import { Utils } from "snake-game/utils";
 import { Direction } from "snake-game/typing";
 import { CalcUtils } from "./CalcUtils";
 import type { ActivationFunction } from "./CalcUtils";
@@ -57,8 +57,8 @@ export default class SnakeBrain implements ISnakeBrain {
     if (!this.validateLayerShapes()) throw new Error("Invalid layer shapes");
 
     if (options.providedWeightAndBias) {
-      this.weightArr = utils.cloneObject(options.providedWeightAndBias.weightArr);
-      this.biasesArr = utils.cloneObject(options.providedWeightAndBias.biasesArr);
+      this.weightArr = Utils.cloneObject(options.providedWeightAndBias.weightArr);
+      this.biasesArr = Utils.cloneObject(options.providedWeightAndBias.biasesArr);
       if (!this.validateWeightAndBias()) throw new Error("Invalid provided weight and bias");
     } else {
       this.weightArr = this.layerShapes.map((x) => this.generateRandomLayerWeight(x));
@@ -125,14 +125,14 @@ export default class SnakeBrain implements ISnakeBrain {
 
       for (let row = 0; row < weight.length; row++) {
         for (let col = 0; col < weight[row].length; col++) {
-          if (utils.randomBool(mutationRate)) {
-            const newValue = weight[row][col] + utils.randomUniform(-mutationAmount, mutationAmount);
+          if (Utils.randomBool(mutationRate)) {
+            const newValue = weight[row][col] + Utils.randomUniform(-mutationAmount, mutationAmount);
             weight[row][col] = CalcUtils.minmax(SnakeBrain.MIN_WEIGHT, newValue, SnakeBrain.MAX_WEIGHT);
           }
         }
 
-        if (utils.randomBool(mutationRate)) {
-          const newValue = biases[row] + utils.randomUniform(-mutationAmount, mutationAmount);
+        if (Utils.randomBool(mutationRate)) {
+          const newValue = biases[row] + Utils.randomUniform(-mutationAmount, mutationAmount);
           biases[row] = CalcUtils.minmax(SnakeBrain.MIN_BIAS, newValue, SnakeBrain.MAX_BIAS);
         }
       }
@@ -164,13 +164,13 @@ export default class SnakeBrain implements ISnakeBrain {
     const template: number[][] = Array(row)
       .fill(null)
       .map(() => Array(col).fill(null));
-    return template.map((x) => x.map((_) => utils.randomUniform(SnakeBrain.MIN_WEIGHT, SnakeBrain.MAX_WEIGHT)));
+    return template.map((x) => x.map((_) => Utils.randomUniform(SnakeBrain.MIN_WEIGHT, SnakeBrain.MAX_WEIGHT)));
   }
 
   private generateRandomLayerBiases(layerShape: LayerShape): number[] {
     const [row, _] = layerShape;
     const template: number[] = Array(row).fill(null);
-    return template.map((_) => utils.randomUniform(SnakeBrain.MIN_BIAS, SnakeBrain.MAX_BIAS));
+    return template.map((_) => Utils.randomUniform(SnakeBrain.MIN_BIAS, SnakeBrain.MAX_BIAS));
   }
 
   private getAction(index: number): Direction {

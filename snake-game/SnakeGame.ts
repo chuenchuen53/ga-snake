@@ -1,9 +1,9 @@
 import Position from "./Position";
 import Snake from "./Snake";
 import { Direction } from "./typing";
-import { utils } from "./utils";
+import { Utils } from "./utils";
 import { oppositeDirection } from "./oppositeDirection";
-import type { SnakeAction, PositionAndDirection } from "./typing";
+import type { PositionAndDirection, SnakeAction } from "./typing";
 import type { ISnake } from "./Snake";
 import type { IPosition } from "./Position";
 
@@ -256,7 +256,7 @@ export default class SnakeGame implements ISnakeGame {
       snakeOccupied[position.x * this.worldHeight + position.y] = true;
     }
     const availablePositions = this.allPositions.filter((_, index) => !snakeOccupied[index]);
-    return utils.randomItemFromArray(availablePositions);
+    return Utils.randomItemFromArray(availablePositions);
   }
 
   public snakeMoveBySnakeAction(action: SnakeAction) {
@@ -354,7 +354,7 @@ export default class SnakeGame implements ISnakeGame {
 
   private getInitSnake() {
     const position = new Position(Math.floor(this.worldWidth / 2), Math.floor(this.worldHeight / 2));
-    const direction = utils.randomItemFromEnum(Direction);
+    const direction = Utils.randomItemFromEnum(Direction);
     return new Snake([position], direction);
   }
 }
