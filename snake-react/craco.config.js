@@ -11,7 +11,6 @@ module.exports = {
           configFile: "tsconfig.json",
         },
       });
-
       return webpackConfig;
     },
   },

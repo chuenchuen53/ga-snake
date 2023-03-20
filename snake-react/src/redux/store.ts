@@ -1,11 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
-import counterSliceReducer from "./slice/counterSlice";
-import manualSnakeGameSliceReducer from "./slice/manualSnakeGameSlice";
+import { trainingSlice } from "./slice/trainingSlice";
+import { manualSnakeGameSlice } from "./slice/manualSnakeGameSlice";
+import { replaySnakeGameSlice } from "./slice/replaySnakeGameSlice";
+import { trainedModelsSlice } from "./slice/trainedModelsSlice";
+import type { AnyAction, ThunkAction } from "@reduxjs/toolkit";
 
 export const store = configureStore({
   reducer: {
-    counter: counterSliceReducer,
-    manualSnakeGame: manualSnakeGameSliceReducer,
+    training: trainingSlice.reducer,
+    manualSnakeGame: manualSnakeGameSlice.reducer,
+    replaySnakeGame: replaySnakeGameSlice.reducer,
+    trainedModels: trainedModelsSlice.reducer,
   },
 });
 
@@ -13,3 +18,5 @@ export const store = configureStore({
 export type RootState = ReturnType<typeof store.getState>;
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = typeof store.dispatch;
+
+export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, AnyAction>;

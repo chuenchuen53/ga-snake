@@ -37,7 +37,7 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame.gameOver).toBe(false);
     expect(snakeGame.moves).toBe(0);
     expect(snakeGame.movesForNoFood).toBe(0);
-    expect(snakeGame.maxTurnOfNoFood).toBeGreaterThan(0);
+    expect(snakeGame.maxMovesOfNoFood).toBeGreaterThan(0);
   });
 
   it("constructor test for providedInitialStatus", () => {
@@ -87,7 +87,7 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame.gameOver).toBe(false);
     expect(snakeGame.moves).toBe(10);
     expect(snakeGame.movesForNoFood).toBe(2);
-    expect(snakeGame.maxTurnOfNoFood).toBeGreaterThan(0);
+    expect(snakeGame.maxMovesOfNoFood).toBeGreaterThan(0);
   });
 
   it("toPlainObject test", () => {
@@ -143,7 +143,7 @@ describe("test suite for SnakeGame", () => {
       gameOver: false,
       moves: 10,
       movesForNoFood: 2,
-      maxTurnOfNoFood: snakeGame.maxTurnOfNoFood,
+      maxTurnOfNoFood: snakeGame.maxMovesOfNoFood,
       initialSnakePosition: { x: 1, y: 1 },
       initialSnakeDirection: Direction.UP,
       initialFoodPosition: { x: 0, y: 0 },
@@ -199,7 +199,7 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame.gameOver).toBe(false);
     expect(snakeGame.moves).toBe(0);
     expect(snakeGame.movesForNoFood).toBe(0);
-    expect(snakeGame.maxTurnOfNoFood).toBeGreaterThan(0);
+    expect(snakeGame.maxMovesOfNoFood).toBeGreaterThan(0);
     expect(snakeGame.initialSnakePosition).toStrictEqual(snakeGame.snake.head.toPlainObject());
     expect(snakeGame.initialSnakeDirection).toBe(snakeGame.snake.direction);
     expect(snakeGame.initialFoodPosition).toStrictEqual(snakeGame.food.toPlainObject());

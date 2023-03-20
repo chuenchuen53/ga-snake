@@ -1,41 +1,59 @@
 import React from "react";
-import Button from "@mui/material/Button";
-import { ManualSnakeGame } from "./components/ManualSnakeGame";
-import { useAppDispatch, useAppSelector } from "./redux/hook";
-import { changeWorldSize, snakeMove as snakeMoveAction } from "./redux/slice/manualSnakeGameSlice";
-import type { Direction } from "snake-game/typing";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import CssBaseline from "@mui/material/CssBaseline";
+import { createTheme } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material";
+import MainLayout from "./components/MainLayout";
+import { ErrorPage } from "./pages/ErrorPage";
 import "./App.css";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+import { PlayPage } from "./pages/PlayPage";
+import { TrainingPage } from "./pages/TraningPage";
+import { TrainedModelsPage } from "./pages/TrainedModelsPage";
 
-export async function apiTest() {
-  const resp = await fetch("http://localhost:8080/hi", { method: "GET" });
-  const text = await resp.text();
-  console.log(text);
-  return text;
-}
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <MainLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "play",
+        element: <PlayPage />,
+      },
+      {
+        path: "training",
+        element: <TrainingPage />,
+      },
+      {
+        path: "trained-models",
+        element: <TrainedModelsPage />,
+      },
+    ],
+  },
+]);
+
+const theme = createTheme({
+  typography: {
+    button: {
+      textTransform: "none",
+    },
+  },
+  palette: {
+    mode: "dark",
+  },
+});
 
 function App() {
-  const dispatch = useAppDispatch();
-
-  const snakeGame = useAppSelector((state) => state.manualSnakeGame.snakeGame);
-  const snakeMove = (direction: Direction) => dispatch(snakeMoveAction(direction));
-
-  const changeWorld = () =>
-    dispatch(
-      changeWorldSize({
-        worldWidth: Math.random() < 0.5 ? 10 : 20,
-        worldHeight: Math.random() < 0.5 ? 10 : 20,
-      })
-    );
-
   return (
     <div className="App">
-      <ManualSnakeGame snakeGame={snakeGame} snakeMove={snakeMove} />
-      <Button variant="contained" onClick={changeWorld}>
-        change world test
-      </Button>
-      <Button variant="contained" onClick={apiTest}>
-        api test
-      </Button>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </div>
   );
 }

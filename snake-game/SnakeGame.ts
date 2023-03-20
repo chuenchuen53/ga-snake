@@ -7,17 +7,13 @@ import type { SnakeAction, PositionAndDirection } from "./typing";
 import type { ISnake } from "./Snake";
 import type { IPosition } from "./Position";
 
-export interface MoveRecordRow {
-  move: number;
-  fx?: number;
-  fy?: number;
-}
-
 export interface GameRecord {
+  worldWidth: number;
+  worldHeight: number;
   initialSnakePosition: IPosition;
   initialSnakeDirection: Direction;
   initialFoodPosition: IPosition;
-  moveRecord: MoveRecordRow[];
+  moveRecord: number[];
 }
 
 export interface ProvidedInitialStatus {
@@ -29,7 +25,7 @@ export interface ProvidedInitialStatus {
   initialSnakePosition: IPosition;
   initialSnakeDirection: Direction;
   initialFoodPosition: IPosition;
-  moveRecord: MoveRecordRow[];
+  moveRecord: number[];
 }
 
 export interface Options {
@@ -47,11 +43,11 @@ export interface ISnakeGame {
   gameOver: boolean;
   moves: number;
   movesForNoFood: number;
-  maxTurnOfNoFood: number;
+  maxMovesOfNoFood: number;
   initialSnakePosition: IPosition;
   initialSnakeDirection: Direction;
   initialFoodPosition: IPosition;
-  moveRecord: MoveRecordRow[];
+  moveRecord: number[];
 }
 
 export default class SnakeGame implements ISnakeGame {
@@ -90,13 +86,13 @@ export default class SnakeGame implements ISnakeGame {
         initialSnakePosition: { ...snakeGame.initialSnakePosition },
         initialSnakeDirection: snakeGame.initialSnakeDirection,
         initialFoodPosition: { ...snakeGame.initialFoodPosition },
-        moveRecord: snakeGame.moveRecord.map((x) => ({ ...x })),
+        moveRecord: snakeGame.moveRecord.slice(),
       },
     });
   }
 
   public static cloneGameRecord(gameRecord: GameRecord): GameRecord {
-    const moveRecord = gameRecord.moveRecord.map((x) => ({ ...x }));
+    const moveRecord = gameRecord.moveRecord.slice();
     return {
       ...gameRecord,
       moveRecord,
@@ -111,11 +107,11 @@ export default class SnakeGame implements ISnakeGame {
   public gameOver: boolean;
   public moves: number;
   public movesForNoFood: number;
-  public maxTurnOfNoFood: number;
+  public maxMovesOfNoFood: number;
   public initialSnakePosition: IPosition;
   public initialSnakeDirection: Direction;
   public initialFoodPosition: IPosition;
-  public moveRecord: MoveRecordRow[];
+  public moveRecord: number[];
 
   constructor(options: Options) {
     this.worldWidth = options.worldWidth;
@@ -134,7 +130,7 @@ export default class SnakeGame implements ISnakeGame {
       this.gameOver = options.providedInitialStatus.gameOver;
       this.moves = options.providedInitialStatus.moves;
       this.movesForNoFood = options.providedInitialStatus.movesForNoFood;
-      this.maxTurnOfNoFood = 0;
+      this.maxMovesOfNoFood = 0;
       this.initialSnakePosition = { ...options.providedInitialStatus.initialSnakePosition };
       this.initialSnakeDirection = options.providedInitialStatus.initialSnakeDirection;
       this.initialFoodPosition = { ...options.providedInitialStatus.initialFoodPosition };
@@ -147,7 +143,7 @@ export default class SnakeGame implements ISnakeGame {
       this.gameOver = false;
       this.moves = 0;
       this.movesForNoFood = 0;
-      this.maxTurnOfNoFood = 0;
+      this.maxMovesOfNoFood = 0;
       this.initialSnakePosition = this.snake.head.toPlainObject();
       this.initialSnakeDirection = this.snake.direction;
       this.initialFoodPosition = this.food.toPlainObject();
@@ -167,21 +163,63 @@ export default class SnakeGame implements ISnakeGame {
       gameOver: this.gameOver,
       moves: this.moves,
       movesForNoFood: this.movesForNoFood,
-      maxTurnOfNoFood: this.maxTurnOfNoFood,
+      maxMovesOfNoFood: this.maxMovesOfNoFood,
       initialSnakePosition: { ...this.initialSnakePosition },
       initialSnakeDirection: this.initialSnakeDirection,
       initialFoodPosition: { ...this.initialFoodPosition },
-      moveRecord: this.moveRecord.map((x) => ({ ...x })),
+      moveRecord: this.moveRecord.slice(),
+    };
+  }
+
+  public toPlainObjectIgnoreMoveRecordAndAllPosition(): ISnakeGame {
+    return {
+      worldWidth: this.worldWidth,
+      worldHeight: this.worldHeight,
+      allPositions: [],
+      snake: this.snake.toPlainObject(),
+      food: this.food.toPlainObject(),
+      gameOver: this.gameOver,
+      moves: this.moves,
+      movesForNoFood: this.movesForNoFood,
+      maxMovesOfNoFood: this.maxMovesOfNoFood,
+      initialSnakePosition: { ...this.initialSnakePosition },
+      initialSnakeDirection: this.initialSnakeDirection,
+      initialFoodPosition: { ...this.initialFoodPosition },
+      moveRecord: [],
     };
   }
 
   public exportGameRecord(): GameRecord {
     return {
+      worldWidth: this.worldWidth,
+      worldHeight: this.worldHeight,
       initialSnakePosition: { ...this.initialSnakePosition },
       initialSnakeDirection: this.initialSnakeDirection,
       initialFoodPosition: { ...this.initialFoodPosition },
-      moveRecord: this.moveRecord.map((x) => ({ ...x })),
+      moveRecord: this.moveRecord.slice(),
     };
+  }
+
+  public to1DIndex(x: number, y: number): number {
+    return x * this.worldHeight + y;
+  }
+
+  public to2DIndex(oneDIndex: number): number[] {
+    const y = oneDIndex % this.worldHeight;
+    const x = (oneDIndex - y) / this.worldHeight;
+    return [x, y];
+  }
+
+  public encodeMoveRecord(oriSnakeHeadPos: Position, targetSnakeHeadPos: Position, newFoodPos?: Position): number {
+    const relativeDirection = SnakeGame.directionMap[SnakeGame.relativeDirection(oriSnakeHeadPos, targetSnakeHeadPos)];
+
+    if (newFoodPos) {
+      const newFoodPosIn1D = this.to1DIndex(newFoodPos.x, newFoodPos.y);
+      // add 1 to avoid 0
+      return 10 * (newFoodPosIn1D + 1) + relativeDirection;
+    }
+
+    return relativeDirection;
   }
 
   public reset() {
@@ -190,7 +228,7 @@ export default class SnakeGame implements ISnakeGame {
     this.gameOver = false;
     this.moves = 0;
     this.movesForNoFood = 0;
-    this.maxTurnOfNoFood = 0;
+    this.maxMovesOfNoFood = 0;
     this.initialSnakePosition = this.snake.head.toPlainObject();
     this.initialSnakeDirection = this.snake.direction;
     this.initialFoodPosition = this.food.toPlainObject();
@@ -205,7 +243,7 @@ export default class SnakeGame implements ISnakeGame {
     this.moves++;
     this.movesForNoFood++;
     this.gameOver = true;
-    this.moveRecord.push({ move: -1 });
+    this.moveRecord.push(-1);
   }
 
   public checkOutOfBounds(position: Position): boolean {
@@ -251,10 +289,31 @@ export default class SnakeGame implements ISnakeGame {
     this.snakeMove(newHeadPositionAndDirection);
   }
 
-  private snakeMove(newHeadPositionAndDirection: PositionAndDirection) {
+  public replayMove(moveRecord: number): void {
+    const encodedDirection = moveRecord % 10;
+    const direction = SnakeGame.inverseDirectionMap[encodedDirection];
+    if (!direction) throw new Error("moveRecordRow.move is not from 0-3");
+
+    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveByDirection(direction);
+
+    const haveFood = moveRecord >= 10;
+    if (haveFood) {
+      // minus 1 because we add 1 to avoid 0
+      const foodPositionIn1D = Math.floor(moveRecord / 10) - 1;
+      const [fx, fy] = this.to2DIndex(foodPositionIn1D);
+      const foodPosition = new Position(fx, fy);
+      const providedFoodPosition = this.allPositions.find((p) => p.isEqual(foodPosition));
+      if (!providedFoodPosition) throw new Error("providedFoodPosition is not valid");
+      this.snakeMove(newHeadPositionAndDirection, providedFoodPosition);
+    } else {
+      this.snakeMove(newHeadPositionAndDirection);
+    }
+  }
+
+  private snakeMove(newHeadPositionAndDirection: PositionAndDirection, providedFoodPosition?: Position) {
     this.moves++;
 
-    const encodedMove = SnakeGame.directionMap[SnakeGame.relativeDirection(this.snake.head, newHeadPositionAndDirection.position)];
+    const oriSnakeHeadPos = this.snake.head;
 
     const eatFood = this.food.isEqual(newHeadPositionAndDirection.position);
     if (eatFood) {
@@ -264,7 +323,7 @@ export default class SnakeGame implements ISnakeGame {
       if (this.snake.positions.length >= this.worldWidth * this.worldHeight) {
         this.gameOver = true;
       } else {
-        this.food = this.getRandomFoodPosition();
+        this.food = providedFoodPosition ? providedFoodPosition : this.getRandomFoodPosition();
         this.updateMaxTurnOfNoFood();
       }
     } else {
@@ -274,21 +333,22 @@ export default class SnakeGame implements ISnakeGame {
         this.gameOver = true;
       } else {
         this.snake.move(newHeadPositionAndDirection);
-        if (this.movesForNoFood >= this.maxTurnOfNoFood) this.gameOver = true;
+        if (this.movesForNoFood >= this.maxMovesOfNoFood) this.gameOver = true;
       }
     }
 
-    this.moveRecord.push(eatFood ? { move: encodedMove, fx: this.food.x, fy: this.food.y } : { move: encodedMove });
+    const encodedMove = this.encodeMoveRecord(oriSnakeHeadPos, newHeadPositionAndDirection.position, eatFood ? this.food : undefined);
+    this.moveRecord.push(encodedMove);
   }
 
   private updateMaxTurnOfNoFood(): void {
     const snakeLength = this.snake.positions.length;
     if (snakeLength < 0.2 * (this.worldWidth * this.worldHeight)) {
-      this.maxTurnOfNoFood = Math.max(Math.ceil(0.5 * (this.worldWidth * this.worldHeight)));
+      this.maxMovesOfNoFood = Math.max(Math.ceil(0.5 * (this.worldWidth * this.worldHeight)));
     } else if (snakeLength < 0.5 * (this.worldWidth * this.worldHeight)) {
-      this.maxTurnOfNoFood = this.worldWidth * this.worldHeight;
+      this.maxMovesOfNoFood = this.worldWidth * this.worldHeight;
     } else {
-      this.maxTurnOfNoFood = 2 * this.worldWidth * this.worldHeight;
+      this.maxMovesOfNoFood = 2 * this.worldWidth * this.worldHeight;
     }
   }
 

@@ -9,9 +9,6 @@ import type { ISnakeBrain } from "./SnakeBrain";
 import type { ActivationFunction, BaseStats } from "./CalcUtils";
 import type { GameRecord } from "snake-game/SnakeGame";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const tempPrint: any = [];
-
 export interface Options {
   worldWidth: number;
   worldHeight: number;
@@ -247,7 +244,7 @@ export default class GaModel implements ExportedGaModel {
 
     const timeSpent = (new Date().getTime() - startTime) / 1000;
 
-    const print = {
+    console.table({
       generation,
       highestFitness: finalBestPlayer.fitness,
       meanFitness: this.population.reduce((acc, cur) => acc + cur.fitness, 0) / this.population.length,
@@ -256,10 +253,7 @@ export default class GaModel implements ExportedGaModel {
       bestMoves: finalBestPlayer.moves,
       meanMoves: this.population.reduce((acc, cur) => acc + cur.moves, 0) / this.population.length,
       time: timeSpent,
-    };
-
-    tempPrint.push(print);
-    console.table(tempPrint);
+    });
 
     this._evolving = false;
 

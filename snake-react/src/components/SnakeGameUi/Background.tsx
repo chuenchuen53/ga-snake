@@ -8,6 +8,8 @@ interface Props {
   worldBackgroundColor: string;
 }
 
-export const Background = ({ worldWidth, worldHeight, gridSize, worldBackgroundColor }: Props) => {
+export const Background = React.memo(({ worldWidth, worldHeight, gridSize, worldBackgroundColor }: Props) => {
+  console.log("render Background");
+
   return <Rect x={0} y={0} width={worldWidth * gridSize} height={worldHeight * gridSize} fill={worldBackgroundColor} />;
-};
+});

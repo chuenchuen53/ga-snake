@@ -1,11 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 import { ActivationFunction } from "snake-ai/CalcUtils";
 import { Direction } from "snake-game/typing";
-import type { InferSchemaType} from "mongoose";
+import type { InferSchemaType } from "mongoose";
 import type { ISnakeBrain } from "snake-ai/SnakeBrain";
 import type { IPosition } from "snake-game/Position";
 import type { IndividualPlainObject } from "snake-ai/GaModel";
-import type { GameRecord, MoveRecordRow } from "snake-game/SnakeGame";
+import type { GameRecord } from "snake-game/SnakeGame";
 
 export const snakeBrainSchema = new Schema<ISnakeBrain>(
   {
@@ -26,21 +26,14 @@ export const positionSchema = new Schema<IPosition>(
   { _id: false }
 );
 
-export const moveRecordRowSchema = new Schema<MoveRecordRow>(
-  {
-    move: { type: Number, required: true },
-    fx: { type: Number, required: false },
-    fy: { type: Number, required: false },
-  },
-  { _id: false }
-);
-
 export const gameRecordSchema = new Schema<GameRecord>(
   {
+    worldWidth: { type: Number, required: true },
+    worldHeight: { type: Number, required: true },
     initialSnakePosition: { type: positionSchema, required: true },
     initialSnakeDirection: { type: String, enum: Direction, required: true },
     initialFoodPosition: { type: positionSchema, required: true },
-    moveRecord: { type: [moveRecordRowSchema], required: true },
+    moveRecord: { type: [Number], required: true },
   },
   { _id: false }
 );

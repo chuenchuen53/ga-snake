@@ -1,9 +1,12 @@
+import events from "events";
 import { evolveRequestSchema, initModelRequestSchema, toggleBackupPopulationWhenFinishRequestSchema } from "../api-typing/zod/training";
 import type TrainingService from "../services/TrainingService";
 import type { Request, Response } from "express";
-import type { GetCurrentModelInfoResponse, InitModelResponse } from "../api-typing/training";
+import type { GetCurrentModelInfoResponse, InitModelResponse, PollingInfoResponse } from "../api-typing/training";
 
 export default class TrainingController {
+  private static pollingTimeOut = 30000;
+
   constructor(private service: TrainingService) {}
 
   public initModel = async (req: Request, res: Response) => {
@@ -18,8 +21,8 @@ export default class TrainingController {
         res.status(400).json({ message: bodyValidation.error });
       } else {
         const { options } = bodyValidation.data;
-        const id = await this.service.initModel(options);
-        res.json({ id } satisfies InitModelResponse);
+        const currentModelInfo = await this.service.initModel(options);
+        res.json(currentModelInfo satisfies InitModelResponse);
       }
     } catch (err) {
       console.log("TrainingController ~ initModel= ~ err", err);
@@ -123,6 +126,68 @@ export default class TrainingController {
       res.status(204).end();
     } catch (err) {
       console.log("TrainingController ~ removeCurrentModel= ~ err", err);
+      res.status(500).json({ message: "internal server error" });
+    }
+  };
+
+  public pollingInfo = async (req: Request, res: Response) => {
+    try {
+      if (!this.haveModelGuard(res)) return;
+
+      const currentEvolvingResultHistoryGeneration = parseInt(req.params.currentEvolvingResultHistoryGeneration);
+      const currentPopulationHistoryGeneration = parseInt(req.params.currentPopulationHistoryGeneration);
+      const currentBackupPopulationInProgress = req.params.currentBackupPopulationInProgress.toString() === "true";
+      const currentBackupPopulationWhenFinish = req.params.currentBackupPopulationWhenFinish.toString() === "true";
+      const currentEvolving = req.params.currentEvolving.toString() === "true";
+
+      const stateMatch = this.service.stateMatch({
+        evolvingResultHistoryGeneration: currentEvolvingResultHistoryGeneration,
+        populationHistoryGeneration: currentPopulationHistoryGeneration,
+        backupPopulationInProgress: currentBackupPopulationInProgress,
+        backupPopulationWhenFinish: currentBackupPopulationWhenFinish,
+        evolving: currentEvolving,
+      });
+
+      if (!stateMatch) {
+        const info = this.service.pollingInfo({
+          currentEvolvingResultHistoryGeneration,
+          currentPopulationHistoryGeneration,
+        });
+        res.json(info satisfies PollingInfoResponse);
+        return;
+      }
+
+      const info: PollingInfoResponse = await new Promise<PollingInfoResponse>((resolve) => {
+        const emitter = new events.EventEmitter();
+        emitter.once("change", () => {
+          const info = this.service.pollingInfo({
+            currentEvolvingResultHistoryGeneration,
+            currentPopulationHistoryGeneration,
+          });
+          this.service.removeEmitter(emitter);
+          resolve(info);
+        });
+        this.service.addEmitter(emitter);
+
+        setTimeout(() => {
+          emitter.removeListener("change", () => {
+            // do nothing
+          });
+          const info: PollingInfoResponse = {
+            newEvolveResultHistory: [],
+            newPopulationHistory: [],
+            backupPopulationInProgress: currentBackupPopulationInProgress,
+            backupPopulationWhenFinish: currentBackupPopulationWhenFinish,
+            evolving: currentEvolving,
+          };
+          this.service.removeEmitter(emitter);
+          resolve(info);
+        }, TrainingController.pollingTimeOut);
+      });
+
+      res.json(info satisfies PollingInfoResponse);
+    } catch (err) {
+      console.log("TrainingController ~ pollingInfo= ~ err", err);
       res.status(500).json({ message: "internal server error" });
     }
   };

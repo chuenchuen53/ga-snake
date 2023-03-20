@@ -4,16 +4,26 @@ import type { EvolveResult, ExportedGaModel } from "snake-ai/GaModel";
 
 export type InitModelRequest = z.infer<typeof initModelRequestSchema>;
 
-export interface InitModelResponse {
-  id: string;
-}
-
 export type EvolveRequest = z.infer<typeof evolveRequestSchema>;
 
-export type ToggleBackupPopulationRequest = z.infer<typeof toggleBackupPopulationWhenFinishRequestSchema>;
+export type toggleBackupPopulationWhenFinishRequest = z.infer<typeof toggleBackupPopulationWhenFinishRequestSchema>;
+
+export interface EvolveResultWithId extends EvolveResult {
+  _id: string;
+}
 
 export type GetCurrentModelInfoResponse = Omit<Omit<ExportedGaModel, "parentModelId">, "population"> & {
   id: string;
-  evolveResultHistory: EvolveResult[];
-  populationHistory: { generation: number }[];
+  evolveResultHistory: EvolveResultWithId[];
+  populationHistory: { _id: string; generation: number }[];
 };
+
+export type InitModelResponse = GetCurrentModelInfoResponse;
+
+export interface PollingInfoResponse {
+  newEvolveResultHistory: EvolveResultWithId[];
+  newPopulationHistory: { _id: string; generation: number }[];
+  backupPopulationInProgress: boolean;
+  backupPopulationWhenFinish: boolean;
+  evolving: boolean;
+}

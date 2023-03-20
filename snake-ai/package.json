@@ -14,7 +14,7 @@
     "tryModel": "npm run build && node ./build/scripts/tryModel.js"
   },
   "dependencies": {
-    "piscina": "3.2.0",
-    "snake-game": "workspace:*"
+    "snake-game": "workspace:*",
+    "piscina": "3.2.0"
   }
 }

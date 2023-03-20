@@ -1,8 +1,9 @@
 import GaModel from "snake-ai/GaModel";
 import { AppDb } from "../mongo";
+import type { EventEmitter } from "events";
 import type { Types } from "mongoose";
-import type { EvolveResult as IEvolveResult } from "snake-ai/GaModel";
-import type { GetCurrentModelInfoResponse, InitModelRequest } from "../api-typing/training";
+import type { EvolveResult } from "snake-ai/GaModel";
+import type { EvolveResultWithId, GetCurrentModelInfoResponse, InitModelRequest, PollingInfoResponse } from "../api-typing/training";
 import type { IGaModel } from "../mongo/GaModel";
 
 export default class TrainingService {
@@ -12,6 +13,9 @@ export default class TrainingService {
   private _backupPopulationInProgress = false;
   private backupPopulationWhenFinish = false;
   private currentModelId: null | Types.ObjectId = null;
+  private evolveResultHistoryCache: EvolveResultWithId[] = [];
+  private populationHistoryCache: { _id: string; generation: number }[] = [];
+  private emitters: EventEmitter[] = [];
 
   public get gaModel(): GaModel | null {
     return this._gaModel;
@@ -25,7 +29,15 @@ export default class TrainingService {
     return this._backupPopulationInProgress;
   }
 
-  public async initModel(options: InitModelRequest["options"]): Promise<string> {
+  public addEmitter(emitter: EventEmitter): void {
+    this.emitters.push(emitter);
+  }
+
+  public removeEmitter(emitter: EventEmitter): void {
+    this.emitters = this.emitters.filter((e) => e !== emitter);
+  }
+
+  public async initModel(options: InitModelRequest["options"]): Promise<GetCurrentModelInfoResponse> {
     this._gaModel = new GaModel(options);
 
     const { population: _, ...modelData } = this._gaModel.exportModel();
@@ -39,7 +51,7 @@ export default class TrainingService {
     this.currentModelId = _id;
     await this.backupCurrentPopulation();
 
-    return this.currentModelId.toString();
+    return await this.getCurrentModelInfo();
   }
 
   public evolve(times: number): void {
@@ -77,6 +89,8 @@ export default class TrainingService {
     }
 
     this._backupPopulationInProgress = true;
+    this.emitters.forEach((emitter) => emitter.emit("change"));
+
     const insertResult = await this.db.Population.insertNewPopulation({
       generation: exportModel.generation,
       population: exportModel.population,
@@ -86,6 +100,11 @@ export default class TrainingService {
     const gaModelDoc = (await this.db.GaModel.findById(this.currentModelId))!;
     gaModelDoc.populationHistory.push(insertResult._id);
     await gaModelDoc.save();
+
+    if (exportModel.generation !== -1) {
+      this.populationHistoryCache.push({ _id: insertResult._id.toString(), generation: exportModel.generation });
+      this.emitters.forEach((emitter) => emitter.emit("change"));
+    }
     this._backupPopulationInProgress = false;
     return true;
   }
@@ -93,7 +112,7 @@ export default class TrainingService {
   public async getCurrentModelInfo(): Promise<GetCurrentModelInfoResponse> {
     if (!this.currentModelId) throw new Error("model not exists");
     const model = await this.db.GaModel.findById(this.currentModelId)
-      .populate<{ evolveResultHistory: IEvolveResult[] }>("evolveResultHistory")
+      .populate<{ evolveResultHistory: EvolveResult[] }>("evolveResultHistory")
       .populate<{ populationHistory: { generation: number }[] }>("populationHistory", "generation")
       .exec();
     if (!model) throw new Error("model not exists");
@@ -107,7 +126,52 @@ export default class TrainingService {
       this._gaModel = null;
       this._queueTraining = 0;
       this._backupPopulationInProgress = false;
+      this.evolveResultHistoryCache = [];
+      this.populationHistoryCache = [];
     }
+  }
+
+  public stateMatch({
+    evolvingResultHistoryGeneration,
+    populationHistoryGeneration,
+    backupPopulationInProgress,
+    backupPopulationWhenFinish,
+    evolving,
+  }: {
+    evolvingResultHistoryGeneration: number;
+    populationHistoryGeneration: number;
+    backupPopulationInProgress: boolean;
+    backupPopulationWhenFinish: boolean;
+    evolving: boolean;
+  }): boolean {
+    if (!this._gaModel) throw new Error("model not exists");
+    const haveNewEvolveResultHistory = (this.evolveResultHistoryCache[this.evolveResultHistoryCache.length - 1]?.generation ?? -1) > evolvingResultHistoryGeneration;
+    const haveNewPopulationHistory = (this.populationHistoryCache[this.populationHistoryCache.length - 1]?.generation ?? -1) > populationHistoryGeneration;
+    const backupPopulationInProgressMatch = this._backupPopulationInProgress === backupPopulationInProgress;
+    const backupPopulationWhenFinishMatch = this.backupPopulationWhenFinish === backupPopulationWhenFinish;
+    const evolvingMatch = Boolean(this.queueTraining || this._gaModel.evolving) === evolving;
+    return !haveNewEvolveResultHistory && !haveNewPopulationHistory && backupPopulationInProgressMatch && backupPopulationWhenFinishMatch && evolvingMatch;
+  }
+
+  public pollingInfo({
+    currentEvolvingResultHistoryGeneration,
+    currentPopulationHistoryGeneration,
+  }: {
+    currentEvolvingResultHistoryGeneration: number;
+    currentPopulationHistoryGeneration: number;
+  }): PollingInfoResponse {
+    if (!this._gaModel) throw new Error("model not exists");
+
+    const newEvolveResultHistory = this.evolveResultHistoryCache.filter((x) => x.generation > currentEvolvingResultHistoryGeneration);
+    const newPopulationHistory = this.populationHistoryCache.filter((x) => x.generation > currentPopulationHistoryGeneration);
+
+    return {
+      newEvolveResultHistory,
+      newPopulationHistory,
+      backupPopulationInProgress: this._backupPopulationInProgress,
+      backupPopulationWhenFinish: this.backupPopulationWhenFinish,
+      evolving: Boolean(this.queueTraining || this._gaModel.evolving),
+    };
   }
 
   private async startTraining(): Promise<void> {
@@ -122,6 +186,8 @@ export default class TrainingService {
       model.generation = evolveResult.generation;
       model.evolveResultHistory.push(evolveResultId);
       await model.save();
+      this.evolveResultHistoryCache.push({ ...evolveResult, _id: evolveResultId.toString() });
+      this.emitters.forEach((emitter) => emitter.emit("change"));
 
       if (this._queueTraining > 0) {
         setImmediate(() => this.startTraining());

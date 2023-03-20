@@ -8,7 +8,7 @@ interface Props {
   gridStrokeColor: string;
 }
 
-export const WorldGrid = ({ worldWidth, worldHeight, gridSize, gridStrokeColor }: Props) => {
+export const WorldGrid = React.memo(({ worldWidth, worldHeight, gridSize, gridStrokeColor }: Props) => {
   const xLines = Array(worldHeight - 1)
     .fill(0)
     .map((x, idx) => (idx + 1) * gridSize);
@@ -18,6 +18,8 @@ export const WorldGrid = ({ worldWidth, worldHeight, gridSize, gridStrokeColor }
 
   const maxWidth = worldWidth * gridSize;
   const maxHeight = worldHeight * gridSize;
+
+  console.log("render WorldGrid");
 
   return (
     <>
@@ -29,4 +31,4 @@ export const WorldGrid = ({ worldWidth, worldHeight, gridSize, gridStrokeColor }
       ))}
     </>
   );
-};
+});

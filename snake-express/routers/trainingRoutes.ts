@@ -13,3 +13,7 @@ trainingRoutes.post("/backup-current-population", trainingController.backupCurre
 trainingRoutes.put("/toggle-backup-population-when-finish", trainingController.toggleBackupPopulationWhenFinish);
 trainingRoutes.get("/current-model-info", trainingController.getCurrentModelInfo);
 trainingRoutes.delete("/current-model", trainingController.removeCurrentModel);
+trainingRoutes.get(
+  "/polling-info/:currentEvolvingResultHistoryGeneration/:currentPopulationHistoryGeneration/:currentBackupPopulationInProgress/:currentBackupPopulationWhenFinish/:currentEvolving",
+  trainingController.pollingInfo
+);
