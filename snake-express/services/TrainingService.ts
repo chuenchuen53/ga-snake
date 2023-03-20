@@ -1,12 +1,14 @@
 import GaModel from "snake-ai/GaModel";
 import { AppDb } from "../mongo";
+import type { EvolveResult } from "snake-ai/GaModel";
 import type { EventEmitter } from "events";
 import type { Types } from "mongoose";
-import type { EvolveResult } from "snake-ai/GaModel";
 import type { EvolveResultWithId, GetCurrentModelInfoResponse, InitModelRequest, PollingInfoResponse } from "../api-typing/training";
 import type { IGaModel } from "../mongo/GaModel";
 
 export default class TrainingService {
+  public static currentModelId = "";
+
   private db = AppDb.getInstance();
   private _gaModel: GaModel | null = null;
   private _queueTraining = 0;
@@ -49,6 +51,7 @@ export default class TrainingService {
     });
     const { _id } = await gaModelDoc.save();
     this.currentModelId = _id;
+    TrainingService.currentModelId = _id.toString();
     await this.backupCurrentPopulation();
 
     return await this.getCurrentModelInfo();

@@ -1,9 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { ActivationFunction } from "snake-ai/CalcUtils";
 import TrainingApi from "../../api/Training";
-import type { PollingInfoResponse, GetCurrentModelInfoResponse } from "snake-express/api-typing/training";
+import type { Draft, PayloadAction } from "@reduxjs/toolkit";
+import type { GetCurrentModelInfoResponse, PollingInfoResponse } from "snake-express/api-typing/training";
 import type { AppThunk } from "../store";
-import type { PayloadAction, Draft } from "@reduxjs/toolkit";
 import type { Options } from "snake-ai/GaModel";
 
 interface CounterState {
@@ -114,6 +114,7 @@ export function initModelThunk(): AppThunk {
     try {
       const resp = await TrainingApi.initModel({ options: training.gaModelSetting });
       dispatch(trainingSlice.actions.setCurrentModelInfo(resp));
+      dispatch(startSubscribeInfoThunk());
     } catch (e) {
       // todo: handle error
     }

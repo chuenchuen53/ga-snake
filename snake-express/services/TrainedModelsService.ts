@@ -41,6 +41,7 @@ export default class TrainedModelsService {
           },
         },
       ])
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .toArray()) as any;
 
     const models = getTrainedModelsDbResult.map((model) => {
@@ -65,8 +66,24 @@ export default class TrainedModelsService {
   }
 
   public async deleteModel(id: string): Promise<void> {
-    const model = await this.db.GaModel.findById(id).exec();
-    console.log(model, "todo");
-    return;
+    try {
+      const gaModel = await this.db.GaModel.findById(id);
+      if (!gaModel) throw new Error(`No document found with id ${id}`);
+
+      const populationHistoryIds = gaModel.populationHistory;
+      const evolveResultHistoryIds = gaModel.evolveResultHistory;
+      const populationIds = await this.db.Population.find({ generation: gaModel.generation });
+      const individualIds = await this.db.Individual.find({ _id: { $in: populationIds } });
+
+      await Promise.all([
+        this.db.GaModel.findByIdAndDelete(id),
+        this.db.EvolveResult.deleteMany({ _id: { $in: evolveResultHistoryIds } }),
+        this.db.Population.deleteMany({ _id: { $in: populationHistoryIds } }),
+        this.db.Individual.deleteMany({ _id: { $in: individualIds } }),
+      ]);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

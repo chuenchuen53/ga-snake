@@ -5,11 +5,13 @@ import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import QuizIcon from "@mui/icons-material/Quiz";
 import { setNewReplay } from "../../redux/slice/replaySnakeGameSlice";
 import { useAppDispatch } from "../../redux/hook";
+import { setSnakeBrain } from "../../redux/slice/snakeBrainExamSlice";
 import type { AppDispatch } from "../../redux/store";
-import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import type { GetCurrentModelInfoResponse } from "snake-express/api-typing/training";
+import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
 interface Props {
   worldWidth: number;
@@ -63,6 +65,16 @@ const columns: GridColDef[] = [
       </IconButton>
     ),
   },
+  {
+    field: "exam",
+    headerName: "exam",
+    width: 40,
+    renderCell: (params: GridRenderCellParams) => (
+      <IconButton color="primary" onClick={() => params.value()}>
+        <QuizIcon />
+      </IconButton>
+    ),
+  },
 ];
 
 function toDataGridRows(populationHistory: Props["populationHistory"], evolveResultHistory: Props["evolveResultHistory"], worldWidth: number, worldHeight: number, dispatch: AppDispatch) {
@@ -95,10 +107,14 @@ function toDataGridRows(populationHistory: Props["populationHistory"], evolveRes
         );
       }
     },
+    exam: () => {
+      const snakeBrain = evolveResult.bestIndividual.snakeBrain;
+      dispatch(setSnakeBrain(snakeBrain));
+    },
   }));
 }
 
-export const EvolveHistory = (props: Props) => {
+export const EvolveHistoryTable = (props: Props) => {
   const dispatch = useAppDispatch();
   const rows = toDataGridRows(props.populationHistory, props.evolveResultHistory, props.worldWidth, props.worldHeight, dispatch);
 

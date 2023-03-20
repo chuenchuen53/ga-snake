@@ -13,7 +13,7 @@ export interface EvolveResultWithId extends EvolveResult {
 }
 
 export type GetCurrentModelInfoResponse = Omit<Omit<ExportedGaModel, "parentModelId">, "population"> & {
-  id: string;
+  _id: string;
   evolveResultHistory: EvolveResultWithId[];
   populationHistory: { _id: string; generation: number }[];
 };

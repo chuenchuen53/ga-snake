@@ -1,3 +1,4 @@
+import TrainingService from "../services/TrainingService";
 import type { GetCurrentModelInfoResponse } from "../api-typing/training";
 import type TrainedModelsService from "../services/TrainedModelsService";
 import type { Request, Response } from "express";
@@ -28,6 +29,11 @@ export default class TrainedModelsController {
 
   public deleteModel = async (req: Request, res: Response) => {
     try {
+      if (req.params.id === TrainingService.currentModelId) {
+        res.status(400).json({ message: "cannot delete current model" });
+        return;
+      }
+      
       await this.service.deleteModel(req.params.id);
       res.status(204).end();
     } catch (err) {

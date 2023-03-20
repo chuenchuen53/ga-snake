@@ -6,7 +6,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Typography from "@mui/material/Typography";
 import AccordionDetails from "@mui/material/AccordionDetails/AccordionDetails";
 import { ModelSetting } from "./ModelSetting";
-import { EvolveHistory } from "./EvolveHistory";
+import { EvolveHistoryTable } from "./EvolveHistoryTable";
 import { EvolveHistoryChart } from "./EvolveHistoryChart";
 import type { GetCurrentModelInfoResponse } from "snake-express/api-typing/training";
 
@@ -36,7 +36,7 @@ export const GaModelDetail = ({ modelInfo: m }: Props) => {
           />
         </AccordionDetails>
       </Accordion>
-      <EvolveHistory worldWidth={m.worldWidth} worldHeight={m.worldHeight} evolveResultHistory={m.evolveResultHistory} populationHistory={m.populationHistory} />
+      <EvolveHistoryTable worldWidth={m.worldWidth} worldHeight={m.worldHeight} evolveResultHistory={m.evolveResultHistory} populationHistory={m.populationHistory} />
       <Box>
         <EvolveHistoryChart evolveResultHistory={m.evolveResultHistory} />
       </Box>

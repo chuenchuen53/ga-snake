@@ -3,6 +3,7 @@ import AppEnv from "../AppEnv";
 import { GaModel } from "./GaModel";
 import { EvolveResult } from "./EvolveResult";
 import { Population } from "./Population";
+import { Individual } from "./Individual";
 
 export class AppDb {
   private static instance: AppDb;
@@ -15,6 +16,7 @@ export class AppDb {
   public readonly GaModel = GaModel;
   public readonly Population = Population;
   public readonly EvolveResult = EvolveResult;
+  public readonly Individual = Individual;
 
   private constructor() {}
 
