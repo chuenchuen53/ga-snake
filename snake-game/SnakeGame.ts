@@ -1,7 +1,7 @@
 import Position from "./Position";
 import Snake from "./Snake";
 import { Direction } from "./typing";
-import { Utils } from "./utils";
+import Utils from "./Utils";
 import { oppositeDirection } from "./oppositeDirection";
 import type { PositionAndDirection, SnakeAction } from "./typing";
 import type { ISnake } from "./Snake";

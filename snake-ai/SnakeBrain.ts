@@ -1,4 +1,4 @@
-import { Utils } from "snake-game/utils";
+import { Utils } from "snake-game/Utils";
 import { Direction } from "snake-game/typing";
 import { CalcUtils } from "./CalcUtils";
 import type { ActivationFunction } from "./CalcUtils";
@@ -57,8 +57,8 @@ export default class SnakeBrain implements ISnakeBrain {
     if (!this.validateLayerShapes()) throw new Error("Invalid layer shapes");
 
     if (options.providedWeightAndBias) {
-      this.weightArr = Utils.cloneObject(options.providedWeightAndBias.weightArr);
-      this.biasesArr = Utils.cloneObject(options.providedWeightAndBias.biasesArr);
+      this.weightArr = Utils.clone3DArr(options.providedWeightAndBias.weightArr);
+      this.biasesArr = Utils.clone2DArr(options.providedWeightAndBias.biasesArr);
       if (!this.validateWeightAndBias()) throw new Error("Invalid provided weight and bias");
     } else {
       this.weightArr = this.layerShapes.map((x) => this.generateRandomLayerWeight(x));

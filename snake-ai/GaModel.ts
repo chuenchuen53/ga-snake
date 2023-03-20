@@ -1,4 +1,4 @@
-import { Utils } from "snake-game/utils";
+import { Utils } from "snake-game/Utils";
 import SnakeGame from "snake-game/SnakeGame";
 import InputLayer from "./InputLayer";
 import { CalcUtils } from "./CalcUtils";

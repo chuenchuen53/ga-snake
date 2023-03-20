@@ -2,7 +2,7 @@ import { oppositeDirection } from "../oppositeDirection";
 import Position from "../Position";
 import SnakeGame from "../SnakeGame";
 import { Direction, SnakeAction } from "../typing";
-import { Utils } from "../utils";
+import Utils from "../Utils";
 
 describe("test suite for SnakeGame", () => {
   it("static clone test", () => {

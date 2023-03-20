@@ -1,5 +1,5 @@
 import { Direction } from "snake-game/typing";
-import { Utils } from "snake-game/utils";
+import { Utils } from "snake-game/Utils";
 import Position from "snake-game/Position";
 import type SnakeGame from "snake-game/SnakeGame";
 

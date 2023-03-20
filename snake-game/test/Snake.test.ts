@@ -1,7 +1,7 @@
 import Position from "../Position";
 import Snake from "../Snake";
 import { Direction, SnakeAction } from "../typing";
-import { Utils } from "../utils";
+import Utils from "../Utils";
 
 describe("test suite for Snake", () => {
   it("fromPlainObj test", () => {
