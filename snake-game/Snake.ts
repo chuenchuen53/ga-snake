@@ -1,7 +1,7 @@
 import Position from "./Position";
 import { Direction, SnakeAction } from "./typing";
-import type { PositionAndDirection } from "./typing";
 import type { IPosition } from "./Position";
+import type { PositionAndDirection } from "./typing";
 
 interface ActionMapSecondLayerObject {
   direction: Direction;
@@ -72,8 +72,8 @@ export default class Snake implements ISnake {
   public readonly positions: Position[];
 
   constructor(positions: Position[], direction: Direction) {
-    this.direction = direction;
     this.positions = positions.slice();
+    this.direction = direction;
   }
 
   public toPlainObject(): ISnake {
@@ -85,6 +85,10 @@ export default class Snake implements ISnake {
 
   public get head(): Position {
     return this.positions[0];
+  }
+
+  public get length(): number {
+    return this.positions.length;
   }
 
   public positionInSnake(position: Position): boolean {
@@ -107,7 +111,7 @@ export default class Snake implements ISnake {
   }
 
   public getHeadPositionAndDirectionAfterMoveBySnakeAction(action: SnakeAction): PositionAndDirection {
-    const { x: x0, y: y0 } = this.positions[0];
+    const { x: x0, y: y0 } = this.head;
     const { direction, positionChange } = Snake.actionMap[this.direction][action];
     const { dx, dy } = positionChange;
     const position = new Position(x0 + dx, y0 + dy);
@@ -116,7 +120,7 @@ export default class Snake implements ISnake {
   }
 
   public getHeadPositionAndDirectionAfterMoveByDirection(direction: Direction): PositionAndDirection {
-    const { x: x0, y: y0 } = this.positions[0];
+    const { x: x0, y: y0 } = this.head;
     const { dx, dy } = Snake.directionDxDyMap[direction];
     const position = new Position(x0 + dx, y0 + dy);
     return { position, direction };
