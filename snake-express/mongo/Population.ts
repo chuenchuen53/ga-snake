@@ -9,13 +9,14 @@ export const populationSchema = new Schema(
     population: { type: [Schema.Types.ObjectId], required: true, ref: "Individual" },
   },
   {
+    timestamps: true,
     statics: {
       async insertNewPopulation(data: { generation: number; population: IndividualPlainObject[] }) {
         const insertedIndividuals = await Individual.insertMany(data.population);
-        const populationArray = insertedIndividuals.map((x) => x._id);
+        const ids = insertedIndividuals.map((x) => x._id);
         return await this.create({
           generation: data.generation,
-          population: populationArray,
+          population: ids,
         });
       },
     },

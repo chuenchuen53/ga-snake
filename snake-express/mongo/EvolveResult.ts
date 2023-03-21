@@ -17,16 +17,19 @@ const baseStatsSchema = new Schema<BaseStats>(
   { _id: false }
 );
 
-export const evolveResultSchema = new Schema<IEvolveResult>({
-  generation: { type: Number, required: true },
-  bestIndividual: { type: embeddedIndividualSchema, required: true },
-  timeSpent: { type: Number, required: true },
-  overallStats: {
-    fitness: { type: baseStatsSchema, required: true },
-    snakeLength: { type: baseStatsSchema, required: true },
-    moves: { type: baseStatsSchema, required: true },
+export const evolveResultSchema = new Schema<IEvolveResult>(
+  {
+    generation: { type: Number, required: true },
+    bestIndividual: { type: embeddedIndividualSchema, required: true },
+    timeSpent: { type: Number, required: true },
+    overallStats: {
+      fitness: { type: baseStatsSchema, required: true },
+      snakeLength: { type: baseStatsSchema, required: true },
+      moves: { type: baseStatsSchema, required: true },
+    },
   },
-});
+  { timestamps: true }
+);
 
 export const EvolveResult = mongoose.model("EvolveResult", evolveResultSchema);
 export type EvolveResultDocument = InferSchemaType<typeof evolveResultSchema>;

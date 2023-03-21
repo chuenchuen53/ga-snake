@@ -50,14 +50,17 @@ export const embeddedIndividualSchema = new Schema<IndividualPlainObject>(
   { _id: false }
 );
 
-export const individualSchema = new Schema<IndividualPlainObject>({
-  snakeBrain: { type: snakeBrainSchema, required: true },
-  snakeLength: { type: Number, required: true },
-  moves: { type: Number, required: true },
-  fitness: { type: Number, required: true },
-  survive: { type: Boolean, required: true },
-  gameRecord: { type: gameRecordSchema, default: null },
-});
+export const individualSchema = new Schema<IndividualPlainObject>(
+  {
+    snakeBrain: { type: snakeBrainSchema, required: true },
+    snakeLength: { type: Number, required: true },
+    moves: { type: Number, required: true },
+    fitness: { type: Number, required: true },
+    survive: { type: Boolean, required: true },
+    gameRecord: { type: gameRecordSchema, default: null },
+  },
+  { timestamps: true }
+);
 
 export const Individual = mongoose.model("Individual", individualSchema);
 export type IndividualDocument = InferSchemaType<typeof Individual>;

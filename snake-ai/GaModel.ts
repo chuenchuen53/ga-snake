@@ -249,7 +249,7 @@ export default class GaModel implements IGaModel {
       moves: CalcUtils.statsOfArray(this.population.map((x) => x.moves)),
     };
 
-    const timeSpent = (new Date().getTime() - startTime) / 1000;
+    const timeSpent = new Date().getTime() - startTime;
     this._evolving = false;
 
     return { generation, bestIndividual, timeSpent, overallStats };

@@ -21,12 +21,12 @@ export class AppDb {
   private constructor() {}
 
   public async connect(): Promise<void> {
-    console.log("[INFO] database start connecting...");
+    console.log(`[INFO] ${new Date()} database start connecting...`);
     await mongoose.connect(AppEnv.MONGODB_CONN_STRING, {
       dbName: AppEnv.DATABASE_NAME,
       bufferCommands: false,
     });
-    console.log("[INFO] database connected");
+    console.log(`[INFO] ${new Date()} database connected`);
   }
 
   public async close(): Promise<void> {
