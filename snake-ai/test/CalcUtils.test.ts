@@ -1,3 +1,4 @@
+import { describe, expect, it } from "@jest/globals";
 import { ActivationFunction, CalcUtils } from "../CalcUtils";
 
 const M1 = [
@@ -31,31 +32,31 @@ const statsSampleArr2 = [0.39450487, -0.10545648, -0.90960379, 0.41854961, -0.46
 const quartileSampleArr = [6, 7, 15, 36, 39, 41, 41, 43, 43, 47, 49];
 
 describe("CalcUtils", () => {
-  test("addition", () => {
+  it("addition", () => {
     expect(CalcUtils.addition(M1X1, B1)).toEqual(X2);
   });
 
-  test("multiplication", () => {
+  it("multiplication", () => {
     expect(CalcUtils.multiplication(M1, X1)).toStrictEqual(M1X1);
   });
 
-  test("ComputeOneLayer", () => {
+  it("ComputeOneLayer", () => {
     expect(CalcUtils.computeOneLayer(M1, X1, B1)).toStrictEqual(X2);
     expect(CalcUtils.computeOneLayer(M2, X2, B2)).toStrictEqual(X3);
   });
 
-  test("computeMultipleLayer", () => {
+  it("computeMultipleLayer", () => {
     expect(CalcUtils.computeMultipleLayer([M1, M2], X1, [B1, B2], ActivationFunction.LINEAR)).toStrictEqual(X3);
   });
 
-  test("IndexOfMaxValueInArray", () => {
+  it("IndexOfMaxValueInArray", () => {
     expect(CalcUtils.indexOfMaxValueInArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toBe(9);
     expect(CalcUtils.indexOfMaxValueInArray([6, 7, 8, 9, 10, 1, 2, 3, 4, 5])).toBe(4);
     expect(CalcUtils.indexOfMaxValueInArray([-1, -2, -3, -4, -5, -6])).toBe(0);
     expect(CalcUtils.indexOfMaxValueInArray([1, 2, 3, -1, -2, -3])).toBe(2);
   });
 
-  test("minmax", () => {
+  it("minmax", () => {
     expect(CalcUtils.minmax(-1, 0.5, 1)).toBe(0.5);
     expect(CalcUtils.minmax(-1, 127, 1)).toBe(1);
     expect(CalcUtils.minmax(-1, -127, 1)).toBe(-1);
@@ -64,7 +65,7 @@ describe("CalcUtils", () => {
     expect(CalcUtils.minmax(-3, -127, 1)).toBe(-3);
   });
 
-  test("stats.minOfArray", () => {
+  it("stats.minOfArray", () => {
     expect(CalcUtils.minOfArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toBe(1);
     expect(CalcUtils.minOfArray([6, 7, 8, 9, 10, 1, 2, 3, 4, 5])).toBe(1);
     expect(CalcUtils.minOfArray([-6, -7, -8, -9, -10, -1, -2, -3, -4, -5])).toBe(-10);
@@ -72,7 +73,7 @@ describe("CalcUtils", () => {
     expect(CalcUtils.minOfArray(statsSampleArr2)).toBe(-0.93352642);
   });
 
-  test("stats.maxOfArray", () => {
+  it("stats.maxOfArray", () => {
     expect(CalcUtils.maxOfArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toBe(10);
     expect(CalcUtils.maxOfArray([6, 7, 8, 9, 10, 1, 2, 3, 4, 5])).toBe(10);
     expect(CalcUtils.maxOfArray([-6, -7, -8, -9, -10, -1, -2, -3, -4, -5])).toBe(-1);
@@ -80,29 +81,29 @@ describe("CalcUtils", () => {
     expect(CalcUtils.maxOfArray(statsSampleArr2)).toBe(0.91963169);
   });
 
-  test("stats.meanOfArray", () => {
+  it("stats.meanOfArray", () => {
     expect(CalcUtils.meanOfArray(statsSampleArr1)).toBeCloseTo(-34.4);
     expect(CalcUtils.meanOfArray(statsSampleArr2)).toBeCloseTo(-0.026633349);
   });
 
-  test("stats.sdOfArray", () => {
+  it("stats.sdOfArray", () => {
     expect(CalcUtils.sdOfArray(statsSampleArr1)).toBeCloseTo(583.433320954503);
     expect(CalcUtils.sdOfArray(statsSampleArr2)).toBeCloseTo(0.6224940164933749);
   });
 
-  test("stats.lowerQuartileOfArray", () => {
+  it("stats.lowerQuartileOfArray", () => {
     expect(CalcUtils.lowerQuartileOfArray(quartileSampleArr)).toBeCloseTo(15);
     expect(CalcUtils.lowerQuartileOfArray(statsSampleArr1)).toBeCloseTo(-470);
     expect(CalcUtils.lowerQuartileOfArray(statsSampleArr2)).toBeCloseTo(-0.55964653);
   });
 
-  test("stats.medianOfArray", () => {
+  it("stats.medianOfArray", () => {
     expect(CalcUtils.medianOfArray(quartileSampleArr)).toBeCloseTo(41);
     expect(CalcUtils.medianOfArray(statsSampleArr1)).toBeCloseTo(-6);
     expect(CalcUtils.medianOfArray(statsSampleArr2)).toBeCloseTo(0.39450487);
   });
 
-  test("stats.upperQuartileOfArray", () => {
+  it("stats.upperQuartileOfArray", () => {
     expect(CalcUtils.upperQuartileOfArray(quartileSampleArr)).toBeCloseTo(43);
     expect(CalcUtils.upperQuartileOfArray(statsSampleArr1)).toBeCloseTo(487);
     expect(CalcUtils.upperQuartileOfArray(statsSampleArr2)).toBeCloseTo(0.46510193);

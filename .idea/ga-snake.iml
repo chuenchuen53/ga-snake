@@ -4,6 +4,9 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/snake-ai/build" />
+      <excludeFolder url="file://$MODULE_DIR$/snake-game/build" />
+      <excludeFolder url="file://$MODULE_DIR$/snake-react/build" />
+      <excludeFolder url="file://$MODULE_DIR$/snake-game/coverage" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

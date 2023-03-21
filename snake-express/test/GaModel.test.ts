@@ -7,7 +7,7 @@ import type { IGaModel } from "../mongo/GaModel";
 import type { IndividualPlainObject } from "snake-ai/GaModel";
 
 describe("check GaModel", () => {
-  test("gaModelSchema", () => {
+  it("gaModelSchema", () => {
     const model = mongoose.model("tempTestGaModelSchema", gaModelSchema);
 
     const individual: IndividualPlainObject = {

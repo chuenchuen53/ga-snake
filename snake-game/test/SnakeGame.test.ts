@@ -514,7 +514,7 @@ describe("test suite for SnakeGame", () => {
       },
     });
 
-    it.skip.each<{ name: string; snakeGame: SnakeGame }>`
+    it.each<{ name: string; snakeGame: SnakeGame }>`
       name        | snakeGame
       ${"test 1"} | ${snakeGame1}
       ${"test 2"} | ${snakeGame2}

@@ -2,14 +2,14 @@ import { describe } from "node:test";
 import { Direction } from "snake-game/typing";
 import mongoose from "mongoose";
 import { ActivationFunction } from "snake-ai/CalcUtils";
-import { snakeBrainSchema, moveRecordRowSchema, positionSchema, gameRecordSchema, embeddedIndividualSchema } from "../mongo/Individual";
+import { embeddedIndividualSchema, gameRecordSchema, moveRecordRowSchema, positionSchema, snakeBrainSchema } from "../mongo/Individual";
 import type { IPosition } from "snake-game/Position";
 import type { GameRecord, MoveRecordRow } from "snake-game/SnakeGame";
 import type { ISnakeBrain } from "snake-ai/SnakeBrain";
 import type { IndividualPlainObject } from "snake-ai/GaModel";
 
 describe("check Individual", () => {
-  test("snakeBrainSchema", () => {
+  it("snakeBrainSchema", () => {
     const model = mongoose.model("tempTestSnakeBrain", snakeBrainSchema);
 
     const snakeBrain1: ISnakeBrain = {
@@ -39,7 +39,7 @@ describe("check Individual", () => {
     expect(snakeBrain2.toObject()).toStrictEqual(snakeBrain1);
   });
 
-  test("check PositionSchema", () => {
+  it("check PositionSchema", () => {
     const model = mongoose.model("tempTestPosition", positionSchema);
 
     const position1: IPosition = { x: 0, y: 0 };
@@ -47,7 +47,7 @@ describe("check Individual", () => {
     expect(position2.toObject()).toStrictEqual(position1);
   });
 
-  test("check MoveRecordRowSchema", () => {
+  it("check MoveRecordRowSchema", () => {
     const model = mongoose.model("tempTestMoveRecordRow", moveRecordRowSchema);
 
     const moveRecordRow1: MoveRecordRow = { move: 0, fx: 0, fy: 0 };
@@ -59,7 +59,7 @@ describe("check Individual", () => {
     expect(moveRecordRow4.toObject()).toStrictEqual(moveRecordRow3);
   });
 
-  test("check GameRecordSchema", () => {
+  it("check GameRecordSchema", () => {
     const model = mongoose.model("tempTestGameRecord", gameRecordSchema);
     const gameRecord1: GameRecord = {
       initialSnakePosition: { x: 0, y: 0 },
@@ -71,7 +71,7 @@ describe("check Individual", () => {
     expect(gameRecord2.toObject()).toStrictEqual(gameRecord1);
   });
 
-  test("check IndividualSchema", () => {
+  it("check IndividualSchema", () => {
     const model = mongoose.model("tempTestIndividual", embeddedIndividualSchema);
 
     const individual1: IndividualPlainObject = {

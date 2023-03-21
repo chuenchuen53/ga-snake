@@ -6,7 +6,7 @@ import { evolveResultSchema } from "../mongo/EvolveResult";
 import type { EvolveResult } from "snake-ai/GaModel";
 
 describe("check evolveResultSchema", () => {
-  test("evolveResultSchema", () => {
+  it("evolveResultSchema", () => {
     const model = mongoose.model("tempTestEvolveResultSchema", evolveResultSchema);
 
     const evolveResult1: EvolveResult = {
