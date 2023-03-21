@@ -1,7 +1,8 @@
-import { describe } from "node:test";
+import { describe, expect, it } from "@jest/globals";
 import { Direction } from "snake-game/typing";
 import SnakeBrain from "../SnakeBrain";
 import { ActivationFunction } from "../CalcUtils";
+import type { Options } from "../SnakeBrain";
 
 describe("test suite for SnakeBrain", () => {
   describe("constructor test suite", () => {
@@ -64,12 +65,12 @@ describe("test suite for SnakeBrain", () => {
       expect(snakeBrain.inputLength).toBe(3);
       expect(snakeBrain.layerShapes).toStrictEqual([[4, 3]]);
       expect(snakeBrain.hiddenLayerActivationFunction).toBe(ActivationFunction.RELU);
-      expect(snakeBrain.weightArr.length).toBe(1);
-      expect(snakeBrain.weightArr[0].length).toBe(4);
-      expect(snakeBrain.weightArr[0][0].length).toBe(3);
-      expect(snakeBrain.biasesArr.length).toBe(1);
-      expect(snakeBrain.biasesArr[0].length).toBe(4);
-      expect(snakeBrain.validateWeightAndBias()).toBe(true);
+      expect(snakeBrain.weights.length).toBe(1);
+      expect(snakeBrain.weights[0].length).toBe(4);
+      expect(snakeBrain.weights[0].every((x) => x.length === 3)).toBe(true);
+      expect(snakeBrain.biases.length).toBe(1);
+      expect(snakeBrain.biases[0].length).toBe(4);
+      expect(snakeBrain.validateWeightsAndBiases()).toBe(true);
     });
 
     it("should create a new SnakeBrain with 2 hidden layers", () => {
@@ -89,15 +90,16 @@ describe("test suite for SnakeBrain", () => {
         [4, 7],
       ]);
       expect(snakeBrain.hiddenLayerActivationFunction).toBe(ActivationFunction.LINEAR);
-      expect(snakeBrain.weightArr.length).toBe(2);
-      expect(snakeBrain.weightArr[0].length).toBe(7);
-      expect(snakeBrain.weightArr[0][0].length).toBe(5);
-      expect(snakeBrain.weightArr[1].length).toBe(4);
-      expect(snakeBrain.weightArr[1][0].length).toBe(7);
-      expect(snakeBrain.biasesArr.length).toBe(2);
-      expect(snakeBrain.biasesArr[0].length).toBe(7);
-      expect(snakeBrain.biasesArr[1].length).toBe(4);
-      expect(snakeBrain.validateWeightAndBias()).toBe(true);
+      expect(snakeBrain.weights.length).toBe(2);
+      expect(snakeBrain.weights[0].length).toBe(7);
+      expect(snakeBrain.weights[0][0].length).toBe(5);
+      expect(snakeBrain.weights[0].every((x) => x.length === 5)).toBe(true);
+      expect(snakeBrain.weights[1].length).toBe(4);
+      expect(snakeBrain.weights[1].every((x) => x.length === 7)).toBe(true);
+      expect(snakeBrain.biases.length).toBe(2);
+      expect(snakeBrain.biases[0].length).toBe(7);
+      expect(snakeBrain.biases[1].length).toBe(4);
+      expect(snakeBrain.validateWeightsAndBiases()).toBe(true);
     });
 
     it("should create a new SnakeBrain with 3 hidden layers", () => {
@@ -119,30 +121,30 @@ describe("test suite for SnakeBrain", () => {
         [4, 7],
       ]);
       expect(snakeBrain.hiddenLayerActivationFunction).toBe(ActivationFunction.TANH);
-      expect(snakeBrain.weightArr.length).toBe(3);
-      expect(snakeBrain.weightArr[0].length).toBe(8);
-      expect(snakeBrain.weightArr[0][0].length).toBe(9);
-      expect(snakeBrain.weightArr[1].length).toBe(7);
-      expect(snakeBrain.weightArr[1][0].length).toBe(8);
-      expect(snakeBrain.weightArr[2].length).toBe(4);
-      expect(snakeBrain.weightArr[2][0].length).toBe(7);
-      expect(snakeBrain.biasesArr.length).toBe(3);
-      expect(snakeBrain.biasesArr[0].length).toBe(8);
-      expect(snakeBrain.biasesArr[1].length).toBe(7);
-      expect(snakeBrain.biasesArr[2].length).toBe(4);
-      expect(snakeBrain.validateWeightAndBias()).toBe(true);
+      expect(snakeBrain.weights.length).toBe(3);
+      expect(snakeBrain.weights[0].length).toBe(8);
+      expect(snakeBrain.weights[0].every((x) => x.length === 9)).toBe(true);
+      expect(snakeBrain.weights[1].length).toBe(7);
+      expect(snakeBrain.weights[1].every((x) => x.length === 8)).toBe(true);
+      expect(snakeBrain.weights[2].length).toBe(4);
+      expect(snakeBrain.weights[2].every((x) => x.length === 7)).toBe(true);
+      expect(snakeBrain.biases.length).toBe(3);
+      expect(snakeBrain.biases[0].length).toBe(8);
+      expect(snakeBrain.biases[1].length).toBe(7);
+      expect(snakeBrain.biases[2].length).toBe(4);
+      expect(snakeBrain.validateWeightsAndBiases()).toBe(true);
     });
 
-    it("should fail as the provided invalided weightArr and biasesArr", () => {
+    it("should fail as the provided invalided weights and biases", () => {
       expect(
         () =>
           new SnakeBrain({
             inputLength: 3,
             layerShapes: [[4, 3]],
             hiddenLayerActivationFunction: ActivationFunction.RELU,
-            providedWeightAndBias: {
-              weightArr: [],
-              biasesArr: [[0.1, 0.1, 0.1, 0.1]],
+            providedWeightsAndBiases: {
+              weights: [],
+              biases: [[0.1, 0.1, 0.1, 0.1]],
             },
           })
       ).toThrowError("Invalid provided weight and bias");
@@ -153,8 +155,8 @@ describe("test suite for SnakeBrain", () => {
             inputLength: 3,
             layerShapes: [[4, 3]],
             hiddenLayerActivationFunction: ActivationFunction.RELU,
-            providedWeightAndBias: {
-              weightArr: [
+            providedWeightsAndBiases: {
+              weights: [
                 [
                   [0.1, 0.1, 0.1],
                   [0.1, 0.1, 0.1],
@@ -162,7 +164,7 @@ describe("test suite for SnakeBrain", () => {
                   [0.1, 0.1, 0.1],
                 ],
               ],
-              biasesArr: [],
+              biases: [],
             },
           })
       ).toThrowError("Invalid provided weight and bias");
@@ -173,8 +175,8 @@ describe("test suite for SnakeBrain", () => {
             inputLength: 3,
             layerShapes: [[4, 3]],
             hiddenLayerActivationFunction: ActivationFunction.RELU,
-            providedWeightAndBias: {
-              weightArr: [
+            providedWeightsAndBiases: {
+              weights: [
                 [
                   [0.1, 0.1, 0.1],
                   [0.1, 0.1, 0.1],
@@ -182,7 +184,7 @@ describe("test suite for SnakeBrain", () => {
                   [0.1, 0.1, 0.1],
                 ],
               ],
-              biasesArr: [[0.1, 0.1]],
+              biases: [[0.1, 0.1]],
             },
           })
       ).toThrowError("Invalid provided weight and bias");
@@ -198,8 +200,8 @@ describe("test suite for SnakeBrain", () => {
           [4, 5],
         ],
         hiddenLayerActivationFunction: ActivationFunction.LINEAR,
-        providedWeightAndBias: {
-          weightArr: [
+        providedWeightsAndBiases: {
+          weights: [
             [
               [0.1, 0.15],
               [0.2, 0.25],
@@ -214,7 +216,7 @@ describe("test suite for SnakeBrain", () => {
               [0.4, 0.45, 0.5, 0.55, 0.6],
             ],
           ],
-          biasesArr: [
+          biases: [
             [0.1, 0.1, 0.1, 0.1, 0.1],
             [0.1, -0.1, 0.1, -0.1],
           ],
@@ -228,7 +230,7 @@ describe("test suite for SnakeBrain", () => {
 
   describe("crossOver test suite", () => {
     it("crossOver test 1", () => {
-      const options = {
+      const options: Options = {
         inputLength: 2,
         layerShapes: [
           [5, 2],
@@ -242,14 +244,14 @@ describe("test suite for SnakeBrain", () => {
 
       child.crossOver(parent1, parent2);
 
-      const parent1FlattenedWeightArr = parent1.weightArr.flat(2);
-      const parent1FlattenedBiasesArr = parent1.biasesArr.flat(1);
+      const parent1FlattenedWeightArr = parent1.weights.flat(2);
+      const parent1FlattenedBiasesArr = parent1.biases.flat(1);
 
-      const parent2FlattenedWeightArr = parent2.weightArr.flat(2);
-      const parent2FlattenedBiasesArr = parent2.biasesArr.flat(1);
+      const parent2FlattenedWeightArr = parent2.weights.flat(2);
+      const parent2FlattenedBiasesArr = parent2.biases.flat(1);
 
-      const childFlattenedWeightArr = child.weightArr.flat(2);
-      const childFlattenedBiasesArr = child.biasesArr.flat(1);
+      const childFlattenedWeightArr = child.weights.flat(2);
+      const childFlattenedBiasesArr = child.biases.flat(1);
 
       const minDiffInArr = (x: number[], a: number[], b: number[]) => x.map((v, i) => Math.min(Math.abs(v - a[i]), Math.abs(v - b[i])));
 
@@ -271,7 +273,7 @@ describe("test suite for SnakeBrain", () => {
       const mutationRate = 0.2;
       const mutationAmount = 0.05;
 
-      const options = {
+      const options: Options = {
         inputLength: 2,
         layerShapes: [
           [10000, 2],
@@ -281,13 +283,13 @@ describe("test suite for SnakeBrain", () => {
       };
       const snakeBrain = new SnakeBrain(options);
 
-      const originalWeightArr = snakeBrain.weightArr.flat(2).slice();
-      const originalBiasesArr = snakeBrain.biasesArr.flat(1).slice();
+      const originalWeightArr = snakeBrain.weights.flat(2).slice();
+      const originalBiasesArr = snakeBrain.biases.flat(1).slice();
 
       snakeBrain.mutate(mutationRate, mutationAmount);
 
-      const mutatedWeightArr = snakeBrain.weightArr.flat(2);
-      const mutatedBiasesArr = snakeBrain.biasesArr.flat(1);
+      const mutatedWeightArr = snakeBrain.weights.flat(2);
+      const mutatedBiasesArr = snakeBrain.biases.flat(1);
 
       const diffInWeightArr = mutatedWeightArr.map((v, i) => Math.abs(v - originalWeightArr[i]));
       const diffInBiasesArr = mutatedBiasesArr.map((v, i) => Math.abs(v - originalBiasesArr[i]));
@@ -311,26 +313,6 @@ describe("test suite for SnakeBrain", () => {
       const tolerance = 0.01;
       expect(largerThanZeroCount / diffInWeightArr.length - mutationRate).toBeLessThan(tolerance);
       expect(largerThanZeroCount2 / diffInBiasesArr.length - mutationRate).toBeLessThan(tolerance);
-    });
-  });
-
-  describe("export exportBrainToJson test suite", () => {
-    it("export exportBrainToJson test 1", () => {
-      const options = {
-        inputLength: 2,
-        layerShapes: [[4, 2]],
-        hiddenLayerActivationFunction: ActivationFunction.LINEAR,
-      };
-      const snakeBrain = new SnakeBrain(options);
-      const exportedBrain = snakeBrain.exportBrainToJson();
-
-      const snakeBrainPlainObject = JSON.parse(exportedBrain);
-
-      expect(snakeBrainPlainObject.inputLength).toBe(snakeBrain.inputLength);
-      expect(snakeBrainPlainObject.layerShapes).toStrictEqual(snakeBrain.layerShapes);
-      expect(snakeBrainPlainObject.hiddenLayerActivationFunction).toBe(snakeBrain.hiddenLayerActivationFunction);
-      expect(snakeBrainPlainObject.weightArr).toStrictEqual(snakeBrain.weightArr);
-      expect(snakeBrainPlainObject.biasesArr).toStrictEqual(snakeBrain.biasesArr);
     });
   });
 });

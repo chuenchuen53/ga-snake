@@ -19,7 +19,7 @@ describe("check Individual", () => {
         [3, 4],
       ],
       hiddenLayerActivationFunction: ActivationFunction.RELU,
-      weightArr: [
+      weights: [
         [
           [1, 2],
           [3, 4],
@@ -30,7 +30,7 @@ describe("check Individual", () => {
           [13, 14, 15, 16],
         ],
       ],
-      biasesArr: [
+      biases: [
         [1, 2],
         [3, 4, 5, 6],
       ],
@@ -82,7 +82,7 @@ describe("check Individual", () => {
           [3, 4],
         ],
         hiddenLayerActivationFunction: ActivationFunction.RELU,
-        weightArr: [
+        weights: [
           [
             [1, 2],
             [3, 4],
@@ -93,7 +93,7 @@ describe("check Individual", () => {
             [13, 14, 15, 16],
           ],
         ],
-        biasesArr: [
+        biases: [
           [1, 2],
           [3, 4, 5, 6],
         ],

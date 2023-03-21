@@ -41,14 +41,14 @@ export const snakeBrainExamSlice = createSlice({
       state.snakeGame = snakeGame.toPlainObjectIgnoreMoveRecordAndAllPosition();
     },
     setSnakeBrain: (state, action: PayloadAction<ISnakeBrain>) => {
-      const { inputLength, layerShapes, hiddenLayerActivationFunction, weightArr, biasesArr } = new SnakeBrain(action.payload);
+      const { inputLength, layerShapes, hiddenLayerActivationFunction, weights, biases } = new SnakeBrain(action.payload);
       snakeBrain = new SnakeBrain({
         inputLength,
         layerShapes,
         hiddenLayerActivationFunction: hiddenLayerActivationFunction,
-        providedWeightAndBias: {
-          weightArr,
-          biasesArr,
+        providedWeightsAndBiases: {
+          weights: weights,
+          biases: biases,
         },
       });
       if (!snakeGame) {

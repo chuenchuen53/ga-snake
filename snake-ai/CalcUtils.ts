@@ -38,17 +38,17 @@ export default class CalcUtils {
     return CalcUtils.addition(CalcUtils.multiplication(W, X), B);
   }
 
-  public static computeMultipleLayer(Ws: number[][][], x: number[], a: number[][], hiddenLayerActivationFunction: ActivationFunction): number[] {
+  public static computeMultipleLayer(Ws: number[][][], x: number[], Bs: number[][], hiddenLayerActivationFunction: ActivationFunction): number[] {
     const numOfLayer = Ws.length;
 
     let layerOutput = x;
     // hidden layer
     for (let i = 0; i < numOfLayer - 1; i++) {
-      layerOutput = CalcUtils.hiddenLayerActivation(CalcUtils.computeOneLayer(Ws[i], layerOutput, a[i]), hiddenLayerActivationFunction);
+      layerOutput = CalcUtils.hiddenLayerActivation(CalcUtils.computeOneLayer(Ws[i], layerOutput, Bs[i]), hiddenLayerActivationFunction);
     }
 
     // output layer
-    layerOutput = CalcUtils.computeOneLayer(Ws[numOfLayer - 1], layerOutput, a[numOfLayer - 1]);
+    layerOutput = CalcUtils.computeOneLayer(Ws[numOfLayer - 1], layerOutput, Bs[numOfLayer - 1]);
     return layerOutput;
   }
 

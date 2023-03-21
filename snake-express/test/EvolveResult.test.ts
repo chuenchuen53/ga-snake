@@ -19,7 +19,7 @@ describe("check evolveResultSchema", () => {
             [3, 4],
           ],
           hiddenLayerActivationFunction: ActivationFunction.RELU,
-          weightArr: [
+          weights: [
             [
               [1, 2],
               [3, 4],
@@ -30,7 +30,7 @@ describe("check evolveResultSchema", () => {
               [13, 14, 15, 16],
             ],
           ],
-          biasesArr: [
+          biases: [
             [1, 2],
             [3, 4, 5, 6],
           ],

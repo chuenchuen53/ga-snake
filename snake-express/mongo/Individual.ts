@@ -12,8 +12,8 @@ export const snakeBrainSchema = new Schema<ISnakeBrain>(
     inputLength: { type: Number, required: true },
     layerShapes: { type: [[Number]], required: true },
     hiddenLayerActivationFunction: { type: String, enum: ActivationFunction, required: true },
-    weightArr: { type: [[[Number]]], required: true },
-    biasesArr: { type: [[Number]], required: true },
+    weights: { type: [[[Number]]], required: true },
+    biases: { type: [[Number]], required: true },
   },
   { _id: false }
 );

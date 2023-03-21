@@ -19,9 +19,9 @@ export default function workerFunc(workerData: WorkerData): WorkerResult {
     inputLength: snakeBrainPlainObject.inputLength,
     layerShapes: snakeBrainPlainObject.layerShapes,
     hiddenLayerActivationFunction: snakeBrainPlainObject.hiddenLayerActivationFunction,
-    providedWeightAndBias: {
-      weightArr: snakeBrainPlainObject.weightArr,
-      biasesArr: snakeBrainPlainObject.biasesArr,
+    providedWeightsAndBiases: {
+      weights: snakeBrainPlainObject.weights,
+      biases: snakeBrainPlainObject.biases,
     },
   });
 

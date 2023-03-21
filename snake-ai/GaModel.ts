@@ -144,9 +144,9 @@ export default class GaModel implements ExportedGaModel {
           inputLength: x.inputLength,
           layerShapes: x.layerShapes,
           hiddenLayerActivationFunction: x.hiddenLayerActivationFunction,
-          providedWeightAndBias: {
-            weightArr: x.weightArr,
-            biasesArr: x.biasesArr,
+          providedWeightsAndBiases: {
+            weights: x.weights,
+            biases: x.biases,
           },
         }),
         fitness: 0,
