@@ -15,7 +15,6 @@ export interface GameRecord {
   initialFoodPosition: IPosition;
   /**
    * 0 -> up, 1 -> down, 2 -> left, 3 -> right
-   * if go opposition direction, the snake will be -1 * direction
    * if no eat food, the snake will be direction
    * if eat food, the snake will be ( new food index in 1d + 1 ) * 10 + direction
    * */
@@ -209,12 +208,12 @@ export default class SnakeGame implements ISnakeGame {
   }
 
   public to1DIndex(x: number, y: number): number {
-    return x * this.worldHeight + y;
+    return y + this.worldWidth * x;
   }
 
   public to2DIndex(oneDIndex: number): number[] {
-    const y = oneDIndex % this.worldHeight;
-    const x = (oneDIndex - y) / this.worldHeight;
+    const x = Math.floor(oneDIndex / this.worldWidth);
+    const y = oneDIndex % this.worldWidth;
     return [x, y];
   }
 
@@ -250,7 +249,7 @@ export default class SnakeGame implements ISnakeGame {
     this.moves++;
     this.movesForNoFood++;
     this.gameOver = true;
-    const encodedMove = -1 * this.encodeMoveRecord(direction);
+    const encodedMove = this.encodeMoveRecord(direction);
     this.moveRecord.push(encodedMove);
   }
 
@@ -296,7 +295,7 @@ export default class SnakeGame implements ISnakeGame {
   }
 
   public replayMove(moveRecord: number): void {
-    const encodedDirection = moveRecord < 0 ? -moveRecord % 10 : moveRecord % 10;
+    const encodedDirection = moveRecord % 10;
     const direction = SnakeGame.inverseDirectionMap[encodedDirection];
     if (!direction) throw new Error("moveRecord's direction is not from 0-3");
 
@@ -306,9 +305,7 @@ export default class SnakeGame implements ISnakeGame {
     if (haveFood) {
       // minus 1 because we add 1 to avoid 0
       const foodPositionIn1D = Math.floor(moveRecord / 10) - 1;
-      const [fx, fy] = this.to2DIndex(foodPositionIn1D);
-      const foodPosition = new Position(fx, fy);
-      const providedFoodPosition = this.allPositions.find((p) => p.isEqual(foodPosition));
+      const providedFoodPosition = this.allPositions[foodPositionIn1D];
       if (!providedFoodPosition) throw new Error("providedFoodPosition is not valid");
       this.snakeMove(newHeadPositionAndDirection, providedFoodPosition);
     } else {
@@ -365,15 +362,15 @@ export default class SnakeGame implements ISnakeGame {
 
   private getInitSnake() {
     const randPosition = new Position(Math.floor(this.worldWidth / 2), Math.floor(this.worldHeight / 2));
-    const position = this.allPositions.find((p) => p.isEqual(randPosition));
-    if (!position) throw new Error("getInitSnake fail as randPosition is not valid");
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- it will always find the position
+    const position = this.allPositions.find((p) => p.isEqual(randPosition))!;
     const direction = Utils.randomItemFromEnum(Direction);
     return new Snake([position], direction, this.allPositions2D);
   }
 
   private getInitSnakeWithProvidedPositionAndDirection(positionsPlainObject: IPosition[], direction: Direction) {
     const positions = positionsPlainObject.map((p) => new Position(p.x, p.y)).map((p) => this.allPositions.find((p2) => p2.isEqual(p)));
-    if (positions.some((p) => !p)) throw new Error("getInitSnakeWithProvidedPositionAndDirection fail as positions is not valid");
+    if (positions.some((p) => !p)) throw new Error("Provided snake position is not valid");
     return new Snake(positions as Position[], direction, this.allPositions2D);
   }
 }

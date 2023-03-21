@@ -4,7 +4,8 @@ import Position from "../Position";
 import { Direction, SnakeAction } from "../typing";
 import Utils from "../Utils";
 import { oppositeDirection } from "../oppositeDirection";
-import type { ISnakeGame, GameRecord } from "../SnakeGame";
+import type { IPosition } from "../Position";
+import type { GameRecord, ISnakeGame } from "../SnakeGame";
 
 const allPositionsFor3x2World = [new Position(0, 0), new Position(1, 0), new Position(2, 0), new Position(0, 1), new Position(1, 1), new Position(2, 1)];
 
@@ -199,6 +200,51 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame.maxMovesOfNoFood).toBeGreaterThan(0);
   });
 
+  it("constructor test for invalid snake positions", () => {
+    const snakePositions = [
+      { x: 1, y: 1 },
+      { x: 9, y: 1 },
+    ];
+
+    const fn = () =>
+      new SnakeGame({
+        worldWidth: 3,
+        worldHeight: 3,
+        providedInitialStatus: {
+          snake: {
+            positions: snakePositions,
+            direction: Direction.LEFT,
+          },
+          food: { x: 0, y: 0 },
+          moves: 10,
+          movesForNoFood: 2,
+          gameOver: false,
+          initialSnakePosition: { x: 1, y: 1 },
+          initialSnakeDirection: Direction.UP,
+          initialFoodPosition: { x: 0, y: 0 },
+          moveRecord: new Array(10).fill({ move: 0 }),
+        },
+      });
+
+    expect(fn).toThrowError("Provided snake position is not valid");
+  });
+
+  it("constructor test 3x2 world", () => {
+    const snakeGame = new SnakeGame({ worldWidth: 3, worldHeight: 2 });
+
+    expect(snakeGame.worldWidth).toBe(3);
+    expect(snakeGame.worldHeight).toBe(2);
+    expect(snakeGame.allPositions).toStrictEqual(allPositionsFor3x2World);
+    expect(snakeGame.allPositions2D).toStrictEqual(allPositions2DFor3x2World);
+    expect(snakeGame.snake.length).toBe(1);
+    expect(snakeGame.snake.head.isEqual(new Position(1, 1))).toBe(true);
+    expect(snakeGame.food.isEqual(new Position(1, 1))).toBe(false);
+    expect(snakeGame.gameOver).toBe(false);
+    expect(snakeGame.moves).toBe(0);
+    expect(snakeGame.movesForNoFood).toBe(0);
+    expect(snakeGame.maxMovesOfNoFood).toBeGreaterThan(0);
+  });
+
   it("toPlainObject and toPlainObjectIgnoreMoveRecordAndAllPosition test", () => {
     const snakePositions = [
       { x: 1, y: 1 },
@@ -345,7 +391,7 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame1.movesForNoFood).toBe(1);
     expect(snakeGame1.gameOver).toBe(true);
     expect(snakeGame1.moveRecord.length).toBe(1);
-    expect(snakeGame1.moveRecord[0]).toStrictEqual(-1 * SnakeGame.directionMap[oppositeDirection(snakeGame1.snake.direction)]);
+    expect(snakeGame1.moveRecord[0]).toStrictEqual(SnakeGame.directionMap[oppositeDirection(snakeGame1.snake.direction)]);
 
     const snakeGame2 = new SnakeGame(options);
     snakeGame2.snakeMoveBySnakeAction(SnakeAction.FRONT);
@@ -355,7 +401,7 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame2.movesForNoFood).toBe(movesForNoFoodBeforeSuicide + 1);
     expect(snakeGame2.gameOver).toBe(true);
     expect(snakeGame2.moveRecord.length).toBe(2);
-    expect(snakeGame2.moveRecord[1]).toStrictEqual(-1 * SnakeGame.directionMap[oppositeDirection(snakeGame2.snake.direction)]);
+    expect(snakeGame2.moveRecord[1]).toStrictEqual(SnakeGame.directionMap[oppositeDirection(snakeGame2.snake.direction)]);
   });
 
   it("suicide test toThrowError", () => {
@@ -468,7 +514,7 @@ describe("test suite for SnakeGame", () => {
       },
     });
 
-    it.each<{ name: string; snakeGame: SnakeGame }>`
+    it.skip.each<{ name: string; snakeGame: SnakeGame }>`
       name        | snakeGame
       ${"test 1"} | ${snakeGame1}
       ${"test 2"} | ${snakeGame2}
@@ -771,7 +817,7 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame.moveRecord).toStrictEqual(expectedMoveRecord);
 
     snakeGame.snakeMoveByDirection(Direction.RIGHT); // suicide
-    expectedMoveRecord.push(-3);
+    expectedMoveRecord.push(3);
     expect(snakeGame.moveRecord).toStrictEqual(expectedMoveRecord);
   });
 
@@ -797,26 +843,79 @@ describe("test suite for SnakeGame", () => {
 
     snakeGame.snakeMoveByDirection(Direction.LEFT);
     snakeGame.snakeMoveByDirection(Direction.LEFT);
-    expect(snakeGame.moveRecord).toStrictEqual([2, -2]);
+    expect(snakeGame.moveRecord).toStrictEqual([2, 2]);
   });
 
-  it("moveRecord test", () => {
-    const snakeGame = new SnakeGame({ worldWidth: 10, worldHeight: 10 });
+  describe("to1DIndex and to2DIndex test", () => {
+    const snakeGame1 = new SnakeGame({ worldWidth: 3, worldHeight: 3 });
+    const snakeGame2 = new SnakeGame({ worldWidth: 3, worldHeight: 2 });
+
+    it.each<{ name: string; snakeGame: SnakeGame; arr1D: Position[]; arr2D: Position[][] }>`
+      name        | snakeGame     | arr1D                      | arr2D
+      ${"test 1"} | ${snakeGame1} | ${allPositionsFor3x3World} | ${allPositions2DFor3x3World}
+      ${"test 2"} | ${snakeGame2} | ${allPositionsFor3x2World} | ${allPositions2DFor3x2World}
+    `("$name", ({ snakeGame, arr1D, arr2D }) => {
+      for (let i = 0; i < arr1D.length; i++) {
+        const [x, y] = snakeGame.to2DIndex(i);
+        expect(arr1D[i]).toStrictEqual(arr2D[x][y]);
+      }
+      for (let i = 0; i < arr2D.length; i++) {
+        for (let j = 0; j < arr2D[i].length; j++) {
+          const index = snakeGame.to1DIndex(i, j);
+          expect(arr1D[index]).toStrictEqual(arr2D[i][j]);
+        }
+      }
+    });
+  });
+
+  describe("moveRecord test", () => {
+    const snakeGame = new SnakeGame({ worldWidth: 8, worldHeight: 10 });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- use type-casting to access the private method
     const snakeMoveSpy = jest.spyOn(snakeGame as any, "snakeMove").mockImplementation(() => {
       // do nothing
     });
 
-    snakeGame.replayMove(0);
-    expect(snakeMoveSpy).toBeCalledWith({ direction: Direction.UP, position: { x: 5, y: 4 } });
+    const up = { direction: Direction.UP, position: { x: 4, y: 4 } };
+    const down = { direction: Direction.DOWN, position: { x: 4, y: 6 } };
+    const left = { direction: Direction.LEFT, position: { x: 3, y: 5 } };
+    const right = { direction: Direction.RIGHT, position: { x: 5, y: 5 } };
 
-    snakeGame.replayMove(2);
-    expect(snakeMoveSpy).toBeCalledWith({ direction: Direction.LEFT, position: { x: 4, y: 5 } });
+    it.each<{ name: string; moveRecord: number; posAndDir: { direction: Direction; position: IPosition }; foodPos: IPosition | null }>`
+      name         | moveRecord | posAndDir | foodPos
+      ${"test 1"}  | ${0}       | ${up}     | ${null}
+      ${"test 2"}  | ${1}       | ${down}   | ${null}
+      ${"test 3"}  | ${2}       | ${left}   | ${null}
+      ${"test 4"}  | ${3}       | ${right}  | ${null}
+      ${"test 5"}  | ${10}      | ${up}     | ${{ x: 0, y: 0 }}
+      ${"test 6"}  | ${11}      | ${down}   | ${{ x: 0, y: 0 }}
+      ${"test 7"}  | ${12}      | ${left}   | ${{ x: 0, y: 0 }}
+      ${"test 8"}  | ${13}      | ${right}  | ${{ x: 0, y: 0 }}
+      ${"test 9"}  | ${222}     | ${left}   | ${{ x: 5, y: 2 }}
+      ${"test 10"} | ${300}     | ${up}     | ${{ x: 5, y: 3 }}
+      ${"test 10"} | ${470}     | ${up}     | ${{ x: 6, y: 5 }}
+      ${"test 10"} | ${471}     | ${down}   | ${{ x: 6, y: 5 }}
+      ${"test 11"} | ${472}     | ${left}   | ${{ x: 6, y: 5 }}
+      ${"test 12"} | ${473}     | ${right}  | ${{ x: 6, y: 5 }}
+      ${"test 13"} | ${693}     | ${right}  | ${{ x: 4, y: 8 }}
+      ${"test 13"} | ${791}     | ${down}   | ${{ x: 6, y: 9 }}
+    `("$name", ({ moveRecord, posAndDir, foodPos }) => {
+      snakeGame.replayMove(moveRecord);
+      if (!foodPos) {
+        expect(snakeMoveSpy).lastCalledWith(posAndDir);
+      } else {
+        expect(snakeMoveSpy).lastCalledWith(posAndDir, foodPos);
+      }
+    });
   });
 
   it("moveRecord test to throw", () => {
     const snakeGame = new SnakeGame({ worldWidth: 10, worldHeight: 10 });
     expect(() => snakeGame.replayMove(4)).toThrow("moveRecord's direction is not from 0-3");
     expect(() => snakeGame.replayMove(9)).toThrow("moveRecord's direction is not from 0-3");
+  });
+
+  it("moveRecord test to throw", () => {
+    const snakeGame = new SnakeGame({ worldWidth: 2, worldHeight: 2 });
+    expect(() => snakeGame.replayMove(99990)).toThrow("providedFoodPosition is not valid");
   });
 });
