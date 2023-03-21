@@ -1,3 +1,4 @@
+import { describe, expect, it } from "@jest/globals";
 import SnakeGame from "snake-game/SnakeGame";
 import { Direction } from "snake-game/typing";
 import InputLayer, { slopeMap4 } from "../InputLayer";
