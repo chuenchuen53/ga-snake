@@ -11,7 +11,7 @@
     "test-dev": "jest --watchAll",
     "coverage": "jest --coverage",
     "build": "tsc --project tsconfig.build.json",
-    "tryModel": "npm run build && node ./build/scripts/tryModel.js"
+    "tryModel": "pnpm run build && node ./build/scripts/tryModel.js"
   },
   "dependencies": {
     "snake-game": "workspace:*",
