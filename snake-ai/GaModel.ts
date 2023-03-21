@@ -1,7 +1,7 @@
-import { Utils } from "snake-game/Utils";
+import Utils from "snake-game/Utils";
 import SnakeGame from "snake-game/SnakeGame";
 import InputLayer from "./InputLayer";
-import { CalcUtils } from "./CalcUtils";
+import CalcUtils from "./CalcUtils";
 import SnakeBrain from "./SnakeBrain";
 import { generateLayerShape } from "./generateLayerShape";
 import MultiThreadGames from "./MultiThreadGames";

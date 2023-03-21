@@ -14,7 +14,7 @@ export interface BaseStats {
   upperQuartile: number;
 }
 
-export class CalcUtils {
+export default class CalcUtils {
   public static hiddenLayerActivation(x: number[], type: ActivationFunction): number[] {
     switch (type) {
       case ActivationFunction.LINEAR:

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { ActivationFunction, CalcUtils } from "../CalcUtils";
+import CalcUtils, { ActivationFunction } from "../CalcUtils";
 
 const M1 = [
   [0, 1, 2, 3, 4, 5],

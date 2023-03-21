@@ -1,6 +1,6 @@
-import { Utils } from "snake-game/Utils";
+import Utils from "snake-game/Utils";
 import { Direction } from "snake-game/typing";
-import { CalcUtils } from "./CalcUtils";
+import CalcUtils from "./CalcUtils";
 import type { ActivationFunction } from "./CalcUtils";
 
 export type LayerShape = number[];
