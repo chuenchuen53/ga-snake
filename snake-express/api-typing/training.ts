@@ -1,6 +1,6 @@
 import type { evolveRequestSchema, initModelRequestSchema, toggleBackupPopulationWhenFinishRequestSchema } from "./zod/training";
 import type { z } from "zod";
-import type { EvolveResult, ExportedGaModel } from "snake-ai/GaModel";
+import type { EvolveResult, IGaModel } from "snake-ai/GaModel";
 
 export type InitModelRequest = z.infer<typeof initModelRequestSchema>;
 
@@ -12,7 +12,7 @@ export interface EvolveResultWithId extends EvolveResult {
   _id: string;
 }
 
-export type GetCurrentModelInfoResponse = Omit<Omit<ExportedGaModel, "parentModelId">, "population"> & {
+export type GetCurrentModelInfoResponse = Omit<Omit<IGaModel, "parentModelId">, "population"> & {
   _id: string;
   evolveResultHistory: EvolveResultWithId[];
   populationHistory: { _id: string; generation: number }[];

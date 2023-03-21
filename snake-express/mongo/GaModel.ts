@@ -1,9 +1,9 @@
 import mongoose, { Schema } from "mongoose";
 import { ActivationFunction } from "snake-ai/CalcUtils";
-import type { InferSchemaType, Types, Model } from "mongoose";
-import type { ExportedGaModel } from "snake-ai/GaModel";
+import type { InferSchemaType, Model, Types } from "mongoose";
+import type { IGaModel } from "snake-ai/GaModel";
 
-export type IGaModel = Omit<ExportedGaModel, "population"> & {
+export type IGaModel = Omit<IGaModel, "population"> & {
   populationHistory: Types.ObjectId[];
   evolveResultHistory: Types.ObjectId[];
 };

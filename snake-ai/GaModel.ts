@@ -3,9 +3,8 @@ import SnakeGame from "snake-game/SnakeGame";
 import InputLayer from "./InputLayer";
 import CalcUtils from "./CalcUtils";
 import SnakeBrain from "./SnakeBrain";
-import { generateLayerShape } from "./generateLayerShape";
 import MultiThreadGames from "./MultiThreadGames";
-import type { ISnakeBrain } from "./SnakeBrain";
+import type { ISnakeBrain, LayerShape } from "./SnakeBrain";
 import type { ActivationFunction, BaseStats } from "./CalcUtils";
 import type { GameRecord } from "snake-game/SnakeGame";
 
@@ -30,22 +29,7 @@ export interface Options {
   };
 }
 
-export type ExportedGaModel = {
-  worldWidth: number;
-  worldHeight: number;
-  hiddenLayersLength: number[];
-  hiddenLayerActivationFunction: ActivationFunction;
-  populationSize: number;
-  surviveRate: number;
-  populationMutationRate: number;
-  geneMutationRate: number;
-  mutationAmount: number;
-  trialTimes: number;
-  generation: number;
-  population: IndividualPlainObject[];
-};
-
-interface Individual {
+export interface Individual {
   snakeBrain: SnakeBrain;
   snakeLength: number;
   moves: number;
@@ -69,7 +53,30 @@ export interface EvolveResult {
   };
 }
 
-export default class GaModel implements ExportedGaModel {
+export interface IGaModel {
+  worldWidth: number;
+  worldHeight: number;
+  hiddenLayersLength: number[];
+  hiddenLayerActivationFunction: ActivationFunction;
+  populationSize: number;
+  surviveRate: number;
+  populationMutationRate: number;
+  geneMutationRate: number;
+  mutationAmount: number;
+  trialTimes: number;
+  generation: number;
+  population: IndividualPlainObject[];
+}
+
+export default class GaModel implements IGaModel {
+  public static generateLayerShape(...args: number[]) {
+    const shapes: LayerShape[] = [];
+    for (let i = 0; i < args.length - 1; i++) {
+      shapes.push([args[i + 1], args[i]]);
+    }
+    return shapes;
+  }
+
   public static fitness(moves: number, snakeLength: number, maxPossibleSnakeLength: number): number {
     if (snakeLength === 0) return 0;
 
@@ -133,7 +140,7 @@ export default class GaModel implements ExportedGaModel {
     this.trialTimes = option.gaConfig.trialTimes;
 
     const inputLayerLength = InputLayer.inputLayerLength;
-    const layerShapes = generateLayerShape(inputLayerLength, ...this.hiddenLayersLength, SnakeBrain.OUTPUT_LAYER_LENGTH);
+    const layerShapes = GaModel.generateLayerShape(inputLayerLength, ...this.hiddenLayersLength, SnakeBrain.OUTPUT_LAYER_LENGTH);
 
     if (option.providedInfo) {
       const { generation, snakeBrains } = option.providedInfo;
@@ -188,7 +195,7 @@ export default class GaModel implements ExportedGaModel {
     return this._evolving;
   }
 
-  public exportModel(): ExportedGaModel {
+  public exportModel(): IGaModel {
     return {
       worldWidth: this.worldWidth,
       worldHeight: this.worldHeight,
@@ -213,7 +220,7 @@ export default class GaModel implements ExportedGaModel {
   }
 
   public async evolve(): Promise<EvolveResult> {
-    if (this._evolving) throw Error("evolving is still running.");
+    if (this._evolving) throw Error("Evolve is still running.");
 
     this._evolving = true;
     const startTime = new Date().getTime();
@@ -243,42 +250,26 @@ export default class GaModel implements ExportedGaModel {
     };
 
     const timeSpent = (new Date().getTime() - startTime) / 1000;
-
-    console.table({
-      generation,
-      highestFitness: finalBestPlayer.fitness,
-      meanFitness: this.population.reduce((acc, cur) => acc + cur.fitness, 0) / this.population.length,
-      bestSnakeLength: finalBestPlayer.snakeLength,
-      meanSnakeLength: this.population.reduce((acc, cur) => acc + cur.snakeLength, 0) / this.population.length,
-      bestMoves: finalBestPlayer.moves,
-      meanMoves: this.population.reduce((acc, cur) => acc + cur.moves, 0) / this.population.length,
-      time: timeSpent,
-    });
-
     this._evolving = false;
 
     return { generation, bestIndividual, timeSpent, overallStats };
   }
 
   public async destroy(): Promise<void> {
-    if (this._evolving) throw Error("evolving is still running.");
+    if (this._evolving) throw Error("Evolve is still running.");
     await this.multiThreadGames.destroy();
   }
 
   private async evaluate(): Promise<void> {
     this._generation++;
 
-    const promise = this.population.map((p) => this.multiThreadGames.playGames(this.worldWidth, this.worldHeight, this.trialTimes, p.snakeBrain));
-    const result = await Promise.all(promise);
+    const promises = this.population.map((p) => this.multiThreadGames.playGames(this.worldWidth, this.worldHeight, this.trialTimes, p.snakeBrain));
+    const result = await Promise.all(promises);
 
     for (let i = 0; i < this.population.length; i++) {
       const p = this.population[i];
       const { snakeLengthArr, movesArr, gameRecordArr } = result[i];
-
-      const fitnessArr: number[] = [];
-      for (let j = 0; j < this.trialTimes; j++) {
-        fitnessArr.push(GaModel.fitness(movesArr[j], snakeLengthArr[j], this._maxPossibleSnakeLength));
-      }
+      const fitnessArr: number[] = new Array(this.trialTimes).fill(0).map((_, j) => GaModel.fitness(movesArr[j], snakeLengthArr[j], this._maxPossibleSnakeLength));
 
       p.snakeLength = CalcUtils.meanOfArray(snakeLengthArr);
       p.moves = CalcUtils.meanOfArray(movesArr);
@@ -299,13 +290,13 @@ export default class GaModel implements ExportedGaModel {
     this.population.forEach((p, childIdx) => {
       if (this.population[childIdx].survive) return;
 
-      const parent1 = this.pickParentIdx(childIdx);
-      const parent2 = this.pickParentIdx(childIdx, parent1);
+      const parent1 = this.pickParent(childIdx);
+      const parent2 = this.pickParent(childIdx, parent1);
       p.snakeBrain.crossOver(parent1.snakeBrain, parent2.snakeBrain);
     });
   }
 
-  private pickParentIdx(childIdx: number, anotherParent?: Individual): Individual {
+  private pickParent(childIdx: number, anotherParent?: Individual): Individual {
     const anotherParentIdx = anotherParent ? this.population.findIndex((p) => p === anotherParent) : -1;
     const filteredPopulation = this.population.filter((p, idx) => idx !== childIdx && idx !== anotherParentIdx);
     return GaModel.spinRouletteWheel(filteredPopulation);
