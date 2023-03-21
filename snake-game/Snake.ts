@@ -1,8 +1,8 @@
-import Position from "./Position";
 import { Direction, SnakeAction } from "./typing";
 import { oppositeDirection } from "./oppositeDirection";
+import type Position from "./Position";
 import type { IPosition } from "./Position";
-import type { PositionAndDirection } from "./typing";
+import type { PositionAndDirection , NotNullPositionAndDirection} from "./typing";
 
 interface ActionMapSecondLayerObject {
   direction: Direction;
@@ -65,14 +65,6 @@ export default class Snake implements ISnake {
     [Direction.LEFT]: { dx: -1, dy: 0 },
     [Direction.RIGHT]: { dx: 1, dy: 0 },
   };
-
-  public static fromPlainObj(obj: ISnake): Snake {
-    return new Snake(
-      obj.positions.map(Position.fromPlainObj),
-      obj.direction,
-      obj.allPositions2D.map((row) => row.map(Position.fromPlainObj))
-    );
-  }
 
   public direction: Direction;
   public readonly positions: Position[];
@@ -139,21 +131,25 @@ export default class Snake implements ISnake {
   }
 
   public move(direction: Direction): void {
-    if (this.direction === oppositeDirection(direction)) throw new Error("snake cannot move to opposite direction");
-    const positionAndDirection = this.getHeadPositionAndDirectionAfterMoveByDirection(direction);
-    if (positionAndDirection.position === null) throw new Error("snake move will out of bound");
-
+    const positionAndDirection = this.getHeadPositionAndDirectionAfterMoveByDirectionWithCheckingEatSelfAndOutOfBound(direction);
     this.positions.unshift(positionAndDirection.position);
     this.positions.pop();
     this.direction = positionAndDirection.direction;
   }
 
   public moveWithFoodEaten(direction: Direction): void {
+    const positionAndDirection = this.getHeadPositionAndDirectionAfterMoveByDirectionWithCheckingEatSelfAndOutOfBound(direction);
+    this.positions.unshift(positionAndDirection.position);
+    this.direction = positionAndDirection.direction;
+  }
+
+  private getHeadPositionAndDirectionAfterMoveByDirectionWithCheckingEatSelfAndOutOfBound(direction: Direction): NotNullPositionAndDirection {
     if (this.direction === oppositeDirection(direction)) throw new Error("snake cannot move to opposite direction");
     const positionAndDirection = this.getHeadPositionAndDirectionAfterMoveByDirection(direction);
     if (positionAndDirection.position === null) throw new Error("snake move will out of bound");
-
-    this.positions.unshift(positionAndDirection.position);
-    this.direction = positionAndDirection.direction;
+    return {
+      position: positionAndDirection.position,
+      direction: positionAndDirection.direction,
+    };
   }
 }

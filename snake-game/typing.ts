@@ -17,3 +17,8 @@ export interface PositionAndDirection {
   position: Position | null;
   direction: Direction;
 }
+
+export interface NotNullPositionAndDirection {
+  position: Position;
+  direction: Direction;
+}

@@ -1,10 +1,10 @@
-import { describe, expect, it, test } from "@jest/globals";
+import { describe, expect, it } from "@jest/globals";
 import Position from "../Position";
 import Snake from "../Snake";
 import { Direction, SnakeAction } from "../typing";
 import Utils from "../Utils";
-import type { IPosition } from "../Position";
 import type { ISnake } from "../Snake";
+import type { IPosition } from "../Position";
 
 const allPositions2D = [
   [new Position(0, 0), new Position(1, 0), new Position(2, 0)],
@@ -13,25 +13,6 @@ const allPositions2D = [
 ];
 
 describe("test suite for Snake class", () => {
-  it("fromPlainObj test", () => {
-    const plainObj = {
-      positions: [
-        { x: 0, y: 1 },
-        { x: 1, y: 1 },
-        { x: 1, y: 2 },
-      ],
-      direction: Direction.UP,
-      allPositions2D,
-    } satisfies ISnake;
-    const snake = Snake.fromPlainObj(plainObj);
-    expect((snake as unknown) instanceof Snake).toBe(true);
-    expect(snake.positions.length).toBe(3);
-    expect(snake.positions[0].isEqual(new Position(0, 1))).toBe(true);
-    expect(snake.positions[1].isEqual(new Position(1, 1))).toBe(true);
-    expect(snake.positions[2].isEqual(new Position(1, 2))).toBe(true);
-    expect(snake.direction).toBe(Direction.UP);
-  });
-
   it("toPlainObject test", () => {
     const snake = new Snake([new Position(0, 1), new Position(1, 1), new Position(1, 2)], Direction.LEFT, allPositions2D);
     const plainObj = snake.toPlainObject();
@@ -67,10 +48,28 @@ describe("test suite for Snake class", () => {
     expect(JSON.stringify(plainObj)).toBe(JSON.stringify(expectedPlainObj));
   });
 
+  it("toPlainObjectWithoutAllPositions2D test", () => {
+    const snake = new Snake([new Position(0, 1), new Position(1, 1), new Position(1, 2)], Direction.LEFT, allPositions2D);
+    const plainObj = snake.toPlainObjectWithoutAllPositions2D();
+    expect(plainObj instanceof Snake).toBe(false);
+    const expectedPositions = [
+      { x: 0, y: 1 },
+      { x: 1, y: 1 },
+      { x: 1, y: 2 },
+    ];
+    const expectedPlainObj = {
+      positions: expectedPositions,
+      direction: Direction.LEFT,
+      allPositions2D: [],
+    } satisfies ISnake;
+    expect(plainObj).toStrictEqual(expectedPlainObj);
+    expect(JSON.stringify(plainObj)).toBe(JSON.stringify(expectedPlainObj));
+  });
+
   describe("test suite for getter head and length", () => {
     const snake1 = new Snake([new Position(0, 1)], Direction.LEFT, allPositions2D);
     const snake2 = new Snake([new Position(0, 1), new Position(1, 1), new Position(1, 2)], Direction.LEFT, allPositions2D);
-    test.each<{ name: string; snake: Snake; expectedHeadPositionData: IPosition; expectedLength: number }>`
+    it.each<{ name: string; snake: Snake; expectedHeadPositionData: IPosition; expectedLength: number }>`
       name        | snake     | expectedHeadPositionData | expectedLength
       ${"test 1"} | ${snake1} | ${{ x: 0, y: 1 }}        | ${1}
       ${"test 2"} | ${snake2} | ${{ x: 0, y: 1 }}        | ${3}
@@ -85,7 +84,7 @@ describe("test suite for Snake class", () => {
     const snake1 = new Snake([new Position(0, 1)], Direction.LEFT, allPositions2D);
     const snake2 = new Snake([new Position(0, 1), new Position(1, 1), new Position(1, 2)], Direction.LEFT, allPositions2D);
 
-    test.each<{ name: string; snake: Snake; positionData: IPosition; expected: boolean }>`
+    it.each<{ name: string; snake: Snake; positionData: IPosition; expected: boolean }>`
       name         | snake     | positionData      | expected
       ${"test 1"}  | ${snake1} | ${{ x: 0, y: 1 }} | ${true}
       ${"test 2"}  | ${snake1} | ${{ x: 1, y: 1 }} | ${false}
@@ -130,7 +129,7 @@ describe("test suite for Snake class", () => {
     const snake5 = new Snake([new Position(0, 0)], Direction.UP, allPositions2D);
     const snake6 = new Snake([new Position(2, 2)], Direction.DOWN, allPositions2D);
 
-    test.each<{ name: string; snake: Snake; action: SnakeAction; expectedPosition: IPosition; expectedDirection: Direction }>`
+    it.each<{ name: string; snake: Snake; action: SnakeAction; expectedPosition: IPosition; expectedDirection: Direction }>`
       name                    | snake     | action                    | expectedPosition  | expectedDirection
       ${"snake1, FRONT"}      | ${snake1} | ${SnakeAction.FRONT}      | ${{ x: 1, y: 0 }} | ${Direction.UP}
       ${"snake1, TURN_LEFT"}  | ${snake1} | ${SnakeAction.TURN_LEFT}  | ${{ x: 0, y: 1 }} | ${Direction.LEFT}
@@ -187,7 +186,7 @@ describe("test suite for Snake class", () => {
         const positionAndDirection = snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(snakeAction);
         if (!positionAndDirection.position) throw new Error("positionAndDirection.position is null");
         snake.move(positionAndDirection.direction);
-        expect(snake.positions.length).toBe(1);
+        expect(snake.length).toBe(1);
         expect(snake.positions).toStrictEqual([positionAndDirection.position]);
         expect(snake.direction).toBe(positionAndDirection.direction);
       }
@@ -201,7 +200,7 @@ describe("test suite for Snake class", () => {
       const positionAndDirection = snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(snakeAction);
       if (!positionAndDirection.position) throw new Error("positionAndDirection.position is null");
       snake.move(positionAndDirection.direction);
-      expect(snake.positions.length).toBe(4);
+      expect(snake.length).toBe(4);
       expect(snake.positions).toStrictEqual([positionAndDirection.position, positions[0], positions[1], positions[2]]);
       expect(snake.direction).toBe(positionAndDirection.direction);
     }
@@ -214,7 +213,7 @@ describe("test suite for Snake class", () => {
         const positionAndDirection = snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(snakeAction);
         if (!positionAndDirection.position) throw new Error("positionAndDirection.position is null");
         snake.moveWithFoodEaten(positionAndDirection.direction);
-        expect(snake.positions.length).toBe(2);
+        expect(snake.length).toBe(2);
         expect(snake.positions).toStrictEqual([positionAndDirection.position, new Position(1, 1)]);
         expect(snake.direction).toBe(positionAndDirection.direction);
       }
@@ -232,5 +231,23 @@ describe("test suite for Snake class", () => {
       expect(snake.positions).toStrictEqual([positionAndDirection.position, positions[0], positions[1], positions[2], positions[3]]);
       expect(snake.direction).toBe(positionAndDirection.direction);
     }
+  });
+
+  it("move and moveWithFoodEaten test throw Error (opposite direction)", () => {
+    const snake1 = new Snake([new Position(1, 1)], Direction.UP, allPositions2D);
+    expect(() => snake1.move(Direction.DOWN)).toThrow("snake cannot move to opposite direction");
+
+    const snake2 = new Snake([new Position(1, 1)], Direction.UP, allPositions2D);
+    expect(() => snake2.moveWithFoodEaten(Direction.DOWN)).toThrow("snake cannot move to opposite direction");
+  });
+
+  it("move and moveWithFoodEaten test throw Error (out of bound)", () => {
+    const snake1 = new Snake([new Position(1, 1)], Direction.UP, allPositions2D);
+    snake1.move(Direction.UP);
+    expect(() => snake1.move(Direction.UP)).toThrow("snake move will out of bound");
+
+    const snake2 = new Snake([new Position(1, 1)], Direction.UP, allPositions2D);
+    snake2.moveWithFoodEaten(Direction.UP);
+    expect(() => snake2.moveWithFoodEaten(Direction.UP)).toThrow("snake move will out of bound");
   });
 });
