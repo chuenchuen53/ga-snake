@@ -3,13 +3,10 @@ import Piscina from "piscina";
 import type SnakeBrain from "../SnakeBrain";
 import type { WorkerData, WorkerResult } from "./typing";
 
-// todo
-const numOfThreads = 15;
-
 export default class MultiThreadGames {
   private piscina: Piscina;
 
-  constructor() {
+  constructor(numOfThreads: number) {
     this.piscina = new Piscina({
       filename: path.resolve(__dirname, "./worker.js"),
       minThreads: numOfThreads,

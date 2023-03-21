@@ -36,7 +36,7 @@ export default function workerFunc(workerData: WorkerData): WorkerResult {
       snakeGame.snakeMoveByDirection(direction);
     } while (!snakeGame.gameOver);
 
-    snakeLengthArr.push(snakeGame.snake.positions.length);
+    snakeLengthArr.push(snakeGame.snake.length);
     movesArr.push(snakeGame.moves);
     gameRecordArr.push(snakeGame.exportGameRecord());
   }

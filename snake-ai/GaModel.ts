@@ -127,7 +127,7 @@ export default class GaModel implements IGaModel {
   private readonly _maxPossibleSnakeLength: number;
   private readonly multiThreadGames: MultiThreadGames;
 
-  constructor(option: Options) {
+  constructor(option: Options, numOfThreads: number) {
     this.worldHeight = option.worldHeight;
     this.worldWidth = option.worldWidth;
     this.hiddenLayersLength = option.snakeBrainConfig.hiddenLayersLength;
@@ -181,7 +181,7 @@ export default class GaModel implements IGaModel {
     }
 
     this._evolving = false;
-    this.multiThreadGames = new MultiThreadGames();
+    this.multiThreadGames = new MultiThreadGames(numOfThreads);
     this._numberOfSurvival = Math.floor(this.populationSize * this.surviveRate);
     if (this._numberOfSurvival < 2) throw Error("Survival less than 2, please increase survive rate or population size.");
     this._maxPossibleSnakeLength = this.worldHeight * this.worldWidth;
