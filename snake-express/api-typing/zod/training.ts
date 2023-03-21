@@ -1,17 +1,18 @@
 import { z } from "zod";
 import { ActivationFunction } from "snake-ai/CalcUtils";
 import type { Options } from "snake-ai/GaModel";
+import type { ISnakeBrain } from "snake-ai/SnakeBrain";
 
 export const activationFunctionSchema = z.nativeEnum(ActivationFunction);
 
-export const layerShapeSchema = z.array(z.number());
+export const layerShapeSchema = z.tuple([z.number(), z.number()]);
 
 export const iSnakeBrainSchema = z.object({
   inputLength: z.number(),
   layerShapes: z.array(layerShapeSchema),
   hiddenLayerActivationFunction: activationFunctionSchema,
-  weightArr: z.array(z.array(z.array(z.number()))),
-  biasesArr: z.array(z.array(z.number())),
+  weights: z.array(z.array(z.array(z.number()))),
+  biases: z.array(z.array(z.number())),
 });
 
 export const optionsSchema = z.object({
@@ -49,6 +50,10 @@ export const toggleBackupPopulationWhenFinishRequestSchema = z.object({
   backup: z.boolean(),
 });
 
-type Checking = z.infer<typeof optionsSchema> extends Options ? true : false;
-const checking: Checking = true;
-if (!checking) throw new Error("Type checking failed for zod optionsSchema");
+type ISnakeBrainChecking = z.infer<typeof iSnakeBrainSchema> extends ISnakeBrain ? true : false;
+const iSnakeBrainChecking: ISnakeBrainChecking = true;
+if (!iSnakeBrainChecking) throw new Error("Type checking failed for zod iSnakeBrainSchema");
+
+type OptionsChecking = z.infer<typeof optionsSchema> extends Options ? true : false;
+const optionsChecking: OptionsChecking = true;
+if (!optionsChecking) throw new Error("Type checking failed for zod optionsSchema");

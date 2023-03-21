@@ -20,8 +20,8 @@ export const ModelsTable = () => {
         ...model,
         createdAt: new Date(model.createdAt),
         snakeLengthMean: model.snakeLengthMean ? Math.floor(model.snakeLengthMean) : null,
-        detail: model.id,
-        delete: currentModelId === model.id ? null : model.id,
+        detail: model._id,
+        delete: currentModelId === model._id ? null : model._id,
       }))
     : [];
 

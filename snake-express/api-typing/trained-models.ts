@@ -1,5 +1,8 @@
+import type { EvolveResult } from "snake-ai/GaModel";
+import type { IGaModel } from "../mongo/GaModel";
+
 export interface TrainedModel {
-  id: string;
+  _id: string;
   createdAt: Date;
   generation: number;
   bestSnakeLength: number | null;
@@ -11,3 +14,13 @@ export interface TrainedModel {
 export interface GetAllTrainedModelsResponse {
   models: TrainedModel[];
 }
+
+export interface EvolveResultWithId extends EvolveResult {
+  _id: string;
+}
+
+export type GetModelDetailResponse = Omit<IGaModel, "population"> & {
+  _id: string;
+  evolveResultHistory: EvolveResultWithId[];
+  populationHistory: { _id: string; generation: number }[];
+};

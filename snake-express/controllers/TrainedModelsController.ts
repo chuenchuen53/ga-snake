@@ -1,8 +1,7 @@
 import TrainingService from "../services/TrainingService";
-import type { GetCurrentModelInfoResponse } from "../api-typing/training";
+import type { GetAllTrainedModelsResponse, GetModelDetailResponse } from "../api-typing/trained-models";
 import type TrainedModelsService from "../services/TrainedModelsService";
 import type { Request, Response } from "express";
-import type { GetAllTrainedModelsResponse } from "../api-typing/trained-models";
 
 export default class TrainedModelsController {
   constructor(private service: TrainedModelsService) {}
@@ -20,7 +19,7 @@ export default class TrainedModelsController {
   public getModelDetail = async (req: Request, res: Response) => {
     try {
       const data = await this.service.getModelDetail(req.params.id);
-      res.json(data satisfies GetCurrentModelInfoResponse);
+      res.json(data satisfies GetModelDetailResponse);
     } catch (err) {
       console.log("TrainedModelsController ~ getModelDetail= ~ err", err);
       res.status(500).json({ message: "internal server error" });
@@ -30,10 +29,10 @@ export default class TrainedModelsController {
   public deleteModel = async (req: Request, res: Response) => {
     try {
       if (req.params.id === TrainingService.currentModelId) {
-        res.status(400).json({ message: "cannot delete current model" });
+        res.status(400).json({ message: "cannot delete the current model" });
         return;
       }
-      
+
       await this.service.deleteModel(req.params.id);
       res.status(204).end();
     } catch (err) {

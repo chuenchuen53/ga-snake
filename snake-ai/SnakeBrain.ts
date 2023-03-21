@@ -168,6 +168,4 @@ export default class SnakeBrain implements ISnakeBrain {
     const template: number[] = Array(row).fill(null);
     return template.map((_) => Utils.randomUniform(SnakeBrain.MIN_BIAS, SnakeBrain.MAX_BIAS));
   }
-
-
 }

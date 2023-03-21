@@ -1,13 +1,11 @@
 import { AppDb } from "../mongo";
-import type { EvolveResult } from "snake-ai/GaModel";
-import type { GetCurrentModelInfoResponse } from "../api-typing/training";
-import type { GetAllTrainedModelsResponse } from "../api-typing/trained-models";
+import type { EvolveResultWithId, GetAllTrainedModelsResponse, GetModelDetailResponse, TrainedModel } from "../api-typing/trained-models";
 
 export default class TrainedModelsService {
   private db = AppDb.getInstance();
 
   public async getAllTrainedModels(): Promise<GetAllTrainedModelsResponse> {
-    const getTrainedModelsDbResult: any[] = (await this.db.GaModel.collection
+    const getTrainedModelsDbResult: TrainedModel[] = (await this.db.GaModel.collection
       .aggregate([
         { $addFields: { lastEvolveResultId: { $last: "$evolveResultHistory" } } },
         {
@@ -42,25 +40,15 @@ export default class TrainedModelsService {
         },
       ])
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .toArray()) as any;
+      .toArray()) as unknown as TrainedModel[];
 
-    const models = getTrainedModelsDbResult.map((model) => {
-      const { _id, ...rest } = model;
-      return {
-        id: _id.toString(),
-        createdAt: _id.getTimestamp(),
-        ...rest,
-      };
-    });
-
-    return { models };
+    return { models: getTrainedModelsDbResult };
   }
 
-  public async getModelDetail(id: string): Promise<GetCurrentModelInfoResponse> {
+  public async getModelDetail(id: string): Promise<GetModelDetailResponse> {
     const model = await this.db.GaModel.findById(id)
-      .populate<{ evolveResultHistory: EvolveResult[] }>("evolveResultHistory")
-      .populate<{ populationHistory: { generation: number }[] }>("populationHistory", "generation")
-      .exec();
+      .populate<{ evolveResultHistory: EvolveResultWithId[] }>("evolveResultHistory")
+      .populate<{ populationHistory: { _id: string; generation: number }[] }>("populationHistory", "generation");
     if (!model) throw new Error("model not exists");
     return model.toObject();
   }
@@ -72,8 +60,8 @@ export default class TrainedModelsService {
 
       const populationHistoryIds = gaModel.populationHistory;
       const evolveResultHistoryIds = gaModel.evolveResultHistory;
-      const populationIds = await this.db.Population.find({ generation: gaModel.generation });
-      const individualIds = await this.db.Individual.find({ _id: { $in: populationIds } });
+      const populations = await this.db.Population.find({ _id: { $in: populationHistoryIds } });
+      const individualIds = populations.map((population) => population.population).flat();
 
       await Promise.all([
         this.db.GaModel.findByIdAndDelete(id),

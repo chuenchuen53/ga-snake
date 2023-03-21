@@ -1,5 +1,6 @@
 import GaModel from "snake-ai/GaModel";
 import { AppDb } from "../mongo";
+import AppEnv from "../AppEnv";
 import type { EvolveResult } from "snake-ai/GaModel";
 import type { EventEmitter } from "events";
 import type { Types } from "mongoose";
@@ -40,7 +41,8 @@ export default class TrainingService {
   }
 
   public async initModel(options: InitModelRequest["options"]): Promise<GetCurrentModelInfoResponse> {
-    this._gaModel = new GaModel(options);
+    // todo
+    this._gaModel = new GaModel(options as any, AppEnv.NUM_OF_THREADS);
 
     const { population: _, ...modelData } = this._gaModel.exportModel();
 
