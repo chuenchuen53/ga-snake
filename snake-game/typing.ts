@@ -14,6 +14,6 @@ export enum SnakeAction {
 }
 
 export interface PositionAndDirection {
-  position: Position;
+  position: Position | null;
   direction: Direction;
 }

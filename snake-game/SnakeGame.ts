@@ -102,6 +102,7 @@ export default class SnakeGame implements ISnakeGame {
   public worldWidth: number;
   public worldHeight: number;
   public allPositions: Position[];
+  public allPositions2D: Position[][];
   public snake: Snake;
   public food: Position;
   public gameOver: boolean;
@@ -118,9 +119,12 @@ export default class SnakeGame implements ISnakeGame {
     this.worldHeight = options.worldHeight;
 
     this.allPositions = new Array(this.worldWidth * this.worldHeight);
+    this.allPositions2D = new Array(this.worldWidth);
     for (let i = 0; i < this.worldWidth; i++) {
+      this.allPositions2D[i] = new Array(this.worldHeight);
       for (let j = 0; j < this.worldHeight; j++) {
         this.allPositions[i * this.worldHeight + j] = new Position(i, j);
+        this.allPositions2D[i][j] = new Position(i, j);
       }
     }
 
@@ -262,7 +266,7 @@ export default class SnakeGame implements ISnakeGame {
   public snakeMoveBySnakeAction(action: SnakeAction) {
     if (this.gameOver) throw new Error("snakeMoveBySnakeAction() is called when game is over");
 
-    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(action);
+    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveBySnakeAction(action, this.allPositions2D);
     this.snakeMove(newHeadPositionAndDirection);
   }
 
@@ -274,7 +278,7 @@ export default class SnakeGame implements ISnakeGame {
       return;
     }
 
-    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveByDirection(direction);
+    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveByDirection(direction, this.allPositions2D);
     this.snakeMove(newHeadPositionAndDirection);
   }
 
@@ -285,7 +289,7 @@ export default class SnakeGame implements ISnakeGame {
       return;
     }
 
-    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveByDirection(direction);
+    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveByDirection(direction, this.allPositions2D);
     this.snakeMove(newHeadPositionAndDirection);
   }
 
@@ -294,7 +298,7 @@ export default class SnakeGame implements ISnakeGame {
     const direction = SnakeGame.inverseDirectionMap[encodedDirection];
     if (!direction) throw new Error("moveRecordRow.move is not from 0-3");
 
-    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveByDirection(direction);
+    const newHeadPositionAndDirection = this.snake.getHeadPositionAndDirectionAfterMoveByDirection(direction, this.allPositions2D);
 
     const haveFood = moveRecord >= 10;
     if (haveFood) {
@@ -329,7 +333,7 @@ export default class SnakeGame implements ISnakeGame {
     } else {
       this.movesForNoFood++;
 
-      if (this.snake.checkCollisionAfterMove(newHeadPositionAndDirection.position) || this.checkOutOfBounds(newHeadPositionAndDirection.position)) {
+      if (this.snake.checkEatSelfAfterMove(newHeadPositionAndDirection.position) || this.checkOutOfBounds(newHeadPositionAndDirection.position)) {
         this.gameOver = true;
       } else {
         this.snake.move(newHeadPositionAndDirection);
