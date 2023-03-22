@@ -1,7 +1,7 @@
 import React from "react";
 import { Image } from "react-konva";
 import useImage from "use-image";
-import food from "./apple-icon.svg";
+import food from "./assets/apple.svg";
 
 interface Props {
   x: number;
@@ -9,10 +9,12 @@ interface Props {
   gridSize: number;
 }
 
-const SCALE = 0.45;
+const imgSize = 10;
+const offset = 5;
 
 export const FoodImage = React.memo(({ x, y, gridSize }: Props): JSX.Element => {
-  console.log("render food");
   const [image] = useImage(food);
-  return <Image x={x * gridSize} y={y * gridSize} scaleX={SCALE} scaleY={SCALE} image={image} />;
+  const scale = 0.8 * (gridSize / imgSize);
+  const halfGridSize = 0.5 * gridSize;
+  return <Image x={x * gridSize + halfGridSize} y={y * gridSize + halfGridSize} scaleX={scale} scaleY={scale} offsetX={offset} offsetY={offset} image={image} />;
 });

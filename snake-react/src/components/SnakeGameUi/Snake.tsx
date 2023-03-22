@@ -15,8 +15,6 @@ export const Snake = ({ snake, gridSize, snakeFillColor, snakeStrokeColor }: Pro
   const snakePositions = snake.positions;
   const snakeDirection = snake.direction;
 
-  console.log("render snake");
-
   return (
     <>
       {snakePositions.map((p, index) => (
