@@ -67,7 +67,7 @@ const columns: GridColDef[] = [
   },
 ];
 
-function toDataGridRows(populationHistory: Props["populationHistory"], evolveResultHistory: Props["evolveResultHistory"], worldWidth: number, worldHeight: number, dispatch: AppDispatch) {
+function toDataGridRows(populationHistory: Props["populationHistory"], evolveResultHistory: Props["evolveResultHistory"], dispatch: AppDispatch) {
   return evolveResultHistory.map((evolveResult, generation) => ({
     id: evolveResult._id,
     populationFound: Boolean(populationHistory.find((x) => x.generation === generation)),
@@ -87,9 +87,7 @@ function toDataGridRows(populationHistory: Props["populationHistory"], evolveRes
     timeSpent: evolveResult.timeSpent,
     replay: () => {
       const gameRecord = evolveResult.bestIndividual.gameRecord;
-      if (gameRecord) {
-        dispatch(setNewReplay({ worldWidth, worldHeight, gameRecord }));
-      }
+      if (gameRecord) dispatch(setNewReplay(gameRecord));
     },
     exam: () => {
       const snakeBrain = evolveResult.bestIndividual.snakeBrain;
@@ -100,7 +98,7 @@ function toDataGridRows(populationHistory: Props["populationHistory"], evolveRes
 
 export const EvolveHistoryTable = (props: Props) => {
   const dispatch = useAppDispatch();
-  const rows = toDataGridRows(props.populationHistory, props.evolveResultHistory, props.worldWidth, props.worldHeight, dispatch);
+  const rows = toDataGridRows(props.populationHistory, props.evolveResultHistory, dispatch);
 
   return (
     <DataGrid

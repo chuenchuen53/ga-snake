@@ -12,6 +12,7 @@ interface ChartProps {
   bestDataKey: keyof ReturnType<typeof toChartData>[number];
   meanDataKey: keyof ReturnType<typeof toChartData>[number];
   logScale?: boolean;
+  tickFormatter?: (value: number, index: number) => string;
 }
 
 export interface Props {
@@ -20,13 +21,12 @@ export interface Props {
 
 export const EvolveHistoryChart = ({ evolveResultHistory }: Props) => {
   const theme = useTheme();
-  // const bestLineColor = theme.palette.primary.dark;
   const bestLineColor = theme.palette.primary.dark;
   const meanLineColor = theme.palette.secondary.dark;
 
   const data = toChartData(evolveResultHistory);
 
-  const Chart = ({ data, title, bestDataKey, meanDataKey, logScale }: ChartProps) => {
+  const Chart = ({ data, title, bestDataKey, meanDataKey, logScale, tickFormatter }: ChartProps) => {
     return (
       <div>
         <Typography align="center" variant="h5">
@@ -35,7 +35,7 @@ export const EvolveHistoryChart = ({ evolveResultHistory }: Props) => {
         <LineChart width={1100} height={600} data={data} margin={{ top: 24, right: 24, left: 0, bottom: 24 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="generation" />
-          <YAxis scale={logScale ? "log" : "linear"} domain={["auto", "auto"]} />
+          <YAxis scale={logScale ? "log" : "linear"} domain={["auto", "auto"]} tickFormatter={tickFormatter} />
           <Legend />
           <Line isAnimationActive={false} type="monotone" dot={false} dataKey={bestDataKey} stroke={bestLineColor} />
           <Line isAnimationActive={false} type="monotone" dot={false} dataKey={meanDataKey} stroke={meanLineColor} />
@@ -48,7 +48,7 @@ export const EvolveHistoryChart = ({ evolveResultHistory }: Props) => {
     <Box>
       <Paper elevation={1} sx={{ display: "flex", flexDirection: "column", alignItems: "center", p: 3 }}>
         <Chart data={data} title="Snake Length" bestDataKey={"bestSnakeLength"} meanDataKey="meanSnakeLength" />
-        <Chart data={data} title="Fitness" bestDataKey={"bestFitness"} meanDataKey="meanFitness" logScale />
+        <Chart data={data} title="Fitness" bestDataKey={"bestFitness"} meanDataKey="meanFitness" logScale tickFormatter={(value: number) => Number(value.toFixed(10)).toExponential()} />
         <Chart data={data} title="Moves" bestDataKey={"bestMoves"} meanDataKey="meanMoves" />
       </Paper>
     </Box>

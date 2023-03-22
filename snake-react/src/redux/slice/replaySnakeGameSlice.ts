@@ -1,17 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import SnakeGame from "snake-game/SnakeGame";
-import type { ISnakeGame, GameRecord } from "snake-game/SnakeGame";
 import type { PayloadAction } from "@reduxjs/toolkit";
-
-export interface ReplayData {
-  worldWidth: number;
-  worldHeight: number;
-  gameRecord: GameRecord;
-}
+import type { GameRecord, ISnakeGame } from "snake-game/SnakeGame";
 
 interface ReplaySnakeState {
   snakeGame: ISnakeGame | null;
-  replayData: ReplayData | null;
+  gameRecord: GameRecord | null;
   nextMoveIndex: number;
   openModal: boolean;
 }
@@ -20,7 +14,7 @@ let snakeGame: SnakeGame | null = null;
 
 const initialState: ReplaySnakeState = {
   snakeGame: null,
-  replayData: null,
+  gameRecord: null,
   nextMoveIndex: -1,
   openModal: false,
 };
@@ -30,24 +24,24 @@ export const replaySnakeGameSlice = createSlice({
   initialState,
   reducers: {
     nextMove: (state) => {
-      if (!snakeGame || !state.replayData) throw new Error("nextMove is called when snakeGame | replayData is null");
+      if (!snakeGame || !state.gameRecord) throw new Error("nextMove is called when snakeGame | gameRecord is null");
       if (snakeGame.gameOver) throw new Error("nextMove is called when snakeGame is already game over");
-      if (state.nextMoveIndex >= state.replayData.gameRecord.moveRecord.length) throw new Error("nextMove is called when nextMoveIndex is out of range");
+      if (state.nextMoveIndex >= state.gameRecord.moveRecord.length) throw new Error("nextMove is called when nextMoveIndex is out of range");
 
-      const moveRecordRow = state.replayData.gameRecord.moveRecord[state.nextMoveIndex];
+      const moveRecordRow = state.gameRecord.moveRecord[state.nextMoveIndex];
       snakeGame.replayMove(moveRecordRow);
       state.snakeGame = snakeGame.toPlainObjectIgnoreMoveRecordAndAllPosition();
       state.nextMoveIndex++;
-      if (state.nextMoveIndex >= state.replayData.gameRecord.moveRecord.length) {
+      if (state.nextMoveIndex >= state.gameRecord.moveRecord.length) {
         state.nextMoveIndex = -1;
       }
     },
-    setNewReplay: (state, action: PayloadAction<ReplayData>) => {
+    setNewReplay: (state, action: PayloadAction<GameRecord>) => {
       const snake = {
-        positions: [action.payload.gameRecord.initialSnakePosition],
-        direction: action.payload.gameRecord.initialSnakeDirection,
+        positions: [action.payload.initialSnakePosition],
+        direction: action.payload.initialSnakeDirection,
       };
-      const food = action.payload.gameRecord.initialFoodPosition;
+      const food = action.payload.initialFoodPosition;
 
       snakeGame = new SnakeGame({
         worldWidth: action.payload.worldWidth,
@@ -66,14 +60,14 @@ export const replaySnakeGameSlice = createSlice({
       });
 
       state.snakeGame = snakeGame.toPlainObject();
-      state.replayData = action.payload;
+      state.gameRecord = action.payload;
       state.nextMoveIndex = 0;
       state.openModal = true;
     },
     clearReplay: (state) => {
       snakeGame = null;
       state.snakeGame = null;
-      state.replayData = null;
+      state.snakeGame = null;
       state.nextMoveIndex = 0;
       state.openModal = false;
     },
