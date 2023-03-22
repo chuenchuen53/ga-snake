@@ -26,9 +26,6 @@ export const ModelsTable = () => {
       }))
     : [];
 
-  console.log(currentModelId);
-  console.log(rows);
-
   const columns: GridColDef[] = [
     {
       field: "createdAt",
@@ -71,14 +68,8 @@ export const ModelsTable = () => {
       columnHeaderHeight={100}
       disableRowSelectionOnClick
       initialState={{
-        pagination: {
-          paginationModel: {
-            pageSize: 100,
-          },
-        },
-        sorting: {
-          sortModel: [{ field: "generation", sort: "desc" }],
-        },
+        pagination: { paginationModel: { pageSize: 100 } },
+        sorting: { sortModel: [{ field: "createdAt", sort: "desc" }] },
       }}
       sx={{
         flex: "0 0 650px",

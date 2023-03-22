@@ -1,23 +1,24 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { ActivationFunction } from "snake-ai/CalcUtils";
 import TrainingApi from "../../api/Training";
+import { openSnackBar, showSnackBarAfterAction, withLoading } from "./loadingSlice";
 import type { Draft, PayloadAction } from "@reduxjs/toolkit";
 import type { GetCurrentModelInfoResponse, PollingInfoResponse } from "snake-express/api-typing/training";
 import type { AppThunk } from "../store";
 import type { Options } from "snake-ai/GaModel";
 
-interface CounterState {
+interface TrainingState {
   gaModelSetting: Options;
   evolveTimes: number;
   backupPopulationWhenFinish: boolean;
-  currentModelInfo: null | GetCurrentModelInfoResponse;
   evolving: boolean;
   backupInProgress: boolean;
   subscribed: boolean;
   waitingForPolling: boolean;
+  currentModelInfo: null | GetCurrentModelInfoResponse;
 }
 
-const initialState: CounterState = {
+const initialState: TrainingState = {
   gaModelSetting: {
     worldWidth: 20,
     worldHeight: 20,
@@ -26,8 +27,7 @@ const initialState: CounterState = {
       hiddenLayerActivationFunction: ActivationFunction.LINEAR,
     },
     gaConfig: {
-      populationSize: 100,
-      // populationSize: 2000,
+      populationSize: 2000,
       surviveRate: 0.5,
       populationMutationRate: 0.1,
       geneMutationRate: 0.5,
@@ -37,11 +37,11 @@ const initialState: CounterState = {
   },
   evolveTimes: 0,
   backupPopulationWhenFinish: false,
-  currentModelInfo: null,
   evolving: false,
   backupInProgress: false,
   subscribed: false,
   waitingForPolling: false,
+  currentModelInfo: null,
 };
 
 export type GaModelSettingKey = keyof typeof initialState.gaModelSetting;
@@ -57,13 +57,11 @@ export const trainingSlice = createSlice({
   name: "training",
   initialState,
   reducers: {
-    changeSetting: <K extends keyof Options>(state: Draft<CounterState>, action: PayloadAction<{ key: K; value: Options[K] }>) => {
+    changeSetting: <K extends keyof Options>(state: Draft<TrainingState>, action: PayloadAction<{ key: K; value: Options[K] }>) => {
       state.gaModelSetting[action.payload.key] = action.payload.value;
     },
     setEvolveTimes: (state, action: PayloadAction<string>) => {
-      const newValue = parseInt(action.payload);
-      if (isNaN(newValue)) return;
-      state.evolveTimes = Math.max(0, newValue);
+      state.evolveTimes = parseInt(action.payload) || 0;
     },
     setBackupPopulationWhenFinish: (state, action: PayloadAction<boolean>) => {
       state.backupPopulationWhenFinish = action.payload;
@@ -108,16 +106,15 @@ export const trainingSlice = createSlice({
 export function initModelThunk(): AppThunk {
   return async (dispatch, getState) => {
     const { training } = getState();
-
     if (training.currentModelInfo) return;
 
-    try {
-      const resp = await TrainingApi.initModel({ options: training.gaModelSetting });
-      dispatch(trainingSlice.actions.setCurrentModelInfo(resp));
-      dispatch(startSubscribeInfoThunk());
-    } catch (e) {
-      // todo: handle error
-    }
+    dispatch(
+      withLoading(async (dispatch) => {
+        const resp = await TrainingApi.initModel({ options: training.gaModelSetting });
+        dispatch(trainingSlice.actions.setCurrentModelInfo(resp));
+        dispatch(startSubscribeInfoThunk());
+      })
+    );
   };
 }
 
@@ -127,24 +124,20 @@ export function evolveThunk(): AppThunk {
     if (!training.currentModelInfo) return;
     if (training.evolveTimes <= 0) return;
 
-    try {
-      await TrainingApi.evolve({ times: training.evolveTimes });
-      dispatch(trainingSlice.actions.setEvolving(true));
-    } catch (e) {
-      // todo: handle error
-    }
+    dispatch(
+      showSnackBarAfterAction(async (dispatch) => {
+        await TrainingApi.evolve({ times: training.evolveTimes });
+        dispatch(trainingSlice.actions.setEvolving(true));
+      })
+    );
   };
 }
 
 export function stopEvolveThunk(): AppThunk {
-  return async (dispatch) => {
-    try {
-      await TrainingApi.stopEvolve();
-      dispatch(trainingSlice.actions.setEvolving(false));
-    } catch (e) {
-      // todo: handle error
-    }
-  };
+  return showSnackBarAfterAction(async (dispatch) => {
+    await TrainingApi.stopEvolve();
+    dispatch(trainingSlice.actions.setEvolving(false));
+  });
 }
 
 export function backupCurrentPopulationThunk(): AppThunk {
@@ -155,59 +148,43 @@ export function backupCurrentPopulationThunk(): AppThunk {
       dispatch(trainingSlice.actions.setBackupInProgress(false));
     } catch (e) {
       dispatch(trainingSlice.actions.setBackupInProgress(false));
+      dispatch(openSnackBar({ message: "Fail", severity: "error" }));
     }
   };
 }
 
 export function toggleBackupPopulationWhenFinishThunk(): AppThunk {
-  return async (dispatch, getState) => {
-    console.log("called");
-
+  return showSnackBarAfterAction(async (dispatch, getState) => {
     const { training } = getState();
-    try {
-      await TrainingApi.toggleBackupPopulationWhenFinish({ backup: !training.backupPopulationWhenFinish });
-      dispatch(trainingSlice.actions.setBackupPopulationWhenFinish(!training.backupPopulationWhenFinish));
-    } catch (e) {
-      // todo: handle error
-    }
-  };
+    const newState = !training.backupPopulationWhenFinish;
+    await TrainingApi.toggleBackupPopulationWhenFinish({ backup: newState });
+    dispatch(trainingSlice.actions.setBackupPopulationWhenFinish(newState));
+  });
 }
 
 export function getCurrentModelInfoThunk(): AppThunk {
-  return async (dispatch) => {
-    try {
-      const resp = await TrainingApi.getCurrentModelInfo();
-      dispatch(trainingSlice.actions.setCurrentModelInfo(resp));
-      dispatch(startSubscribeInfoThunk());
-    } catch (e) {
-      // todo: handle error
-    }
-  };
+  return withLoading(async (dispatch) => {
+    const resp = await TrainingApi.getCurrentModelInfo();
+    dispatch(trainingSlice.actions.setCurrentModelInfo(resp));
+    dispatch(startSubscribeInfoThunk());
+  });
 }
 
 export function removeCurrentModelThunk(): AppThunk {
-  return async (dispatch) => {
-    try {
-      dispatch(stopSubscribeInfoThunk());
-      await TrainingApi.removeCurrentModel();
-      dispatch(trainingSlice.actions.setCurrentModelInfo(null));
-    } catch (e) {
-      // todo: handle error
-    }
-  };
+  return withLoading(async (dispatch) => {
+    dispatch(stopSubscribeInfoThunk());
+    await TrainingApi.removeCurrentModel();
+    dispatch(trainingSlice.actions.setCurrentModelInfo(null));
+    dispatch(stopSubscribeInfoThunk());
+  });
 }
 
 export function startSubscribeInfoThunk(): AppThunk {
   return async (dispatch, getState) => {
     const { training } = getState();
     if (!training.currentModelInfo || training.subscribed || training.waitingForPolling) return;
-    try {
-      dispatch(trainingSlice.actions.setSubscribed(true));
-      dispatch(subscribeInfoThunk());
-    } catch (e) {
-      console.error(e);
-      dispatch(trainingSlice.actions.setSubscribed(false));
-    }
+    dispatch(trainingSlice.actions.setSubscribed(true));
+    window.setTimeout(() => dispatch(subscribeInfoThunk()), 0);
   };
 }
 
@@ -248,9 +225,9 @@ function subscribeInfoThunk(): AppThunk {
         dispatch(trainingSlice.actions.setWaitingForPolling(false));
       }
     } catch (e) {
-      console.error(e);
       dispatch(trainingSlice.actions.setSubscribed(false));
       dispatch(trainingSlice.actions.setWaitingForPolling(false));
+      dispatch(openSnackBar({ message: "Fail", severity: "error" }));
     }
   };
 }

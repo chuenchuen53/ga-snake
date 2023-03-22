@@ -26,7 +26,7 @@ module.exports = {
     "no-empty-function": "off",
     "no-unused-private-class-members": "error",
     "@typescript-eslint/no-unused-vars": [
-      "error",
+      "warn",
       {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",
@@ -72,6 +72,6 @@ module.exports = {
     "@typescript-eslint/no-empty-function": ["error", { allow: ["private-constructors"] }],
     "import/no-duplicates": "error",
     "import/no-cycle": "error",
-    "import/order": ["error", { groups: ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"] }],
+    "import/order": ["warn", { groups: ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"] }],
   },
 };

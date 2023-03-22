@@ -7,8 +7,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Box from "@mui/material/Box";
 import { GaModelSetting } from "./GaModelSetting";
 import { EvolveControl } from "./EvolveControl";
-import "./index.scss";
 import { GaModelDetailWrapper } from "./GaModelDetailWrapper";
+import "./index.scss";
 
 export const TrainingPage = () => {
   return (
@@ -16,7 +16,7 @@ export const TrainingPage = () => {
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>model setting</Typography>
+            <Typography>Model Setting</Typography>
           </AccordionSummary>
           <AccordionDetails>
             <GaModelSetting />

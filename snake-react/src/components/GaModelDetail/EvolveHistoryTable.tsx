@@ -9,9 +9,9 @@ import QuizIcon from "@mui/icons-material/Quiz";
 import { setNewReplay } from "../../redux/slice/replaySnakeGameSlice";
 import { useAppDispatch } from "../../redux/hook";
 import { setSnakeBrain } from "../../redux/slice/snakeBrainExamSlice";
+import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import type { AppDispatch } from "../../redux/store";
 import type { GetCurrentModelInfoResponse } from "snake-express/api-typing/training";
-import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
 interface Props {
   worldWidth: number;
@@ -24,7 +24,7 @@ const columns: GridColDef[] = [
   {
     field: "generation",
     headerName: "Generation",
-    width: 90,
+    width: 110,
     renderCell: (params: GridRenderCellParams) => (
       <Box sx={{ display: "flex" }}>
         <Typography sx={{ width: 50 }}>{params.value}</Typography>
@@ -32,29 +32,19 @@ const columns: GridColDef[] = [
       </Box>
     ),
   },
-  { field: "bestFitness", headerName: "best fitness", width: 120, valueFormatter: ({ value }) => Math.floor(value) },
+  { field: "bestFitness", headerName: "best fitness", width: 120 },
   { field: "bestSnakeLength", headerName: "best snake length", width: 60 },
   { field: "bestMoves", headerName: "best moves", width: 70 },
-  { field: "fitnessMin", headerName: "fitness min", width: 120, valueFormatter: ({ value }) => Math.floor(value) },
-  { field: "fitnessMax", headerName: "fitness max", width: 120, valueFormatter: ({ value }) => Math.floor(value) },
-  { field: "fitnessMean", headerName: "fitness mean", width: 120, valueFormatter: ({ value }) => Math.floor(value) },
+  { field: "fitnessMin", headerName: "fitness min", width: 120 },
+  { field: "fitnessMax", headerName: "fitness max", width: 120 },
+  { field: "fitnessMean", headerName: "fitness mean", width: 120 },
   { field: "snakeLengthMin", headerName: "snake length min", width: 60 },
   { field: "snakeLengthMax", headerName: "snake length max", width: 60 },
-  {
-    field: "snakeLengthMean",
-    headerName: "snake length mean",
-    width: 60,
-    valueFormatter: ({ value }) => Math.floor(value),
-  },
+  { field: "snakeLengthMean", headerName: "snake length mean", width: 60 },
   { field: "movesMin", headerName: "moves min", width: 70 },
   { field: "movesMax", headerName: "moves max", width: 70 },
-  { field: "movesMean", headerName: "moves mean", width: 70, valueFormatter: ({ value }) => Math.floor(value) },
-  {
-    field: "timeSpent",
-    headerName: "time spent in training",
-    width: 70,
-    valueFormatter: ({ value }) => value.toFixed(3),
-  },
+  { field: "movesMean", headerName: "moves mean", width: 70 },
+  { field: "timeSpent", headerName: "time spent in training", width: 70 },
   {
     field: "replay",
     headerName: "replay",
@@ -82,29 +72,23 @@ function toDataGridRows(populationHistory: Props["populationHistory"], evolveRes
     id: evolveResult._id,
     populationFound: Boolean(populationHistory.find((x) => x.generation === generation)),
     generation,
-    bestFitness: evolveResult.bestIndividual.fitness,
+    bestFitness: Math.floor(evolveResult.bestIndividual.fitness),
     bestSnakeLength: evolveResult.bestIndividual.snakeLength,
     bestMoves: evolveResult.bestIndividual.moves,
-    fitnessMin: evolveResult.overallStats.fitness.min,
-    fitnessMax: evolveResult.overallStats.fitness.max,
-    fitnessMean: evolveResult.overallStats.fitness.mean,
+    fitnessMin: Math.floor(evolveResult.overallStats.fitness.min),
+    fitnessMax: Math.floor(evolveResult.overallStats.fitness.max),
+    fitnessMean: Math.floor(evolveResult.overallStats.fitness.mean),
     snakeLengthMin: evolveResult.overallStats.snakeLength.min,
     snakeLengthMax: evolveResult.overallStats.snakeLength.max,
-    snakeLengthMean: evolveResult.overallStats.snakeLength.mean,
+    snakeLengthMean: Math.floor(evolveResult.overallStats.snakeLength.mean),
     movesMin: evolveResult.overallStats.moves.min,
     movesMax: evolveResult.overallStats.moves.max,
-    movesMean: evolveResult.overallStats.moves.mean,
+    movesMean: Math.floor(evolveResult.overallStats.moves.mean),
     timeSpent: evolveResult.timeSpent,
     replay: () => {
       const gameRecord = evolveResult.bestIndividual.gameRecord;
       if (gameRecord) {
-        dispatch(
-          setNewReplay({
-            worldWidth,
-            worldHeight,
-            gameRecord,
-          })
-        );
+        dispatch(setNewReplay({ worldWidth, worldHeight, gameRecord }));
       }
     },
     exam: () => {
@@ -126,14 +110,8 @@ export const EvolveHistoryTable = (props: Props) => {
       columnHeaderHeight={100}
       disableRowSelectionOnClick
       initialState={{
-        pagination: {
-          paginationModel: {
-            pageSize: 100,
-          },
-        },
-        sorting: {
-          sortModel: [{ field: "generation", sort: "desc" }],
-        },
+        pagination: { paginationModel: { pageSize: 100 } },
+        sorting: { sortModel: [{ field: "generation", sort: "desc" }] },
       }}
       sx={{
         flex: "0 0 650px",
@@ -141,7 +119,7 @@ export const EvolveHistoryTable = (props: Props) => {
         width: "100%",
         "& .MuiDataGrid-columnHeaderTitle": {
           overflow: "visible",
-          lineHeight: "1.43rem",
+          lineHeight: "1.2rem",
           whiteSpace: "normal",
         },
       }}

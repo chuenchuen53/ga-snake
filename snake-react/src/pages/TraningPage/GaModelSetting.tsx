@@ -14,6 +14,7 @@ import type { InteractionProps } from "react-json-view";
 
 export const GaModelSetting = () => {
   const setting = useAppSelector((state) => state.training.gaModelSetting);
+  const haveModel = useAppSelector((state) => Boolean(state.training.currentModelInfo));
   const dispatch = useAppDispatch();
 
   const handleOnChange = <T extends keyof typeof setting>(key: T, value: (typeof setting)[T]) => {
@@ -28,7 +29,7 @@ export const GaModelSetting = () => {
     handleOnChange("gaConfig", newGaConfig);
   };
 
-  const onEdit = (p: InteractionProps) => {
+  const onEdit = (p: InteractionProps): false => {
     if (p.name === "hiddenLayerActivationFunction") return false;
     if (typeof p.new_value !== "number") return false;
 
@@ -85,10 +86,10 @@ export const GaModelSetting = () => {
           <MenuItem value={ActivationFunction.TANH}>tanh</MenuItem>
         </Select>
         <br />
-        <Button variant="contained" onClick={() => dispatch(initModelThunk())}>
+        <Button disabled={haveModel} variant="contained" onClick={() => dispatch(initModelThunk())}>
           new model
         </Button>
-        <Button variant="outlined" color="error" onClick={() => dispatch(removeCurrentModelThunk())}>
+        <Button disabled={!haveModel} variant="outlined" color="error" onClick={() => dispatch(removeCurrentModelThunk())}>
           delete model
         </Button>
       </Box>
