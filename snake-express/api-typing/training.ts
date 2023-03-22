@@ -12,17 +12,22 @@ export interface EvolveResultWithId extends EvolveResult {
   _id: string;
 }
 
+export interface PopulationHistory {
+  _id: string;
+  generation: number;
+}
+
 export type GetCurrentModelInfoResponse = Omit<Omit<IGaModel, "parentModelId">, "population"> & {
   _id: string;
   evolveResultHistory: EvolveResultWithId[];
-  populationHistory: { _id: string; generation: number }[];
+  populationHistory: PopulationHistory[];
 };
 
 export type InitModelResponse = GetCurrentModelInfoResponse;
 
 export interface PollingInfoResponse {
   newEvolveResultHistory: EvolveResultWithId[];
-  newPopulationHistory: { _id: string; generation: number }[];
+  newPopulationHistory: PopulationHistory[];
   backupPopulationInProgress: boolean;
   backupPopulationWhenFinish: boolean;
   evolving: boolean;

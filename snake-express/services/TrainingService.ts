@@ -1,14 +1,16 @@
+import events from "events";
 import GaModel from "snake-ai/GaModel";
 import { AppDb } from "../mongo";
 import AppEnv from "../AppEnv";
+import type { PopulationHistory, EvolveResultWithId, GetCurrentModelInfoResponse, InitModelRequest, PollingInfoResponse } from "../api-typing/training";
 import type { EvolveResult } from "snake-ai/GaModel";
-import type { EventEmitter } from "events";
 import type { Types } from "mongoose";
-import type { EvolveResultWithId, GetCurrentModelInfoResponse, InitModelRequest, PollingInfoResponse } from "../api-typing/training";
 import type { IGaModel } from "../mongo/GaModel";
 
 export default class TrainingService {
   public static currentModelId = "";
+
+  public emitter = new events.EventEmitter();
 
   private db = AppDb.getInstance();
   private _gaModel: GaModel | null = null;
@@ -17,8 +19,7 @@ export default class TrainingService {
   private backupPopulationWhenFinish = false;
   private currentModelId: null | Types.ObjectId = null;
   private evolveResultHistoryCache: EvolveResultWithId[] = [];
-  private populationHistoryCache: { _id: string; generation: number }[] = [];
-  private emitters: EventEmitter[] = [];
+  private populationHistoryCache: PopulationHistory[] = [];
 
   public get gaModel(): GaModel | null {
     return this._gaModel;
@@ -32,17 +33,12 @@ export default class TrainingService {
     return this._backupPopulationInProgress;
   }
 
-  public addEmitter(emitter: EventEmitter): void {
-    this.emitters.push(emitter);
-  }
-
-  public removeEmitter(emitter: EventEmitter): void {
-    this.emitters = this.emitters.filter((e) => e !== emitter);
+  public publishChange(): void {
+    this.emitter.emit("change");
   }
 
   public async initModel(options: InitModelRequest["options"]): Promise<GetCurrentModelInfoResponse> {
-    // todo
-    this._gaModel = new GaModel(options as any, AppEnv.NUM_OF_THREADS);
+    this._gaModel = new GaModel(options, AppEnv.NUM_OF_THREADS);
 
     const { population: _, ...modelData } = this._gaModel.exportModel();
 
@@ -54,7 +50,6 @@ export default class TrainingService {
     const { _id } = await gaModelDoc.save();
     this.currentModelId = _id;
     TrainingService.currentModelId = _id.toString();
-    await this.backupCurrentPopulation();
 
     return await this.getCurrentModelInfo();
   }
@@ -94,7 +89,8 @@ export default class TrainingService {
     }
 
     this._backupPopulationInProgress = true;
-    this.emitters.forEach((emitter) => emitter.emit("change"));
+
+    this.publishChange();
 
     const insertResult = await this.db.Population.insertNewPopulation({
       generation: exportModel.generation,
@@ -106,10 +102,9 @@ export default class TrainingService {
     gaModelDoc.populationHistory.push(insertResult._id);
     await gaModelDoc.save();
 
-    if (exportModel.generation !== -1) {
-      this.populationHistoryCache.push({ _id: insertResult._id.toString(), generation: exportModel.generation });
-      this.emitters.forEach((emitter) => emitter.emit("change"));
-    }
+    this.populationHistoryCache.push({ _id: insertResult._id.toString(), generation: exportModel.generation });
+    this.publishChange();
+
     this._backupPopulationInProgress = false;
     return true;
   }
@@ -118,7 +113,7 @@ export default class TrainingService {
     if (!this.currentModelId) throw new Error("model not exists");
     const model = await this.db.GaModel.findById(this.currentModelId)
       .populate<{ evolveResultHistory: EvolveResult[] }>("evolveResultHistory")
-      .populate<{ populationHistory: { generation: number }[] }>("populationHistory", "generation")
+      .populate<{ populationHistory: PopulationHistory[] }>("populationHistory", "generation")
       .exec();
     if (!model) throw new Error("model not exists");
     return model.toObject();
@@ -192,7 +187,7 @@ export default class TrainingService {
       model.evolveResultHistory.push(evolveResultId);
       await model.save();
       this.evolveResultHistoryCache.push({ ...evolveResult, _id: evolveResultId.toString() });
-      this.emitters.forEach((emitter) => emitter.emit("change"));
+      this.publishChange();
 
       if (this._queueTraining > 0) {
         setImmediate(() => this.startTraining());

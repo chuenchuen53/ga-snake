@@ -1,5 +1,4 @@
-import events from "events";
-import { evolveRequestSchema, initModelRequestSchema, toggleBackupPopulationWhenFinishRequestSchema } from "../api-typing/zod/training";
+import { evolveRequestSchema, initModelRequestSchema, pollingInfoRequestSchema, toggleBackupPopulationWhenFinishRequestSchema } from "../api-typing/zod/training";
 import type TrainingService from "../services/TrainingService";
 import type { Request, Response } from "express";
 import type { GetCurrentModelInfoResponse, InitModelResponse, PollingInfoResponse } from "../api-typing/training";
@@ -83,6 +82,11 @@ export default class TrainingController {
     try {
       if (!this.haveModelGuard(res)) return;
 
+      if (this.service.gaModel?.generation === -1) {
+        res.status(400).json({ message: "model is not evolved" });
+        return;
+      }
+
       if (this.service.backupPopulationInProgress) {
         res.status(400).json({ message: "previous backup still in progress" });
         return;
@@ -134,11 +138,20 @@ export default class TrainingController {
     try {
       if (!this.haveModelGuard(res)) return;
 
-      const currentEvolvingResultHistoryGeneration = parseInt(req.params.currentEvolvingResultHistoryGeneration);
-      const currentPopulationHistoryGeneration = parseInt(req.params.currentPopulationHistoryGeneration);
-      const currentBackupPopulationInProgress = req.params.currentBackupPopulationInProgress.toString() === "true";
-      const currentBackupPopulationWhenFinish = req.params.currentBackupPopulationWhenFinish.toString() === "true";
-      const currentEvolving = req.params.currentEvolving.toString() === "true";
+      const bodyValidation = pollingInfoRequestSchema.safeParse({
+        currentEvolvingResultHistoryGeneration: parseInt(req.params.currentEvolvingResultHistoryGeneration),
+        currentPopulationHistoryGeneration: parseInt(req.params.currentPopulationHistoryGeneration),
+        currentBackupPopulationInProgress: stringToBoolean(req.params.currentBackupPopulationInProgress),
+        currentBackupPopulationWhenFinish: stringToBoolean(req.params.currentBackupPopulationWhenFinish),
+        currentEvolving: stringToBoolean(req.params.currentEvolving),
+      });
+
+      if (!bodyValidation.success) {
+        res.status(400).json({ message: bodyValidation.error });
+        return;
+      }
+
+      const { currentEvolvingResultHistoryGeneration, currentPopulationHistoryGeneration, currentBackupPopulationInProgress, currentBackupPopulationWhenFinish, currentEvolving } = bodyValidation.data;
 
       const stateMatch = this.service.stateMatch({
         evolvingResultHistoryGeneration: currentEvolvingResultHistoryGeneration,
@@ -158,21 +171,15 @@ export default class TrainingController {
       }
 
       const info: PollingInfoResponse = await new Promise<PollingInfoResponse>((resolve) => {
-        const emitter = new events.EventEmitter();
-        emitter.once("change", () => {
+        const handler = () => {
           const info = this.service.pollingInfo({
             currentEvolvingResultHistoryGeneration,
             currentPopulationHistoryGeneration,
           });
-          this.service.removeEmitter(emitter);
           resolve(info);
-        });
-        this.service.addEmitter(emitter);
+        };
 
         setTimeout(() => {
-          emitter.removeListener("change", () => {
-            // do nothing
-          });
           const info: PollingInfoResponse = {
             newEvolveResultHistory: [],
             newPopulationHistory: [],
@@ -180,9 +187,10 @@ export default class TrainingController {
             backupPopulationWhenFinish: currentBackupPopulationWhenFinish,
             evolving: currentEvolving,
           };
-          this.service.removeEmitter(emitter);
           resolve(info);
         }, TrainingController.pollingTimeOut);
+
+        this.service.emitter.once("change", handler);
       });
 
       res.json(info satisfies PollingInfoResponse);
@@ -199,4 +207,8 @@ export default class TrainingController {
     }
     return true;
   };
+}
+
+function stringToBoolean(str: string): boolean | string {
+  return str === "true" ? true : str === "false" ? false : str;
 }

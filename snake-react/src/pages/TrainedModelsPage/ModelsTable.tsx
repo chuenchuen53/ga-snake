@@ -18,6 +18,7 @@ export const ModelsTable = () => {
   const rows = models
     ? models.map((model) => ({
         ...model,
+        id: model._id,
         createdAt: new Date(model.createdAt),
         snakeLengthMean: model.snakeLengthMean ? Math.floor(model.snakeLengthMean) : null,
         detail: model._id,

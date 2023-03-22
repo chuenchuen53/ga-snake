@@ -1,5 +1,5 @@
 import { AppDb } from "../mongo";
-import type { EvolveResultWithId, GetAllTrainedModelsResponse, GetModelDetailResponse, TrainedModel } from "../api-typing/trained-models";
+import type { PopulationHistory , EvolveResultWithId, GetAllTrainedModelsResponse, GetModelDetailResponse, TrainedModel } from "../api-typing/trained-models";
 
 export default class TrainedModelsService {
   private db = AppDb.getInstance();
@@ -48,7 +48,7 @@ export default class TrainedModelsService {
   public async getModelDetail(id: string): Promise<GetModelDetailResponse> {
     const model = await this.db.GaModel.findById(id)
       .populate<{ evolveResultHistory: EvolveResultWithId[] }>("evolveResultHistory")
-      .populate<{ populationHistory: { _id: string; generation: number }[] }>("populationHistory", "generation");
+      .populate<{ populationHistory: PopulationHistory[] }>("populationHistory", "generation");
     if (!model) throw new Error("model not exists");
     return model.toObject();
   }

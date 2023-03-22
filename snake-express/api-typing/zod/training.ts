@@ -50,6 +50,14 @@ export const toggleBackupPopulationWhenFinishRequestSchema = z.object({
   backup: z.boolean(),
 });
 
+export const pollingInfoRequestSchema = z.object({
+  currentEvolvingResultHistoryGeneration: z.number(),
+  currentPopulationHistoryGeneration: z.number(),
+  currentBackupPopulationInProgress: z.boolean(),
+  currentBackupPopulationWhenFinish: z.boolean(),
+  currentEvolving: z.boolean(),
+});
+
 type ISnakeBrainChecking = z.infer<typeof iSnakeBrainSchema> extends ISnakeBrain ? true : false;
 const iSnakeBrainChecking: ISnakeBrainChecking = true;
 if (!iSnakeBrainChecking) throw new Error("Type checking failed for zod iSnakeBrainSchema");

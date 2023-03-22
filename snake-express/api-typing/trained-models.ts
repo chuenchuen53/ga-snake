@@ -19,8 +19,13 @@ export interface EvolveResultWithId extends EvolveResult {
   _id: string;
 }
 
+export interface PopulationHistory {
+  _id: string;
+  generation: number;
+}
+
 export type GetModelDetailResponse = Omit<IGaModel, "population"> & {
   _id: string;
   evolveResultHistory: EvolveResultWithId[];
-  populationHistory: { _id: string; generation: number }[];
+  populationHistory: PopulationHistory[];
 };

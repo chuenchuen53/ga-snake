@@ -27,7 +27,7 @@ export const trainedModelsSlice = createSlice({
     },
     removeModel: (state, action: PayloadAction<string>) => {
       if (state.models) {
-        state.models = state.models.filter((model) => model.id !== action.payload);
+        state.models = state.models.filter((model) => model._id !== action.payload);
       }
     },
   },
