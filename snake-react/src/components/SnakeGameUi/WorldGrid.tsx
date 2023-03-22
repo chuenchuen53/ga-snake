@@ -19,8 +19,6 @@ export const WorldGrid = React.memo(({ worldWidth, worldHeight, gridSize, gridSt
   const maxWidth = worldWidth * gridSize;
   const maxHeight = worldHeight * gridSize;
 
-  console.log("render WorldGrid");
-
   return (
     <>
       {xLines.map((y, idx) => (

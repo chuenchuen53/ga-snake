@@ -1,10 +1,8 @@
-import type { PollingInfoResponse, EvolveRequest, GetCurrentModelInfoResponse, InitModelRequest, InitModelResponse, toggleBackupPopulationWhenFinishRequest } from "snake-express/api-typing/training";
+import type { EvolveRequest, GetCurrentModelInfoResponse, InitModelRequest, InitModelResponse, PollingInfoResponse, toggleBackupPopulationWhenFinishRequest } from "snake-express/api-typing/training";
 
 const { REACT_APP_SERVER_HOST } = process.env;
 
 const trainingRoute = `${REACT_APP_SERVER_HOST}/api/training`;
-
-console.log("trainingRoute", trainingRoute);
 
 async function initModel(body: InitModelRequest): Promise<InitModelResponse> {
   const resp = await fetch(`${trainingRoute}/init-model`, {

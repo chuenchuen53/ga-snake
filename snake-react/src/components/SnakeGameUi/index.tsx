@@ -1,4 +1,4 @@
-import React, { createContext } from "react";
+import React from "react";
 import Box from "@mui/material/Box";
 import { Layer, Stage } from "react-konva";
 import { WorldGrid } from "./WorldGrid";
@@ -16,15 +16,10 @@ interface Props {
   snakeGame: ISnakeGame;
 }
 
-const SnakeGameUiDimensionsContext = createContext<null | { worldWidth: number; worldHeight: number; gridSize: number }>(null);
-console.log("SnakeGameUiDimensionsContext", SnakeGameUiDimensionsContext);
-
 export const SnakeGameUi = ({ snakeGame }: Props) => {
   const worldWidth = snakeGame.worldWidth;
   const worldHeight = snakeGame.worldHeight;
   const gridSize = 600 / Math.max(worldWidth, worldHeight);
-
-  console.log("render SnakeGameUi");
 
   return (
     <Box>

@@ -53,7 +53,6 @@ export const SnakeBrainExamModal = () => {
   return (
     <Dialog
       open={openModel}
-      fullWidth
       maxWidth="lg"
       sx={{
         "	.MuiDialog-paper": { my: 0, height: 650, maxHeight: 650 },
