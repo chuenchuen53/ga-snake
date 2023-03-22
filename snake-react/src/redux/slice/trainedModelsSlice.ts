@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import TrainedModelsApi from "../../api/TrainedModels";
+import { withLoading } from "./loadingSlice";
 import type { AppThunk } from "../store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { TrainedModel } from "snake-express/api-typing/trained-models";
@@ -36,34 +37,22 @@ export const trainedModelsSlice = createSlice({
 export const { setModels, setOpenedDetail } = trainedModelsSlice.actions;
 
 export function getAllTrainedModelsThunk(): AppThunk {
-  return async (dispatch) => {
-    try {
-      const resp = await TrainedModelsApi.getAllTrainedModels();
-      dispatch(trainedModelsSlice.actions.setModels(resp.models));
-    } catch (e) {
-      // todo: handle error
-    }
-  };
+  return withLoading(async (dispatch) => {
+    const resp = await TrainedModelsApi.getAllTrainedModels();
+    dispatch(trainedModelsSlice.actions.setModels(resp.models));
+  });
 }
 
 export function getModelDetailThunk(id: string): AppThunk {
-  return async (dispatch) => {
-    try {
-      const resp = await TrainedModelsApi.getModelDetail(id);
-      dispatch(trainedModelsSlice.actions.setOpenedDetail(resp));
-    } catch (e) {
-      // todo: handle error
-    }
-  };
+  return withLoading(async (dispatch) => {
+    const resp = await TrainedModelsApi.getModelDetail(id);
+    dispatch(trainedModelsSlice.actions.setOpenedDetail(resp));
+  });
 }
 
 export function deleteModelThunk(id: string): AppThunk {
-  return async (dispatch) => {
-    try {
-      await TrainedModelsApi.deleteModel(id);
-      dispatch(trainedModelsSlice.actions.removeModel(id));
-    } catch (e) {
-      // todo: handle error
-    }
-  };
+  return withLoading(async (dispatch) => {
+    await TrainedModelsApi.deleteModel(id);
+    dispatch(trainedModelsSlice.actions.removeModel(id));
+  });
 }
