@@ -17,7 +17,7 @@ interface Props {
 export function GameStatsTable({ snakeLength, movesForNoFood, moves, maxMovesOfNoFood, gameOver }: Props) {
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ width: 350 }} aria-label="simple table">
+      <Table sx={{ width: 350 }}>
         <TableBody>
           <TableRow>
             <TableCell component="th" scope="row">

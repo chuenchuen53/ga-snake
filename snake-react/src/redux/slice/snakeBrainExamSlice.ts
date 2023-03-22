@@ -33,12 +33,11 @@ export const snakeBrainExamSlice = createSlice({
       inputLayer = new InputLayer(snakeGame);
       state.snakeGame = snakeGame.toPlainObjectIgnoreMoveRecordAndAllPosition();
     },
-    setWorldSize: (state, action: PayloadAction<{ worldWidth: number; worldHeight: number }>) => {
-      state.worldWidth = action.payload.worldWidth;
-      state.worldHeight = action.payload.worldHeight;
-      snakeGame = new SnakeGame({ worldWidth: action.payload.worldWidth, worldHeight: action.payload.worldHeight });
-      inputLayer = new InputLayer(snakeGame);
-      state.snakeGame = snakeGame.toPlainObjectIgnoreMoveRecordAndAllPosition();
+    setWorldWidth: (state, action: PayloadAction<number>) => {
+      state.worldWidth = action.payload;
+    },
+    setWorldHeight: (state, action: PayloadAction<number>) => {
+      state.worldHeight = action.payload;
     },
     setSnakeBrain: (state, action: PayloadAction<ISnakeBrain>) => {
       const { inputLength, layerShapes, hiddenLayerActivationFunction, weights, biases } = new SnakeBrain(action.payload);
@@ -75,4 +74,4 @@ export const snakeBrainExamSlice = createSlice({
   },
 });
 
-export const { startNewGame, setSnakeBrain, setWorldSize, endExam, nextMove } = snakeBrainExamSlice.actions;
+export const { startNewGame, setWorldHeight, setWorldWidth, setSnakeBrain, endExam, nextMove } = snakeBrainExamSlice.actions;

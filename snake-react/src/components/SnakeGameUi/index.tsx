@@ -22,7 +22,7 @@ console.log("SnakeGameUiDimensionsContext", SnakeGameUiDimensionsContext);
 export const SnakeGameUi = ({ snakeGame }: Props) => {
   const worldWidth = snakeGame.worldWidth;
   const worldHeight = snakeGame.worldHeight;
-  const gridSize = 600 / worldWidth;
+  const gridSize = 600 / Math.max(worldWidth, worldHeight);
 
   console.log("render SnakeGameUi");
 
