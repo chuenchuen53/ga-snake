@@ -23,6 +23,8 @@ export const manualSnakeGameSlice = createSlice({
   initialState,
   reducers: {
     changeWorldSize: (state) => {
+      state.worldWidth = state.worldWidth ? Math.max(3, state.worldWidth) : 3;
+      state.worldHeight = state.worldHeight ? Math.max(3, state.worldHeight) : 3;
       snakeGame = new SnakeGame({ worldWidth: state.worldWidth, worldHeight: state.worldHeight });
       state.snakeGame = snakeGame.toPlainObject();
     },
@@ -32,10 +34,10 @@ export const manualSnakeGameSlice = createSlice({
       state.snakeGame = snakeGame.toPlainObject();
     },
     setWorldWidth: (state, action: PayloadAction<number>) => {
-      state.worldWidth = Math.max(3, isNaN(action.payload) ? 3 : action.payload);
+      state.worldWidth = action.payload;
     },
     setWorldHeight: (state, action: PayloadAction<number>) => {
-      state.worldHeight = Math.max(3, isNaN(action.payload) ? 3 : action.payload);
+      state.worldHeight = action.payload;
     },
   },
 });
