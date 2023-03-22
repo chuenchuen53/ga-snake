@@ -812,7 +812,7 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame.moveRecord).toStrictEqual(expectedMoveRecord);
 
     snakeGame.snakeMoveByDirection(Direction.LEFT); // 0, 0 eat food
-    const oneDIndex = snakeGame.to1DIndex(snakeGame.food.x, snakeGame.food.y);
+    const oneDIndex = snakeGame.indexInAllPositions(snakeGame.food.x, snakeGame.food.y);
     expectedMoveRecord.push((oneDIndex + 1) * 10 + 2);
     expect(snakeGame.moveRecord).toStrictEqual(expectedMoveRecord);
 
@@ -846,23 +846,20 @@ describe("test suite for SnakeGame", () => {
     expect(snakeGame.moveRecord).toStrictEqual([2, 2]);
   });
 
-  describe("to1DIndex and to2DIndex test", () => {
+  describe("indexInAllPositions test", () => {
     const snakeGame1 = new SnakeGame({ worldWidth: 3, worldHeight: 3 });
     const snakeGame2 = new SnakeGame({ worldWidth: 3, worldHeight: 2 });
 
-    it.each<{ name: string; snakeGame: SnakeGame; arr1D: Position[]; arr2D: Position[][] }>`
-      name        | snakeGame     | arr1D                      | arr2D
-      ${"test 1"} | ${snakeGame1} | ${allPositionsFor3x3World} | ${allPositions2DFor3x3World}
-      ${"test 2"} | ${snakeGame2} | ${allPositionsFor3x2World} | ${allPositions2DFor3x2World}
-    `("$name", ({ snakeGame, arr1D, arr2D }) => {
-      for (let i = 0; i < arr1D.length; i++) {
-        const [x, y] = snakeGame.to2DIndex(i);
-        expect(arr1D[i]).toStrictEqual(arr2D[x][y]);
-      }
-      for (let i = 0; i < arr2D.length; i++) {
-        for (let j = 0; j < arr2D[i].length; j++) {
-          const index = snakeGame.to1DIndex(i, j);
-          expect(arr1D[index]).toStrictEqual(arr2D[i][j]);
+    it.each<{ name: string; snakeGame: SnakeGame; x: number; y: number }>`
+      name        | snakeGame
+      ${"test 1"} | ${snakeGame1}
+      ${"test 2"} | ${snakeGame2}
+    `("$name", ({ snakeGame }) => {
+      for (let x = 0; x < snakeGame.worldWidth; x++) {
+        for (let y = 0; y < snakeGame.worldHeight; y++) {
+          const calculatedIndex = snakeGame.indexInAllPositions(x, y);
+          const foundIndex = snakeGame.allPositions.findIndex((p) => p.x === x && p.y === y);
+          expect(calculatedIndex).toBe(foundIndex);
         }
       }
     });

@@ -207,21 +207,15 @@ export default class SnakeGame implements ISnakeGame {
     };
   }
 
-  public to1DIndex(x: number, y: number): number {
-    return y + this.worldWidth * x;
-  }
-
-  public to2DIndex(oneDIndex: number): number[] {
-    const x = Math.floor(oneDIndex / this.worldWidth);
-    const y = oneDIndex % this.worldWidth;
-    return [x, y];
+  public indexInAllPositions(x: number, y: number): number {
+    return x + this.worldWidth * y;
   }
 
   public encodeMoveRecord(direction: Direction, newFoodPos?: Position): number {
     const encodedDirection = SnakeGame.directionMap[direction];
 
     if (newFoodPos) {
-      const newFoodPosIn1D = this.to1DIndex(newFoodPos.x, newFoodPos.y);
+      const newFoodPosIn1D = this.indexInAllPositions(newFoodPos.x, newFoodPos.y);
       // add 1 to avoid 0
       return 10 * (newFoodPosIn1D + 1) + encodedDirection;
     }
