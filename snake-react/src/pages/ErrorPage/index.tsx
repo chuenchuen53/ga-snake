@@ -18,7 +18,7 @@ export function ErrorPage() {
       <p className="subtitle">
         You’re either misspelling the URL <br /> or requesting a page that's no longer here.
       </p>
-      <div>
+      <div className="text-align-center">
         <Link className="btn-back" to="/">
           Back to home page
         </Link>
