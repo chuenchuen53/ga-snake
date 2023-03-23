@@ -1,5 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import SnakeGame from "snake-game/SnakeGame";
+import SnakeBrain from "snake-ai/SnakeBrain";
+import InputLayer from "snake-ai/InputLayer";
+import type { ISnakeBrain } from "snake-ai/SnakeBrain";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { GameRecord, ISnakeGame } from "snake-game/SnakeGame";
 
@@ -11,6 +14,8 @@ interface ReplaySnakeState {
 }
 
 let snakeGame: SnakeGame | null = null;
+let inputLayer: InputLayer | null = null;
+let snakeBrain: SnakeBrain | null = null;
 
 const initialState: ReplaySnakeState = {
   snakeGame: null,
@@ -29,6 +34,16 @@ export const replaySnakeGameSlice = createSlice({
       if (state.nextMoveIndex >= state.gameRecord.moveRecord.length) throw new Error("nextMove is called when nextMoveIndex is out of range");
 
       const moveRecordRow = state.gameRecord.moveRecord[state.nextMoveIndex];
+
+      // for debug
+      if (snakeBrain && inputLayer) {
+        const computed = SnakeGame.directionMap[snakeBrain.compute(inputLayer.compute())];
+        const record = moveRecordRow % 10;
+        if (computed !== record) {
+          console.log(`unmatched move: computed ${computed}, recorded ${record}`);
+        }
+      }
+
       snakeGame.replayMove(moveRecordRow);
       state.snakeGame = snakeGame.toPlainObjectIgnoreMoveRecordAndAllPosition();
       state.nextMoveIndex++;
@@ -36,16 +51,18 @@ export const replaySnakeGameSlice = createSlice({
         state.nextMoveIndex = -1;
       }
     },
-    setNewReplay: (state, action: PayloadAction<GameRecord>) => {
+    setNewReplay: (state, action: PayloadAction<{ gameRecord: GameRecord; snakeBrain: ISnakeBrain }>) => {
+      const gameRecord = action.payload.gameRecord;
+      const snakeBrainData = action.payload.snakeBrain;
       const snake = {
-        positions: [action.payload.initialSnakePosition],
-        direction: action.payload.initialSnakeDirection,
+        positions: [gameRecord.initialSnakePosition],
+        direction: gameRecord.initialSnakeDirection,
       };
-      const food = action.payload.initialFoodPosition;
+      const food = gameRecord.initialFoodPosition;
 
       snakeGame = new SnakeGame({
-        worldWidth: action.payload.worldWidth,
-        worldHeight: action.payload.worldHeight,
+        worldWidth: gameRecord.worldWidth,
+        worldHeight: gameRecord.worldHeight,
         providedInitialStatus: {
           snake,
           food,
@@ -59,8 +76,20 @@ export const replaySnakeGameSlice = createSlice({
         },
       });
 
+      inputLayer = new InputLayer(snakeGame);
+
+      snakeBrain = new SnakeBrain({
+        inputLength: snakeBrainData.inputLength,
+        layerShapes: snakeBrainData.layerShapes,
+        hiddenLayerActivationFunction: snakeBrainData.hiddenLayerActivationFunction,
+        providedWeightsAndBiases: {
+          weights: snakeBrainData.weights,
+          biases: snakeBrainData.biases,
+        },
+      });
+
       state.snakeGame = snakeGame.toPlainObject();
-      state.gameRecord = action.payload;
+      state.gameRecord = gameRecord;
       state.nextMoveIndex = 0;
       state.openModal = true;
     },

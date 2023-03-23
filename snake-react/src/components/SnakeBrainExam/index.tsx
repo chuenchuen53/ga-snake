@@ -11,8 +11,6 @@ import { WorldSizeForm } from "../WorldSizeForm";
 import { SnakeGameUiWrapper } from "./SnakeGameUiWrapper";
 import { GameStatsTableWrapper } from "./GameStatsTableWrapper";
 
-let timerId = 0;
-
 export const SnakeBrainExamModal = () => {
   const openModel = useAppSelector((state) => state.snakeBrainExam.openModal);
   const gameOver = useAppSelector((state) => state.snakeBrainExam.snakeGame?.gameOver);
@@ -21,32 +19,7 @@ export const SnakeBrainExamModal = () => {
   const haveSnakeGame = useAppSelector((state) => state.snakeBrainExam.snakeGame !== null);
   const dispatch = useAppDispatch();
 
-  const [autoPlaying, setAutoPlaying] = React.useState(false);
-  const [movesPerSecond, setMovesPerSecond] = React.useState(60);
-
-  const autoPlay = () => {
-    if (timerId === 0) {
-      timerId = window.setInterval(() => {
-        try {
-          dispatch(nextMove());
-        } catch (e) {
-          stopAutoPlay();
-        }
-      }, 1000 / movesPerSecond);
-      setAutoPlaying(true);
-    }
-  };
-
-  const stopAutoPlay = () => {
-    if (timerId !== 0) {
-      window.clearInterval(timerId);
-      timerId = 0;
-      setAutoPlaying(false);
-    }
-  };
-
   const handleModalClose = () => {
-    stopAutoPlay();
     dispatch(endExam());
   };
 
@@ -76,15 +49,7 @@ export const SnakeBrainExamModal = () => {
                 setWorldHeight={(v) => dispatch(setWorldHeight(v))}
                 changeWorldSize={() => dispatch(startNewGame())}
               />
-              <AutoPlayControl
-                value={movesPerSecond}
-                setValue={setMovesPerSecond}
-                autoPlaying={autoPlaying}
-                gameOver={gameOver}
-                nextMove={() => dispatch(nextMove())}
-                autoPlay={autoPlay}
-                stopAutoPlay={stopAutoPlay}
-              />
+              <AutoPlayControl gameOver={gameOver} nextMove={() => dispatch(nextMove())} />
             </Box>
           </Box>
         </Box>

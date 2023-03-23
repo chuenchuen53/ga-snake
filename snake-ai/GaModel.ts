@@ -87,8 +87,7 @@ export default class GaModel implements IGaModel {
     const cyclicPenalty = moves * 6 * (1 - ratioOfLength) ** 2;
 
     // for long snake
-    const lengthBaseScore = (snakeLength - 1) ** (5 + 10 * ratioOfLength) * maxPossibleSnakeLength * 10;
-    const lengthScore = lengthBaseScore * moves * ratioOfLength;
+    const lengthScore = (snakeLength - 1) ** (2 + 6 * ratioOfLength) * maxPossibleSnakeLength * moves;
 
     return moveScore - cyclicPenalty + lengthScore;
   }

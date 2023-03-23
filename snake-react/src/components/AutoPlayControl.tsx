@@ -1,22 +1,59 @@
+import React, { useEffect, useRef } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import ButtonGroup from "@mui/material/ButtonGroup";
-import React from "react";
 
 interface AProps {
-  value: number;
-  setValue: (value: number) => void;
-  autoPlaying: boolean;
   gameOver: undefined | boolean;
   nextMove: () => void;
-  autoPlay: () => void;
-  stopAutoPlay: () => void;
 }
 
-export function AutoPlayControl({ value, setValue, autoPlaying, gameOver, nextMove, autoPlay, stopAutoPlay }: AProps) {
-  const group1 = [5, 10, 30];
-  const group2 = [60, 120, 240];
+export function AutoPlayControl({ gameOver, nextMove }: AProps) {
+  const timeId = useRef(0);
+  const [value, setValue] = React.useState(60);
+  const [autoPlaying, setAutoPlaying] = React.useState(false);
+
+  const shortcut = [
+    [5, 10, 30],
+    [60, 120, 240],
+    [360, 480, 1000],
+  ];
+
+  const stopAutoPlay = () => {
+    window.clearInterval(timeId.current);
+    timeId.current = 0;
+    setAutoPlaying(false);
+  };
+
+  const startAutoPlay = (providedValue?: number) => {
+    if (gameOver) return;
+    if (timeId.current === 0) {
+      timeId.current = window.setInterval(() => {
+        try {
+          nextMove();
+        } catch (e) {
+          stopAutoPlay();
+        }
+      }, 1000 / (providedValue ?? value));
+      setAutoPlaying(true);
+    }
+  };
+
+  useEffect(() => {
+    stopAutoPlay();
+
+    return () => {
+      stopAutoPlay();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (autoPlaying) {
+      stopAutoPlay();
+      startAutoPlay();
+    }
+  }, [value]);
 
   return (
     <Box sx={{ textAlign: "right" }}>
@@ -24,24 +61,19 @@ export function AutoPlayControl({ value, setValue, autoPlaying, gameOver, nextMo
         <Button sx={{ width: 120 }} variant="contained" disabled={autoPlaying || gameOver} onClick={() => nextMove()}>
           next move
         </Button>
-        <Button sx={{ width: 120 }} variant="contained" disabled={gameOver} color={autoPlaying ? "error" : "primary"} onClick={() => (autoPlaying ? stopAutoPlay() : autoPlay())}>
+        <Button sx={{ width: 120 }} variant="contained" disabled={gameOver} color={autoPlaying ? "error" : "primary"} onClick={() => (autoPlaying ? stopAutoPlay() : startAutoPlay())}>
           {autoPlaying ? "stop play" : "auto play"}
         </Button>
-        <TextField type="number" label="moves / sec" variant="outlined" value={value} onChange={(e) => setValue(parseInt(e.target.value) || 0)} />
-        <ButtonGroup variant="outlined">
-          {group1.map((v) => (
-            <Button key={v} sx={{ width: 60 }} onClick={() => setValue(v)}>
-              {v}
-            </Button>
-          ))}
-        </ButtonGroup>
-        <ButtonGroup variant="outlined">
-          {group2.map((v) => (
-            <Button key={v} sx={{ width: 60 }} onClick={() => setValue(v)}>
-              {v}
-            </Button>
-          ))}
-        </ButtonGroup>
+        <TextField type="number" label="moves / sec" variant="outlined" value={value} onChange={(e) => setValue(parseInt(e.target.value) || 1)} />
+        {shortcut.map((group, index) => (
+          <ButtonGroup key={index} variant="outlined">
+            {group.map((v) => (
+              <Button key={v} sx={{ width: 60 }} onClick={() => setValue(v)}>
+                {v}
+              </Button>
+            ))}
+          </ButtonGroup>
+        ))}
       </Box>
     </Box>
   );

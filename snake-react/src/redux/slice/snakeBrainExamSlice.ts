@@ -40,7 +40,7 @@ export const snakeBrainExamSlice = createSlice({
       state.worldHeight = action.payload;
     },
     setSnakeBrain: (state, action: PayloadAction<ISnakeBrain>) => {
-      const { inputLength, layerShapes, hiddenLayerActivationFunction, weights, biases } = new SnakeBrain(action.payload);
+      const { inputLength, layerShapes, hiddenLayerActivationFunction, weights, biases } = action.payload;
       snakeBrain = new SnakeBrain({
         inputLength,
         layerShapes,

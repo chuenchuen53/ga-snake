@@ -89,7 +89,7 @@ function toDataGridRows(populationHistory: Props["populationHistory"], evolveRes
     timeSpent: evolveResult.timeSpent,
     replay: () => {
       const gameRecord = evolveResult.bestIndividual.gameRecord;
-      if (gameRecord) dispatch(setNewReplay(gameRecord));
+      if (gameRecord) dispatch(setNewReplay({ gameRecord, snakeBrain: evolveResult.bestIndividual.snakeBrain }));
     },
     exam: () => {
       const snakeBrain = evolveResult.bestIndividual.snakeBrain;

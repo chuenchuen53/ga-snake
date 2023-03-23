@@ -69,7 +69,7 @@ export const GaModelSetting = () => {
 
   return (
     <Box sx={{ display: "flex", gap: 4 }}>
-      <Box sx={{ bgcolor: "rgb(39, 40, 34)", width: 550 }}>
+      <Box sx={{ bgcolor: "rgb(39, 40, 34)", width: 850 }}>
         <ReactJson src={setting} name="options" theme="monokai" enableClipboard={false} displayObjectSize={false} validationMessage="" onEdit={onEdit} />
       </Box>
       <Box sx={{ "& > :not(style)": { m: 1 } }}>
