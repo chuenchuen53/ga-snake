@@ -6,6 +6,8 @@ import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import QuizIcon from "@mui/icons-material/Quiz";
+import CopyAllIcon from "@mui/icons-material/CopyAll";
+import Button from "@mui/material/Button";
 import { setNewReplay } from "../../redux/slice/replaySnakeGameSlice";
 import { useAppDispatch } from "../../redux/hook";
 import { setSnakeBrain } from "../../redux/slice/snakeBrainExamSlice";
@@ -96,9 +98,31 @@ function toDataGridRows(populationHistory: Props["populationHistory"], evolveRes
   }));
 }
 
+function toTabularText(rows: ReturnType<typeof toDataGridRows>) {
+  const data = rows
+    .map((x) => {
+      const { id: _id, populationFound: _populationFound, replay: _replay, exam: _exam, ...rest } = x;
+      return rest;
+    })
+    .sort((a, b) => b.generation - a.generation);
+  const header = Object.keys(data[0]).join("\t");
+  const content = data.map((x) => Object.values(x).join("\t")).join("\n");
+  return header + "\n" + content;
+}
+
 export const EvolveHistoryTable = (props: Props) => {
   const dispatch = useAppDispatch();
   const rows = toDataGridRows(props.populationHistory, props.evolveResultHistory, dispatch);
+
+  const toolbar = () => (
+    <Button startIcon={<CopyAllIcon />} onClick={() => copyAll()}>
+      copy
+    </Button>
+  );
+  const copyAll = () => {
+    const text = toTabularText(rows);
+    navigator.clipboard.writeText(text);
+  };
 
   return (
     <DataGrid
@@ -107,6 +131,7 @@ export const EvolveHistoryTable = (props: Props) => {
       density="compact"
       columnHeaderHeight={100}
       disableRowSelectionOnClick
+      slots={{ toolbar }}
       initialState={{
         pagination: { paginationModel: { pageSize: 100 } },
         sorting: { sortModel: [{ field: "generation", sort: "desc" }] },

@@ -44,7 +44,7 @@ export const snakeBrainExamSlice = createSlice({
       snakeBrain = new SnakeBrain({
         inputLength,
         layerShapes,
-        hiddenLayerActivationFunction: hiddenLayerActivationFunction,
+        hiddenLayerActivationFunction,
         providedWeightsAndBiases: {
           weights: weights,
           biases: biases,

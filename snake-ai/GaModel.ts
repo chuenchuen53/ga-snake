@@ -78,23 +78,19 @@ export default class GaModel implements IGaModel {
   }
 
   public static fitness(moves: number, snakeLength: number, maxPossibleSnakeLength: number): number {
-    if (snakeLength === 0) return 0;
+    if (snakeLength === 1) return 0;
 
-    const movesPerFood = moves / snakeLength;
     const ratioOfLength = snakeLength / maxPossibleSnakeLength;
 
     // for short snake
     const moveScore = moves * 10;
-    const cyclicPenalty = moves * 6 * (1 - snakeLength / maxPossibleSnakeLength) ** 2;
+    const cyclicPenalty = moves * 6 * (1 - ratioOfLength) ** 2;
 
-    // for long snake, encourage fast eat food
-    const lengthBaseScore = (snakeLength - 1) ** (2 + 6 * ratioOfLength) * maxPossibleSnakeLength;
-    const lengthScore1 = lengthBaseScore * movesPerFood;
+    // for long snake
+    const lengthBaseScore = (snakeLength - 1) ** (5 + 10 * ratioOfLength) * maxPossibleSnakeLength * 10;
+    const lengthScore = lengthBaseScore * moves * ratioOfLength;
 
-    // for long snake with survival more important
-    const lengthScore2 = lengthBaseScore * moves * (1 - snakeLength / maxPossibleSnakeLength) ** 2;
-
-    return moveScore - cyclicPenalty + lengthScore1 + lengthScore2;
+    return moveScore - cyclicPenalty + lengthScore;
   }
 
   public static spinRouletteWheel(options: Individual[]): Individual {

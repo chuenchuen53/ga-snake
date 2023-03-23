@@ -31,7 +31,7 @@ export const EvolveControl = () => {
 
   return haveModel ? (
     <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-      <TextField required label="times" variant="outlined" type="number" value={evolveTimes} onChange={(e) => dispatch(setEvolveTimes(e.target.value))} sx={{ width: 70 }} />
+      <TextField required label="times" variant="outlined" type="number" value={evolveTimes} onChange={(e) => dispatch(setEvolveTimes(e.target.value))} sx={{ width: 120 }} />
       <Button sx={{ width: 80 }} variant="contained" onClick={() => (evolving ? dispatch(stopEvolveThunk()) : dispatch(evolveThunk()))}>
         {evolving ? "stop" : "evolve"}
       </Button>

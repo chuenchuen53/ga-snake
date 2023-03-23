@@ -27,7 +27,7 @@ const initialState: TrainingState = {
       hiddenLayerActivationFunction: ActivationFunction.LINEAR,
     },
     gaConfig: {
-      populationSize: 2000,
+      populationSize: 5000,
       surviveRate: 0.5,
       populationMutationRate: 0.1,
       geneMutationRate: 0.5,
@@ -35,7 +35,7 @@ const initialState: TrainingState = {
       trialTimes: 1,
     },
   },
-  evolveTimes: 0,
+  evolveTimes: 100,
   backupPopulationWhenFinish: false,
   evolving: false,
   backupInProgress: false,
