@@ -7,7 +7,9 @@
     "test": "jest",
     "test-dev": "jest --watchAll",
     "coverage": "jest --coverage",
-    "start": "pnpm --filter snake-express... build &&  ts-node-dev --max-old-space-size=4096 app.ts"
+    "dev": "ts-node-dev app.ts",
+    "prestart": "pnpm --filter snake-express... build",
+    "start": "pnpm ts-node app.ts "
   },
   "keywords": [],
   "author": "",
