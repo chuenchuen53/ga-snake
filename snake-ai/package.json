@@ -10,7 +10,7 @@
     "test": "jest",
     "test-dev": "jest --watchAll",
     "coverage": "jest --coverage",
-    "prebuild": "rm -r build",
+    "prebuild": "rimraf build",
     "build": "tsc --project tsconfig.build.json",
     "tryModel": "pnpm run build && node ./build/scripts/tryModel.js"
   },

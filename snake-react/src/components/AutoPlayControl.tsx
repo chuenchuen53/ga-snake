@@ -16,8 +16,8 @@ export function AutoPlayControl({ gameOver, nextMove }: AProps) {
 
   const shortcut = [
     [5, 10, 30],
-    [60, 120, 240],
-    [360, 480, 1000],
+    [60, 90, 120],
+    [240, 360, 480],
   ];
 
   const stopAutoPlay = () => {
