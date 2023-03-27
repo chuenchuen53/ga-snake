@@ -24,18 +24,26 @@ export const EvolveControl = () => {
   const evolveTimes = useAppSelector((state) => state.training.evolveTimes);
   const backupPopulationWhenFinish = useAppSelector((state) => state.training.backupPopulationWhenFinish);
   const evolving = useAppSelector((state) => state.training.evolving);
+  const waitingLastEvolveAfterStop = useAppSelector((state) => state.training.waitingLastEvolveAfterStop);
   const backupInProgress = useAppSelector((state) => state.training.backupInProgress);
   const subscribed = useAppSelector((state) => state.training.subscribed);
   const waitingForPolling = useAppSelector((state) => state.training.waitingForPolling);
+  const isInitialGeneration = useAppSelector((state) => (state.training.currentModelInfo?.generation ?? -1) === -1);
   const dispatch = useAppDispatch();
 
   return haveModel ? (
     <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
       <TextField required label="times" variant="outlined" type="number" value={evolveTimes} onChange={(e) => dispatch(setEvolveTimes(e.target.value))} sx={{ width: 120 }} />
-      <Button sx={{ width: 80 }} variant="contained" onClick={() => (evolving ? dispatch(stopEvolveThunk()) : dispatch(evolveThunk()))}>
+      <LoadingButton
+        sx={{ width: 80 }}
+        variant="contained"
+        loading={waitingLastEvolveAfterStop}
+        disabled={backupInProgress}
+        onClick={() => (evolving ? dispatch(stopEvolveThunk()) : dispatch(evolveThunk()))}
+      >
         {evolving ? "stop" : "evolve"}
-      </Button>
-      <LoadingButton variant="contained" disabled={evolving} loading={backupInProgress} onClick={() => dispatch(backupCurrentPopulationThunk())}>
+      </LoadingButton>
+      <LoadingButton variant="contained" disabled={isInitialGeneration || evolving} loading={backupInProgress} onClick={() => dispatch(backupCurrentPopulationThunk())}>
         backup current population
       </LoadingButton>
       <Button variant="contained" disabled={!subscribed && waitingForPolling} onClick={() => dispatch(subscribed ? stopSubscribeInfoThunk() : startSubscribeInfoThunk())}>

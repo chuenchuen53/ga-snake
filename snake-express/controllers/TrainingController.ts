@@ -10,7 +10,7 @@ export default class TrainingController {
 
   public initModel = async (req: Request, res: Response) => {
     try {
-      if (this.service.gaModel) {
+      if (this.service.currentModelId) {
         res.status(400).json({ message: "model already exists" });
         return;
       }
@@ -81,11 +81,6 @@ export default class TrainingController {
   public backupCurrentPopulation = async (req: Request, res: Response): Promise<void> => {
     try {
       if (!this.haveModelGuard(res)) return;
-
-      if (this.service.gaModel?.generation === -1) {
-        res.status(400).json({ message: "model is not evolved" });
-        return;
-      }
 
       if (this.service.backupPopulationInProgress) {
         res.status(400).json({ message: "previous backup still in progress" });
@@ -201,7 +196,7 @@ export default class TrainingController {
   };
 
   private haveModelGuard = (res: Response) => {
-    if (!this.service.gaModel) {
+    if (!this.service.currentModelId) {
       res.status(400).json({ message: "model not exists" });
       return false;
     }

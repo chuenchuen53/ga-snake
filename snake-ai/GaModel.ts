@@ -258,7 +258,7 @@ export default class GaModel implements IGaModel {
   private async evaluate(): Promise<void> {
     this._generation++;
 
-    const promises = this.population.map((p) => this.multiThreadGames.playGames(this.worldWidth, this.worldHeight, this.trialTimes, p.snakeBrain));
+    const promises = this.population.map((p) => this.multiThreadGames.playGames(this.worldWidth, this.worldHeight, this.trialTimes, p.snakeBrain.toPlainObject()));
     const result = await Promise.all(promises);
 
     for (let i = 0; i < this.population.length; i++) {

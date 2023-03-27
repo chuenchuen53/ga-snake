@@ -1,6 +1,6 @@
 import path from "path";
 import Piscina from "piscina";
-import type SnakeBrain from "../SnakeBrain";
+import type { ISnakeBrain } from "../SnakeBrain";
 import type { WorkerData, WorkerResult } from "./typing";
 
 export default class MultiThreadGames {
@@ -14,12 +14,12 @@ export default class MultiThreadGames {
     });
   }
 
-  public async playGames(worldWidth: number, worldHeight: number, playTimes: number, snakeBrain: SnakeBrain): Promise<WorkerResult> {
+  public async playGames(worldWidth: number, worldHeight: number, playTimes: number, snakeBrainPlainObject: ISnakeBrain): Promise<WorkerResult> {
     const workerData: WorkerData = {
       worldWidth,
       worldHeight,
       playTimes,
-      snakeBrainPlainObject: snakeBrain.toPlainObject(),
+      snakeBrainPlainObject,
     };
     return await this.piscina.run(workerData);
   }

@@ -2,14 +2,14 @@
   "name": "snake-express",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "test": "jest",
     "test-dev": "jest --watchAll",
     "coverage": "jest --coverage",
-    "dev": "ts-node-dev app.ts",
+    "prebuild": "rimraf build",
+    "build": "tsc --project tsconfig.build.json",
     "prestart": "pnpm --filter snake-express... build",
-    "start": "pnpm ts-node app.ts "
+    "start": "pnpm build && node build/app.js"
   },
   "keywords": [],
   "author": "",

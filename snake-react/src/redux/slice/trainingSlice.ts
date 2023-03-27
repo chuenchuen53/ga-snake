@@ -12,6 +12,7 @@ interface TrainingState {
   evolveTimes: number;
   backupPopulationWhenFinish: boolean;
   evolving: boolean;
+  waitingLastEvolveAfterStop: boolean;
   backupInProgress: boolean;
   subscribed: boolean;
   waitingForPolling: boolean;
@@ -38,6 +39,7 @@ const initialState: TrainingState = {
   evolveTimes: 100,
   backupPopulationWhenFinish: false,
   evolving: false,
+  waitingLastEvolveAfterStop: false,
   backupInProgress: false,
   subscribed: false,
   waitingForPolling: false,
@@ -72,6 +74,9 @@ export const trainingSlice = createSlice({
     setEvolving: (state, action: PayloadAction<boolean>) => {
       state.evolving = action.payload;
     },
+    setWaitingLastEvolveAfterStop: (state, action: PayloadAction<boolean>) => {
+      state.waitingLastEvolveAfterStop = action.payload;
+    },
     setBackupInProgress: (state, action: PayloadAction<boolean>) => {
       state.backupInProgress = action.payload;
     },
@@ -98,6 +103,9 @@ export const trainingSlice = createSlice({
       }
       if (action.payload.evolving !== state.evolving) {
         state.evolving = action.payload.evolving;
+        if (!action.payload.evolving && state.waitingLastEvolveAfterStop) {
+          state.waitingLastEvolveAfterStop = false;
+        }
       }
     },
   },
@@ -136,7 +144,7 @@ export function evolveThunk(): AppThunk {
 export function stopEvolveThunk(): AppThunk {
   return showSnackBarAfterAction(async (dispatch) => {
     await TrainingApi.stopEvolve();
-    dispatch(trainingSlice.actions.setEvolving(false));
+    dispatch(trainingSlice.actions.setWaitingLastEvolveAfterStop(true));
   });
 }
 
@@ -232,4 +240,4 @@ function subscribeInfoThunk(): AppThunk {
   };
 }
 
-export const { changeSetting, setEvolveTimes, setBackupPopulationWhenFinish } = trainingSlice.actions;
+export const { changeSetting, setEvolveTimes } = trainingSlice.actions;
