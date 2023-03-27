@@ -11,6 +11,10 @@ export default class MultiThreadGames {
       filename: path.resolve(__dirname, "./worker.js"),
       minThreads: numOfThreads,
       maxThreads: numOfThreads,
+      resourceLimits: {
+        maxOldGenerationSizeMb: 150,
+        maxYoungGenerationSizeMb: 75,
+      },
     });
   }
 
