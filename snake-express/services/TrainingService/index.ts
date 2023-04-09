@@ -4,10 +4,10 @@ import path from "path";
 import { AppDb } from "../../mongo";
 import AppEnv from "../../AppEnv";
 import { WorkerAction } from "./typing";
-import type { EvolveResult, IGaModel } from "snake-ai/GaModel";
+import type { EvolveResult, IGaModel, IndividualPlainObject, Options } from "snake-ai/GaModel";
 import type { IGaModel as IGaModelDb } from "../../mongo/GaModel";
 import type { WorkerMessage, WorkerResponse, GetPopulationResponse } from "./typing";
-import type { PopulationHistory, EvolveResultWithId, GetCurrentModelInfoResponse, InitModelRequest, PollingInfoResponse } from "../../api-typing/training";
+import type { PopulationHistory, EvolveResultWithId, InitModelRequest, PollingInfoResponse, ModelInfo } from "../../api-typing/training";
 import type { Types } from "mongoose";
 
 const WORKER_PATH = path.resolve(__dirname, "./worker.js");
@@ -25,6 +25,7 @@ export default class TrainingService {
   private evolveResultHistoryCache: EvolveResultWithId[] = [];
   private populationHistoryCache: PopulationHistory[] = [];
   private worker: Worker = new Worker(WORKER_PATH);
+  private modelEvolving = false;
 
   public get queueTraining(): number {
     return this._queueTraining;
@@ -42,7 +43,7 @@ export default class TrainingService {
     this.emitter.emit("change");
   }
 
-  public async initModel(options: InitModelRequest["options"]): Promise<GetCurrentModelInfoResponse> {
+  public async initModel(options: InitModelRequest["options"]): Promise<void> {
     this.worker.postMessage({
       action: WorkerAction.NEW_MODEL,
       payload: {
@@ -74,12 +75,76 @@ export default class TrainingService {
     const { _id } = await gaModelDoc.save();
     this._currentModelId = _id;
     TrainingService.currentModelId = _id.toString();
+  }
 
-    return await this.getCurrentModelInfo();
+  public async resumeModel(modelId: string, generation: number): Promise<void> {
+    const gaModel = await this.db.GaModel.findOne({ _id: modelId })
+      .populate<{ populationHistory: { generation: number; population: IndividualPlainObject[] }[] }>({
+        path: "populationHistory",
+        match: { generation },
+        populate: {
+          path: "population",
+          model: "Individual",
+        },
+      })
+      .exec();
+
+    if (!gaModel) throw new Error("model not found");
+
+    const populationHistory = gaModel.populationHistory[0];
+    if (!populationHistory) throw new Error("population not found");
+
+    const snakeBrains = populationHistory.population.map((x) => x.snakeBrain);
+
+    let options: Options = {
+      worldWidth: gaModel.worldWidth,
+      worldHeight: gaModel.worldHeight,
+      snakeBrainConfig: {
+        hiddenLayersLength: gaModel.hiddenLayersLength.map((x) => x as number),
+        hiddenLayerActivationFunction: gaModel.hiddenLayerActivationFunction,
+      },
+      gaConfig: {
+        populationSize: gaModel.populationSize,
+        surviveRate: gaModel.surviveRate,
+        populationMutationRate: gaModel.populationMutationRate,
+        geneMutationRate: gaModel.geneMutationRate,
+        mutationAmount: gaModel.mutationAmount,
+        trialTimes: gaModel.trialTimes,
+      },
+      providedInfo: {
+        generation,
+        snakeBrains,
+      },
+    };
+
+    // worker cannot clone options, so we need to stringify and parse it
+    options = JSON.parse(JSON.stringify(options));
+
+    await this.initModel(options);
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- checked before
+    const parentModelEvolveResultHistory = (await this.db.GaModel.findById(modelId).select("evolveResultHistory"))!;
+
+    const evolveResultIds = [];
+    for (const evolveResultId of parentModelEvolveResultHistory.evolveResultHistory) {
+      // Remove the _id so that a new document with a unique _id is inserted into MongoDB
+      const evolveResult = await this.db.EvolveResult.findById(evolveResultId, { _id: 0 });
+      if (evolveResult && evolveResult.generation <= generation) {
+        const clonedEvolveResult = evolveResult.toObject();
+        if (evolveResult.id) throw new Error("evolveResult.id should not exists");
+        const newEvolveResult = await this.db.EvolveResult.create(clonedEvolveResult);
+        evolveResultIds.push(newEvolveResult._id);
+      }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- currentModel is inserted before
+    const currentModel = (await this.db.GaModel.findById(this._currentModelId))!;
+    currentModel.evolveResultHistory = evolveResultIds;
+    await currentModel.save();
   }
 
   public evolve(times: number): void {
-    if (!this._currentModelId) throw new Error("model not exists");
+    if (!this._currentModelId) throw new Error("model does not exists");
     if (this.queueTraining) throw new Error("training already started");
     this._queueTraining = times;
     setImmediate(() => this.startTraining());
@@ -96,10 +161,10 @@ export default class TrainingService {
   /**
    * @returns true if backup success, false if backup is already exists
    * */
-  public async backupCurrentPopulation(): Promise<boolean> {
-    if (!this._currentModelId) throw new Error("model not exists");
+  public async backupCurrentPopulation(skipQueueTrainingCheck = false): Promise<boolean> {
+    if (!this._currentModelId) throw new Error("model does not exists");
     if (this._backupPopulationInProgress) throw new Error("previous backup still in progress");
-    if (this._queueTraining) throw new Error("model is evolving"); // population will change during evolving
+    if (!skipQueueTrainingCheck && this._queueTraining) throw new Error("model is evolving"); // population will change during evolving
 
     this.worker.postMessage({
       action: WorkerAction.GET_POPULATION,
@@ -123,7 +188,7 @@ export default class TrainingService {
     }
 
     const record = await this.db.GaModel.findById(this._currentModelId).select("populationHistory").populate<{ populationHistory: { generation: number }[] }>("populationHistory", "generation");
-    if (!record) throw new Error("model not exists");
+    if (!record) throw new Error("model does not exists");
 
     const { populationHistory } = record;
     if (populationHistory.length) {
@@ -152,13 +217,13 @@ export default class TrainingService {
     return true;
   }
 
-  public async getCurrentModelInfo(): Promise<GetCurrentModelInfoResponse> {
-    if (!this._currentModelId) throw new Error("model not exists");
+  public async getCurrentModelInfo(): Promise<ModelInfo> {
+    if (!this._currentModelId) throw new Error("model does not exists");
     const model = await this.db.GaModel.findById(this._currentModelId)
       .populate<{ evolveResultHistory: EvolveResult[] }>("evolveResultHistory")
       .populate<{ populationHistory: PopulationHistory[] }>("populationHistory", "generation")
       .exec();
-    if (!model) throw new Error("model not exists");
+    if (!model) throw new Error("model does not exists");
     return model.toObject();
   }
 
@@ -181,6 +246,8 @@ export default class TrainingService {
       this._backupPopulationInProgress = false;
       this.evolveResultHistoryCache = [];
       this.populationHistoryCache = [];
+
+      TrainingService.currentModelId = "";
     }
   }
 
@@ -197,12 +264,12 @@ export default class TrainingService {
     backupPopulationWhenFinish: boolean;
     evolving: boolean;
   }): boolean {
-    if (!this._currentModelId) throw new Error("model not exists");
+    if (!this._currentModelId) throw new Error("model does not exists");
     const haveNewEvolveResultHistory = (this.evolveResultHistoryCache[this.evolveResultHistoryCache.length - 1]?.generation ?? -1) > evolvingResultHistoryGeneration;
     const haveNewPopulationHistory = (this.populationHistoryCache[this.populationHistoryCache.length - 1]?.generation ?? -1) > populationHistoryGeneration;
     const backupPopulationInProgressMatch = this._backupPopulationInProgress === backupPopulationInProgress;
     const backupPopulationWhenFinishMatch = this.backupPopulationWhenFinish === backupPopulationWhenFinish;
-    const evolvingMatch = Boolean(this.queueTraining) === evolving;
+    const evolvingMatch = (Boolean(this.queueTraining) || this.modelEvolving) === evolving;
     return !haveNewEvolveResultHistory && !haveNewPopulationHistory && backupPopulationInProgressMatch && backupPopulationWhenFinishMatch && evolvingMatch;
   }
 
@@ -213,7 +280,7 @@ export default class TrainingService {
     currentEvolvingResultHistoryGeneration: number;
     currentPopulationHistoryGeneration: number;
   }): PollingInfoResponse {
-    if (!this._currentModelId) throw new Error("model not exists");
+    if (!this._currentModelId) throw new Error("model does not exists");
 
     const newEvolveResultHistory = this.evolveResultHistoryCache.filter((x) => x.generation > currentEvolvingResultHistoryGeneration);
     const newPopulationHistory = this.populationHistoryCache.filter((x) => x.generation > currentPopulationHistoryGeneration);
@@ -223,7 +290,7 @@ export default class TrainingService {
       newPopulationHistory,
       backupPopulationInProgress: this._backupPopulationInProgress,
       backupPopulationWhenFinish: this.backupPopulationWhenFinish,
-      evolving: Boolean(this.queueTraining),
+      evolving: Boolean(this.queueTraining) || this.modelEvolving,
     };
   }
 
@@ -232,6 +299,8 @@ export default class TrainingService {
       this.worker.postMessage({
         action: WorkerAction.EVOLVE,
       });
+
+      this.modelEvolving = true;
 
       try {
         const promise = new Promise<EvolveResult>((resolve, reject) => {
@@ -247,12 +316,13 @@ export default class TrainingService {
         });
         const evolveResult = await promise;
 
+        this.modelEvolving = false;
         if (this._queueTraining > 0) this._queueTraining--;
         const evolveResultDoc = new this.db.EvolveResult(evolveResult);
         const evolveResultInsertResult = await evolveResultDoc.save();
         const evolveResultId = evolveResultInsertResult._id;
         const model = await this.db.GaModel.findById(this._currentModelId);
-        if (!model) throw new Error("model not exists");
+        if (!model) throw new Error("model does not exists");
         model.generation = evolveResult.generation;
         model.evolveResultHistory.push(evolveResultId);
         await model.save();
@@ -260,11 +330,19 @@ export default class TrainingService {
         this.publishChange();
 
         if (this._queueTraining > 0) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- gameRecord is not null after evolve
+          const maxScore = this.evolveResultHistoryCache[0].bestIndividual.gameRecord!.worldWidth * this.evolveResultHistoryCache[0].bestIndividual.gameRecord!.worldHeight;
+          // auto backup population if first time reach max length
+          if (this.evolveResultHistoryCache.findIndex((x) => x.bestIndividual.snakeLength === maxScore) === this.evolveResultHistoryCache.length - 1) {
+            await this.backupCurrentPopulation(true);
+          }
+
           setImmediate(() => this.startTraining());
         } else if (this._queueTraining === 0 && this.backupPopulationWhenFinish) {
           await this.backupCurrentPopulation();
         }
       } catch (e) {
+        this.modelEvolving = false;
         console.error(e);
       }
     }

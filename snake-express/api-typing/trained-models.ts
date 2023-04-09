@@ -9,6 +9,7 @@ export interface TrainedModel {
   bestMoves: number | null;
   snakeLengthMean: number | null;
   movesMean: number | null;
+  populationHistory: { generation: number }[];
 }
 
 export interface GetAllTrainedModelsResponse {

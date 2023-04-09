@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import { useTheme } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import type { GetCurrentModelInfoResponse } from "snake-express/api-typing/training";
+import type { ModelInfo } from "snake-express/api-typing/training";
 
 interface ChartProps {
   data: ReturnType<typeof toChartData>;
@@ -16,7 +16,7 @@ interface ChartProps {
 }
 
 export interface Props {
-  evolveResultHistory: GetCurrentModelInfoResponse["evolveResultHistory"];
+  evolveResultHistory: ModelInfo["evolveResultHistory"];
 }
 
 export const EvolveHistoryChart = ({ evolveResultHistory }: Props) => {
@@ -55,7 +55,7 @@ export const EvolveHistoryChart = ({ evolveResultHistory }: Props) => {
   );
 };
 
-function toChartData(evolveResultHistory: GetCurrentModelInfoResponse["evolveResultHistory"]) {
+function toChartData(evolveResultHistory: ModelInfo["evolveResultHistory"]) {
   return evolveResultHistory.map((x) => {
     return {
       generation: x.generation,

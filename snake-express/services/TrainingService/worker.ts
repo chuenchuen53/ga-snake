@@ -51,7 +51,7 @@ typedParentPort.on("message", async (message: WorkerMessage) => {
     case WorkerAction.GET_POPULATION: {
       if (!guardModelExists(message.action, gaModel)) return;
 
-      await doWork(message.action, () => {
+      await doWork(message.action, async () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guardModelExists checked
         const gaModelData = gaModel!.exportModel();
         const response: WorkerResponse = {
@@ -66,6 +66,8 @@ typedParentPort.on("message", async (message: WorkerMessage) => {
       break;
     }
     case WorkerAction.REMOVE_MODEL: {
+      if (!guardModelExists(message.action, gaModel)) return;
+
       await doWork(message.action, async () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guardModelExists checked
         await gaModel!.destroy();
@@ -80,7 +82,7 @@ function guardModelExists(action: WorkerAction, gaModel: GaModel | null): boolea
   if (!gaModel) {
     typedParentPort.postMessage({
       action,
-      errMessage: "gaModel not exists",
+      errMessage: "gaModel does not exist",
     } satisfies WorkerResponse);
     return false;
   }
@@ -99,7 +101,7 @@ function workingGuard(action: WorkerAction): boolean {
   return true;
 }
 
-async function doWork(action: WorkerAction, fn: () => void): Promise<void> {
+async function doWork(action: WorkerAction, fn: () => Promise<void>): Promise<void> {
   working = action;
   await fn();
   working = null;

@@ -8,10 +8,10 @@ import AccordionDetails from "@mui/material/AccordionDetails/AccordionDetails";
 import { ModelSetting } from "./ModelSetting";
 import { EvolveHistoryTable } from "./EvolveHistoryTable";
 import { EvolveHistoryChart } from "./EvolveHistoryChart";
-import type { GetCurrentModelInfoResponse } from "snake-express/api-typing/training";
+import type { ModelInfo } from "snake-express/api-typing/training";
 
 interface Props {
-  modelInfo: GetCurrentModelInfoResponse;
+  modelInfo: ModelInfo;
 }
 
 export const GaModelDetail = ({ modelInfo: m }: Props) => {

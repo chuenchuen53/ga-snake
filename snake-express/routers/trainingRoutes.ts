@@ -7,6 +7,7 @@ const trainingController = new TrainingController(trainingService);
 
 export const trainingRoutes = express.Router();
 trainingRoutes.post("/init-model", trainingController.initModel);
+trainingRoutes.post("/resume-model", trainingController.resumeModel);
 trainingRoutes.post("/evolve", trainingController.evolve);
 trainingRoutes.post("/stop-evolve", trainingController.stopEvolve);
 trainingRoutes.post("/backup-current-population", trainingController.backupCurrentPopulation);

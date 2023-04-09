@@ -4,16 +4,23 @@ import { withLoading } from "./loadingSlice";
 import type { AppThunk } from "../store";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { TrainedModel } from "snake-express/api-typing/trained-models";
-import type { GetCurrentModelInfoResponse } from "snake-express/api-typing/training";
+import type { ModelInfo } from "snake-express/api-typing/training";
+
+export interface ResumeModelPayload {
+  modelId: string;
+  generation: number;
+}
 
 export interface TrainedModelsState {
   models: TrainedModel[] | null;
-  openedDetail: GetCurrentModelInfoResponse | null;
+  openedDetail: ModelInfo | null;
+  openResumeModal: ResumeModelPayload[] | null;
 }
 
 const initialState: TrainedModelsState = {
   models: null,
   openedDetail: null,
+  openResumeModal: null,
 };
 
 export const trainedModelsSlice = createSlice({
@@ -23,8 +30,11 @@ export const trainedModelsSlice = createSlice({
     setModels: (state, action: PayloadAction<TrainedModel[]>) => {
       state.models = action.payload;
     },
-    setOpenedDetail: (state, action: PayloadAction<GetCurrentModelInfoResponse | null>) => {
+    setOpenedDetail: (state, action: PayloadAction<ModelInfo | null>) => {
       state.openedDetail = action.payload;
+    },
+    setOpenResumeModal: (state, action: PayloadAction<ResumeModelPayload[] | null>) => {
+      state.openResumeModal = action.payload;
     },
     removeModel: (state, action: PayloadAction<string>) => {
       if (state.models) {
@@ -34,7 +44,7 @@ export const trainedModelsSlice = createSlice({
   },
 });
 
-export const { setModels, setOpenedDetail } = trainedModelsSlice.actions;
+export const { setModels, setOpenedDetail, setOpenResumeModal } = trainedModelsSlice.actions;
 
 export function getAllTrainedModelsThunk(): AppThunk {
   return withLoading(async (dispatch) => {

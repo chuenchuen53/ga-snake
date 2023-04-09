@@ -217,6 +217,7 @@ export default class GaModel implements IGaModel {
   public async evolve(): Promise<EvolveResult> {
     if (this._evolving) throw Error("Evolve is still running.");
 
+    this._generation++;
     this._evolving = true;
     const startTime = new Date().getTime();
 
@@ -256,8 +257,6 @@ export default class GaModel implements IGaModel {
   }
 
   private async evaluate(): Promise<void> {
-    this._generation++;
-
     const promises = this.population.map((p) => this.multiThreadGames.playGames(this.worldWidth, this.worldHeight, this.trialTimes, p.snakeBrain.toPlainObject()));
     const result = await Promise.all(promises);
 

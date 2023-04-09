@@ -4,6 +4,8 @@ import type { EvolveResult, IGaModel } from "snake-ai/GaModel";
 
 export type InitModelRequest = z.infer<typeof initModelRequestSchema>;
 
+export type ResumeModelRequest = z.infer<typeof initModelRequestSchema>;
+
 export type EvolveRequest = z.infer<typeof evolveRequestSchema>;
 
 export type toggleBackupPopulationWhenFinishRequest = z.infer<typeof toggleBackupPopulationWhenFinishRequestSchema>;
@@ -17,13 +19,19 @@ export interface PopulationHistory {
   generation: number;
 }
 
-export type GetCurrentModelInfoResponse = Omit<Omit<IGaModel, "parentModelId">, "population"> & {
+export type ModelInfo = Omit<Omit<IGaModel, "parentModelId">, "population"> & {
   _id: string;
   evolveResultHistory: EvolveResultWithId[];
   populationHistory: PopulationHistory[];
 };
 
+export type GetCurrentModelInfoResponse = {
+  modelInfo: ModelInfo | null;
+};
+
 export type InitModelResponse = GetCurrentModelInfoResponse;
+
+export type ResumeModelResponse = GetCurrentModelInfoResponse;
 
 export interface PollingInfoResponse {
   newEvolveResultHistory: EvolveResultWithId[];

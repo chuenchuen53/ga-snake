@@ -31,6 +31,12 @@ export const EvolveControl = () => {
   const isInitialGeneration = useAppSelector((state) => (state.training.currentModelInfo?.generation ?? -1) === -1);
   const dispatch = useAppDispatch();
 
+  const RefreshButton = () => (
+    <Button sx={{ ml: "auto" }} variant="outlined" startIcon={<RefreshIcon />} onClick={() => dispatch(getCurrentModelInfoThunk())}>
+      refresh
+    </Button>
+  );
+
   return haveModel ? (
     <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
       <TextField required label="times" variant="outlined" type="number" value={evolveTimes} onChange={(e) => dispatch(setEvolveTimes(e.target.value))} sx={{ width: 120 }} />
@@ -52,9 +58,9 @@ export const EvolveControl = () => {
       <FormGroup>
         <FormControlLabel control={<Switch checked={backupPopulationWhenFinish} onChange={() => dispatch(toggleBackupPopulationWhenFinishThunk())} />} label="backup population when finish" />
       </FormGroup>
-      <Button sx={{ ml: "auto" }} variant="outlined" startIcon={<RefreshIcon />} onClick={() => dispatch(getCurrentModelInfoThunk())}>
-        refresh
-      </Button>
+      <RefreshButton />
     </Box>
-  ) : null;
+  ) : (
+    <RefreshButton />
+  );
 };

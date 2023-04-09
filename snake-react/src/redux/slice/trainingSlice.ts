@@ -3,7 +3,7 @@ import { ActivationFunction } from "snake-ai/CalcUtils";
 import TrainingApi from "../../api/Training";
 import { openSnackBar, showSnackBarAfterAction, withLoading } from "./loadingSlice";
 import type { Draft, PayloadAction } from "@reduxjs/toolkit";
-import type { GetCurrentModelInfoResponse, PollingInfoResponse } from "snake-express/api-typing/training";
+import type { ModelInfo, PollingInfoResponse } from "snake-express/api-typing/training";
 import type { AppThunk } from "../store";
 import type { Options } from "snake-ai/GaModel";
 
@@ -16,7 +16,8 @@ interface TrainingState {
   backupInProgress: boolean;
   subscribed: boolean;
   waitingForPolling: boolean;
-  currentModelInfo: null | GetCurrentModelInfoResponse;
+  currentModelInfo: ModelInfo | null;
+  suspendDidMountGetCurrentModelInfo: boolean;
 }
 
 const initialState: TrainingState = {
@@ -44,6 +45,7 @@ const initialState: TrainingState = {
   subscribed: false,
   waitingForPolling: false,
   currentModelInfo: null,
+  suspendDidMountGetCurrentModelInfo: false,
 };
 
 export type GaModelSettingKey = keyof typeof initialState.gaModelSetting;
@@ -68,7 +70,7 @@ export const trainingSlice = createSlice({
     setBackupPopulationWhenFinish: (state, action: PayloadAction<boolean>) => {
       state.backupPopulationWhenFinish = action.payload;
     },
-    setCurrentModelInfo: (state, action: PayloadAction<GetCurrentModelInfoResponse | null>) => {
+    setCurrentModelInfo: (state, action: PayloadAction<ModelInfo | null>) => {
       state.currentModelInfo = action.payload;
     },
     setEvolving: (state, action: PayloadAction<boolean>) => {
@@ -108,6 +110,9 @@ export const trainingSlice = createSlice({
         }
       }
     },
+    setSuspendDidMountGetCurrentModelInfo: (state, action: PayloadAction<boolean>) => {
+      state.suspendDidMountGetCurrentModelInfo = action.payload;
+    },
   },
 });
 
@@ -119,7 +124,7 @@ export function initModelThunk(): AppThunk {
     dispatch(
       withLoading(async (dispatch) => {
         const resp = await TrainingApi.initModel({ options: training.gaModelSetting });
-        dispatch(trainingSlice.actions.setCurrentModelInfo(resp));
+        dispatch(trainingSlice.actions.setCurrentModelInfo(resp.modelInfo));
         dispatch(startSubscribeInfoThunk());
       })
     );
@@ -170,12 +175,21 @@ export function toggleBackupPopulationWhenFinishThunk(): AppThunk {
   });
 }
 
-export function getCurrentModelInfoThunk(): AppThunk {
-  return withLoading(async (dispatch) => {
+export function getCurrentModelInfoThunk(callByDidMount = false): AppThunk {
+  const getCurrentModelInfo = withLoading(async (dispatch) => {
     const resp = await TrainingApi.getCurrentModelInfo();
-    dispatch(trainingSlice.actions.setCurrentModelInfo(resp));
+    dispatch(trainingSlice.actions.setCurrentModelInfo(resp.modelInfo));
     dispatch(startSubscribeInfoThunk());
   });
+
+  if (callByDidMount) {
+    return async (dispatch, getStore) => {
+      const suspendNextDidMountGetCurrentModelInfo = getStore().training.suspendDidMountGetCurrentModelInfo;
+      if (!suspendNextDidMountGetCurrentModelInfo) return dispatch(getCurrentModelInfo);
+    };
+  }
+
+  return getCurrentModelInfo;
 }
 
 export function removeCurrentModelThunk(): AppThunk {
@@ -240,4 +254,13 @@ function subscribeInfoThunk(): AppThunk {
   };
 }
 
-export const { changeSetting, setEvolveTimes } = trainingSlice.actions;
+export function resumeModelThunk(modelId: string, generation: number, fn: () => void): AppThunk {
+  return withLoading(async (dispatch) => {
+    const resp = await TrainingApi.resumeModel(modelId, generation);
+    dispatch(trainingSlice.actions.setCurrentModelInfo(resp.modelInfo));
+    dispatch(startSubscribeInfoThunk());
+    fn();
+  });
+}
+
+export const { changeSetting, setEvolveTimes, setSuspendDidMountGetCurrentModelInfo } = trainingSlice.actions;

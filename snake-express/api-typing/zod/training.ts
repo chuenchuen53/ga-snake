@@ -42,6 +42,11 @@ export const initModelRequestSchema = z.object({
   options: optionsSchema,
 });
 
+export const resumeModelRequestSchema = z.object({
+  modelId: z.string(),
+  generation: z.number().min(0),
+});
+
 export const evolveRequestSchema = z.object({
   times: z.number().min(1),
 });

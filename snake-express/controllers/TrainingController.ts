@@ -1,7 +1,7 @@
-import { evolveRequestSchema, initModelRequestSchema, pollingInfoRequestSchema, toggleBackupPopulationWhenFinishRequestSchema } from "../api-typing/zod/training";
+import { evolveRequestSchema, initModelRequestSchema, pollingInfoRequestSchema, resumeModelRequestSchema, toggleBackupPopulationWhenFinishRequestSchema } from "../api-typing/zod/training";
 import type TrainingService from "../services/TrainingService";
 import type { Request, Response } from "express";
-import type { GetCurrentModelInfoResponse, InitModelResponse, PollingInfoResponse } from "../api-typing/training";
+import type { InitModelResponse, PollingInfoResponse } from "../api-typing/training";
 
 export default class TrainingController {
   private static pollingTimeOut = 30000;
@@ -20,12 +20,41 @@ export default class TrainingController {
         res.status(400).json({ message: bodyValidation.error });
       } else {
         const { options } = bodyValidation.data;
-        const currentModelInfo = await this.service.initModel(options);
-        res.json(currentModelInfo satisfies InitModelResponse);
+        await this.service.initModel(options);
+        const currentModelInfo = await this.service.getCurrentModelInfo();
+        res.json({ modelInfo: currentModelInfo } satisfies InitModelResponse);
       }
     } catch (err) {
       console.log("TrainingController ~ initModel= ~ err", err);
       res.status(500).json({ message: "internal server error" });
+    }
+  };
+
+  public resumeModel = async (req: Request, res: Response) => {
+    try {
+      if (this.service.currentModelId) {
+        res.status(400).json({ message: "model already exists" });
+        return;
+      }
+
+      const bodyValidation = resumeModelRequestSchema.safeParse(req.body);
+      if (!bodyValidation.success) {
+        res.status(400).json({ message: bodyValidation.error });
+      } else {
+        const { modelId, generation } = bodyValidation.data;
+        await this.service.resumeModel(modelId, generation);
+        const currentModelInfo = await this.service.getCurrentModelInfo();
+        res.json({ modelInfo: currentModelInfo } satisfies InitModelResponse);
+      }
+    } catch (err) {
+      const typedErr = err as { message: string };
+      const { message } = typedErr;
+      if (message === "model not found" || message === "population not found") {
+        res.status(400).json({ message });
+      } else {
+        console.log("TrainingController ~ resumeModel= ~ err", err);
+        res.status(500).json({ message: "internal server error" });
+      }
     }
   };
 
@@ -107,10 +136,12 @@ export default class TrainingController {
 
   public getCurrentModelInfo = async (req: Request, res: Response): Promise<void> => {
     try {
-      if (!this.haveModelGuard(res)) return;
-
-      const modelInfo = await this.service.getCurrentModelInfo();
-      res.json(modelInfo satisfies GetCurrentModelInfoResponse);
+      if (!this.service.currentModelId) {
+        res.json({ modelInfo: null } satisfies InitModelResponse);
+      } else {
+        const currentModelInfo = await this.service.getCurrentModelInfo();
+        res.json({ modelInfo: currentModelInfo } satisfies InitModelResponse);
+      }
     } catch (err) {
       console.log("TrainingController ~ getCurrentModelInfo= ~ err", err);
       res.status(500).json({ message: "internal server error" });
@@ -197,7 +228,7 @@ export default class TrainingController {
 
   private haveModelGuard = (res: Response) => {
     if (!this.service.currentModelId) {
-      res.status(400).json({ message: "model not exists" });
+      res.status(400).json({ message: "model does not exists" });
       return false;
     }
     return true;

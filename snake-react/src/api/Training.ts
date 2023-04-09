@@ -1,4 +1,12 @@
-import type { EvolveRequest, GetCurrentModelInfoResponse, InitModelRequest, InitModelResponse, PollingInfoResponse, toggleBackupPopulationWhenFinishRequest } from "snake-express/api-typing/training";
+import type {
+  EvolveRequest,
+  GetCurrentModelInfoResponse,
+  InitModelRequest,
+  InitModelResponse,
+  PollingInfoResponse,
+  ResumeModelResponse,
+  toggleBackupPopulationWhenFinishRequest,
+} from "snake-express/api-typing/training";
 
 const { REACT_APP_SERVER_HOST } = process.env;
 
@@ -16,6 +24,21 @@ async function initModel(body: InitModelRequest): Promise<InitModelResponse> {
   } else {
     console.error(resp.status, (await resp.json()).message);
     throw new Error("Failed to init model");
+  }
+}
+
+async function resumeModel(modelId: string, generation: number): Promise<ResumeModelResponse> {
+  const resp = await fetch(`${trainingRoute}/resume-model`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ modelId, generation }),
+  });
+
+  if (resp.status === 200) {
+    return await resp.json();
+  } else {
+    console.error(resp.status, (await resp.json()).message);
+    throw new Error("Failed to resume model");
   }
 }
 
@@ -115,6 +138,7 @@ async function pollingInfo(
 
 const TrainingApi = {
   initModel,
+  resumeModel,
   evolve,
   stopEvolve,
   backupCurrentPopulation,

@@ -8,6 +8,7 @@ import { getAllTrainedModelsThunk, setOpenedDetail } from "../../redux/slice/tra
 import { useAppDispatch, useAppSelector } from "../../redux/hook";
 import { GaModelDetail } from "../../components/GaModelDetail";
 import { ModelsTable } from "./ModelsTable";
+import { ResumeModal } from "./ResumeModal";
 
 export const TrainedModelsPage = () => {
   const dispatch = useAppDispatch();
@@ -33,6 +34,7 @@ export const TrainedModelsPage = () => {
         )}
       </Box>
       {openedDetail ? <GaModelDetail modelInfo={openedDetail}></GaModelDetail> : <ModelsTable />}
+      <ResumeModal />
     </div>
   );
 };

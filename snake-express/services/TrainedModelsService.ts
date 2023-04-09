@@ -1,5 +1,5 @@
 import { AppDb } from "../mongo";
-import type { PopulationHistory , EvolveResultWithId, GetAllTrainedModelsResponse, GetModelDetailResponse, TrainedModel } from "../api-typing/trained-models";
+import type { PopulationHistory, EvolveResultWithId, GetAllTrainedModelsResponse, GetModelDetailResponse, TrainedModel } from "../api-typing/trained-models";
 
 export default class TrainedModelsService {
   private db = AppDb.getInstance();
@@ -27,6 +27,15 @@ export default class TrainedModelsService {
           },
         },
         {
+          $lookup: {
+            from: "populations",
+            localField: "populationHistory",
+            foreignField: "_id",
+            pipeline: [{ $project: { generation: 1, _id: 0 } }],
+            as: "populationHistory",
+          },
+        },
+        {
           $project: {
             id: 1,
             createdAt: 1,
@@ -36,6 +45,7 @@ export default class TrainedModelsService {
             bestMoves: { $ifNull: [{ $arrayElemAt: ["$itemDetail.bestIndividual.moves", 0] }, null] },
             snakeLengthMean: { $ifNull: [{ $arrayElemAt: ["$itemDetail.overallStats.snakeLength.mean", 0] }, null] },
             movesMean: { $ifNull: [{ $arrayElemAt: ["$itemDetail.overallStats.moves.mean", 0] }, null] },
+            populationHistory: 1,
           },
         },
       ])
@@ -49,7 +59,7 @@ export default class TrainedModelsService {
     const model = await this.db.GaModel.findById(id)
       .populate<{ evolveResultHistory: EvolveResultWithId[] }>("evolveResultHistory")
       .populate<{ populationHistory: PopulationHistory[] }>("populationHistory", "generation");
-    if (!model) throw new Error("model not exists");
+    if (!model) throw new Error("model does not exists");
     return model.toObject();
   }
 

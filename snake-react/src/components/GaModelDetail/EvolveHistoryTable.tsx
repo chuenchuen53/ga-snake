@@ -13,13 +13,13 @@ import { useAppDispatch } from "../../redux/hook";
 import { setSnakeBrain } from "../../redux/slice/snakeBrainExamSlice";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import type { AppDispatch } from "../../redux/store";
-import type { GetCurrentModelInfoResponse } from "snake-express/api-typing/training";
+import type { ModelInfo } from "snake-express/api-typing/training";
 
 interface Props {
   worldWidth: number;
   worldHeight: number;
-  populationHistory: GetCurrentModelInfoResponse["populationHistory"];
-  evolveResultHistory: GetCurrentModelInfoResponse["evolveResultHistory"];
+  populationHistory: ModelInfo["populationHistory"];
+  evolveResultHistory: ModelInfo["evolveResultHistory"];
 }
 
 const columns: GridColDef[] = [
@@ -70,10 +70,10 @@ const columns: GridColDef[] = [
 ];
 
 function toDataGridRows(populationHistory: Props["populationHistory"], evolveResultHistory: Props["evolveResultHistory"], dispatch: AppDispatch) {
-  return evolveResultHistory.map((evolveResult, generation) => ({
+  return evolveResultHistory.map((evolveResult) => ({
     id: evolveResult._id,
-    populationFound: Boolean(populationHistory.find((x) => x.generation === generation)),
-    generation,
+    populationFound: Boolean(populationHistory.find((x) => x.generation === evolveResult.generation)),
+    generation: evolveResult.generation,
     bestFitness: Math.floor(evolveResult.bestIndividual.fitness),
     bestSnakeLength: Math.floor(evolveResult.bestIndividual.snakeLength),
     bestMoves: Math.floor(evolveResult.bestIndividual.moves),

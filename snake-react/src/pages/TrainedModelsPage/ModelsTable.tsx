@@ -3,8 +3,10 @@ import { DataGrid } from "@mui/x-data-grid";
 import FindInPageIcon from "@mui/icons-material/FindInPage";
 import IconButton from "@mui/material/IconButton";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import CachedIcon from "@mui/icons-material/Cached";
 import { useAppDispatch, useAppSelector } from "../../redux/hook";
-import { deleteModelThunk, getModelDetailThunk } from "../../redux/slice/trainedModelsSlice";
+import { deleteModelThunk, getModelDetailThunk, setOpenResumeModal } from "../../redux/slice/trainedModelsSlice";
+import type { ResumeModelPayload } from "../../redux/slice/trainedModelsSlice";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 
 export const ModelsTable = () => {
@@ -14,15 +16,19 @@ export const ModelsTable = () => {
 
   const getModelDetail = (id: string) => dispatch(getModelDetailThunk(id));
   const deleteModel = (id: string) => dispatch(deleteModelThunk(id));
+  const openResumeModal = (data: ResumeModelPayload[]) => dispatch(setOpenResumeModal(data));
 
   const rows = models
     ? models.map((model) => ({
-        ...model,
         id: model._id,
         createdAt: new Date(model.createdAt),
+        generation: model.generation,
+        bestSnakeLength: model.bestSnakeLength ? Math.floor(model.bestSnakeLength) : null,
+        bestMoves: model.bestMoves ? Math.floor(model.bestMoves) : null,
         snakeLengthMean: model.snakeLengthMean ? Math.floor(model.snakeLengthMean) : null,
         detail: model._id,
         delete: currentModelId === model._id ? null : model._id,
+        resume: model.populationHistory.map((x) => ({ modelId: model._id, generation: x.generation })),
       }))
     : [];
 
@@ -56,6 +62,16 @@ export const ModelsTable = () => {
             <DeleteForeverIcon />
           </IconButton>
         ),
+    },
+    {
+      field: "resume",
+      headerName: "resume",
+      renderCell: ({ value }: GridRenderCellParams) =>
+        value.length ? (
+          <IconButton color="primary" onClick={() => openResumeModal(value)}>
+            <CachedIcon />
+          </IconButton>
+        ) : null,
     },
   ];
 
