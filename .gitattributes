@@ -1,2 +1,2 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Custom for this repository: Always use LF line endings, regardless of OS
+* text eol=lf
