@@ -100,22 +100,33 @@ class InputLayer(val game: SnakeGame) {
     }
 
     fun snakePortionValue(): DoubleArray {
-        val snakeHead = game.snake.head
+        val (snakeHeadX, snakeHeadY) = game.snake.head
 
-        val (topCount, bottomCount) = game.snake.positions.fold(Pair(0, 0)) { acc, pos ->
-            if (pos.y < snakeHead.y) Pair(acc.first + 1, acc.second)
-            else if (pos.y > snakeHead.y) Pair(acc.first, acc.second + 1)
-            else acc
+        var topCount = 0
+        var bottomCount = 0
+        var leftCount = 0
+        var rightCount = 0
+
+        for (pos in game.snake.positions) {
+            if (pos.y < snakeHeadY) {
+                topCount++
+            } else if (pos.y > snakeHeadY) {
+                bottomCount++
+            }
+
+            if (pos.x < snakeHeadX) {
+                leftCount++
+            } else if (pos.x > snakeHeadX) {
+                rightCount++
+            }
         }
 
-        val (leftCount, rightCount) = game.snake.positions.fold(Pair(0, 0)) { acc, pos ->
-            if (pos.x < snakeHead.x) Pair(acc.first + 1, acc.second)
-            else if (pos.x > snakeHead.x) Pair(acc.first, acc.second + 1)
-            else acc
-        }
+        val topResult = topCount.toDouble() / numOfBoardCell
+        val bottomResult = bottomCount.toDouble() / numOfBoardCell
+        val leftResult = leftCount.toDouble() / numOfBoardCell
+        val rightResult = rightCount.toDouble() / numOfBoardCell
 
-        return intArrayOf(topCount, bottomCount, leftCount, rightCount).map { it.toDouble() / numOfBoardCell }
-            .toDoubleArray()
+        return doubleArrayOf(topResult, bottomResult, leftResult, rightResult)
     }
 
     fun getSnakeLengthWorldRatio(): Double {
