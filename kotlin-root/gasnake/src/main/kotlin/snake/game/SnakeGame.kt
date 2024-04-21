@@ -175,7 +175,11 @@ class SnakeGame(options: Options) {
     }
 
     fun getRandomFoodPosition(): Position {
-        val availablePositions = allPositions.filter { !snake.positions.contains(it) }
+        val snakePositions = snake.positions.toSet()
+        val availablePositions = allPositions
+            .filter { it !in snakePositions }
+            .toList()
+
         return availablePositions.random()
     }
 
