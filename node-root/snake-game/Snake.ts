@@ -2,7 +2,7 @@ import { Direction, SnakeAction } from "./typing";
 import { oppositeDirection } from "./oppositeDirection";
 import type Position from "./Position";
 import type { IPosition } from "./Position";
-import type { PositionAndDirection , NotNullPositionAndDirection} from "./typing";
+import type { PositionAndDirection, NotNullPositionAndDirection } from "./typing";
 
 interface ActionMapSecondLayerObject {
   direction: Direction;

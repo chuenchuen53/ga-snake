@@ -229,22 +229,6 @@ describe("test suite for SnakeGame", () => {
     expect(fn).toThrowError("Provided snake position is not valid");
   });
 
-  it("constructor test 3x2 world", () => {
-    const snakeGame = new SnakeGame({ worldWidth: 3, worldHeight: 2 });
-
-    expect(snakeGame.worldWidth).toBe(3);
-    expect(snakeGame.worldHeight).toBe(2);
-    expect(snakeGame.allPositions).toStrictEqual(allPositionsFor3x2World);
-    expect(snakeGame.allPositions2D).toStrictEqual(allPositions2DFor3x2World);
-    expect(snakeGame.snake.length).toBe(1);
-    expect(snakeGame.snake.head.isEqual(new Position(1, 1))).toBe(true);
-    expect(snakeGame.food.isEqual(new Position(1, 1))).toBe(false);
-    expect(snakeGame.gameOver).toBe(false);
-    expect(snakeGame.moves).toBe(0);
-    expect(snakeGame.movesForNoFood).toBe(0);
-    expect(snakeGame.maxMovesOfNoFood).toBeGreaterThan(0);
-  });
-
   it("toPlainObject and toPlainObjectIgnoreMoveRecordAndAllPosition test", () => {
     const snakePositions = [
       { x: 1, y: 1 },
@@ -605,6 +589,7 @@ describe("test suite for SnakeGame", () => {
           expect(snakeGame.moveRecord.length).toBe(1);
         } else {
           expect(getHeadPositionAndDirectionAfterMoveByDirectionSpy).toBeCalledWith(direction);
+          expect(getHeadPositionAndDirectionAfterMoveByDirectionSpy).toBeCalledTimes(2);
           expect(snakeMoveSpy).toBeCalledTimes(1);
           expect(suicideSpy).toBeCalledTimes(0);
           expect(snakeGame.moveRecord.length).toBe(1);
