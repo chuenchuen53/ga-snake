@@ -159,7 +159,7 @@ class SnakeBrainTest {
                     hiddenLayerActivationFunction = ActivationFunction.RELU,
                     providedWeightsAndBiases = ProvidedWeightsAndBiases(
                         weights = emptyList(),
-                        biases = listOf(mutableListOf(0.1, 0.1, 0.1, 0.1))
+                        biases = listOf(doubleArrayOf(0.1, 0.1, 0.1, 0.1))
                     )
                 )
             )
@@ -175,10 +175,10 @@ class SnakeBrainTest {
                     providedWeightsAndBiases = ProvidedWeightsAndBiases(
                         weights = listOf(
                             listOf(
-                                mutableListOf(0.1, 0.1, 0.1),
-                                mutableListOf(0.1, 0.1, 0.1),
-                                mutableListOf(0.1, 0.1, 0.1),
-                                mutableListOf(0.1, 0.1, 0.1)
+                                doubleArrayOf(0.1, 0.1, 0.1),
+                                doubleArrayOf(0.1, 0.1, 0.1),
+                                doubleArrayOf(0.1, 0.1, 0.1),
+                                doubleArrayOf(0.1, 0.1, 0.1)
                             )
                         ),
                         biases = emptyList()
@@ -197,13 +197,13 @@ class SnakeBrainTest {
                     providedWeightsAndBiases = ProvidedWeightsAndBiases(
                         weights = listOf(
                             listOf(
-                                mutableListOf(0.1, 0.1, 0.1),
-                                mutableListOf(0.1, 0.1, 0.1),
-                                mutableListOf(0.1, 0.1, 0.1),
-                                mutableListOf(0.1, 0.1, 0.1)
+                                doubleArrayOf(0.1, 0.1, 0.1),
+                                doubleArrayOf(0.1, 0.1, 0.1),
+                                doubleArrayOf(0.1, 0.1, 0.1),
+                                doubleArrayOf(0.1, 0.1, 0.1)
                             )
                         ),
-                        biases = listOf(mutableListOf(0.1, 0.1))
+                        biases = listOf(doubleArrayOf(0.1, 0.1))
                     )
                 )
             )
@@ -221,29 +221,29 @@ class SnakeBrainTest {
                 providedWeightsAndBiases = ProvidedWeightsAndBiases(
                     weights = listOf(
                         listOf(
-                            mutableListOf(0.1, 0.15),
-                            mutableListOf(0.2, 0.25),
-                            mutableListOf(0.3, 0.35),
-                            mutableListOf(0.4, 0.45),
-                            mutableListOf(0.5, 0.55)
+                            doubleArrayOf(0.1, 0.15),
+                            doubleArrayOf(0.2, 0.25),
+                            doubleArrayOf(0.3, 0.35),
+                            doubleArrayOf(0.4, 0.45),
+                            doubleArrayOf(0.5, 0.55)
                         ),
                         listOf(
-                            mutableListOf(0.1, 0.15, 0.2, 0.25, 0.3),
-                            mutableListOf(0.2, 0.25, 0.3, 0.35, 0.4),
-                            mutableListOf(0.3, 0.35, 0.4, 0.45, 0.5),
-                            mutableListOf(0.4, 0.45, 0.5, 0.55, 0.6)
+                            doubleArrayOf(0.1, 0.15, 0.2, 0.25, 0.3),
+                            doubleArrayOf(0.2, 0.25, 0.3, 0.35, 0.4),
+                            doubleArrayOf(0.3, 0.35, 0.4, 0.45, 0.5),
+                            doubleArrayOf(0.4, 0.45, 0.5, 0.55, 0.6)
                         )
                     ),
                     biases = listOf(
-                        mutableListOf(0.1, 0.1, 0.1, 0.1, 0.1),
-                        mutableListOf(0.1, -0.1, 0.1, -0.1)
+                        doubleArrayOf(0.1, 0.1, 0.1, 0.1, 0.1),
+                        doubleArrayOf(0.1, -0.1, 0.1, -0.1)
                     )
                 )
             )
         )
 
-        assertEquals(Direction.LEFT, snakeBrain.compute(listOf(0.1, 0.2)))
-        assertEquals(Direction.UP, snakeBrain.compute(listOf(-0.8, -0.7)))
+        assertEquals(Direction.LEFT, snakeBrain.compute(doubleArrayOf(0.1, 0.2)))
+        assertEquals(Direction.UP, snakeBrain.compute(doubleArrayOf(-0.8, -0.7)))
     }
 
     @Test
@@ -260,30 +260,30 @@ class SnakeBrainTest {
 
         child.crossOver(parent1, parent2)
 
-        val parent1FlattenedWeightArr = parent1.weights.flatten().flatten()
-        val parent1FlattenedBiasesArr = parent1.biases.flatten()
+        val parent1FlattenedWeightList = parent1.weights.flatten().flatMap { it.toList() }
+        val parent1FlattenedBiasesList = parent1.biases.flatMap { it.toList() }
 
-        val parent2FlattenedWeightArr = parent2.weights.flatten().flatten()
-        val parent2FlattenedBiasesArr = parent2.biases.flatten()
+        val parent2FlattenedWeightList = parent2.weights.flatten().flatMap { it.toList() }
+        val parent2FlattenedBiasesList = parent2.biases.flatMap { it.toList() }
 
-        val childFlattenedWeightArr = child.weights.flatten().flatten()
-        val childFlattenedBiasesArr = child.biases.flatten()
+        val childFlattenedWeightList = child.weights.flatten().flatMap { it.toList() }
+        val childFlattenedBiasesList = child.biases.flatMap { it.toList() }
 
-        val minDiffInArr = { x: List<Double>, a: List<Double>, b: List<Double> ->
+        val minDiffInList = { x: List<Double>, a: List<Double>, b: List<Double> ->
             x.mapIndexed { index, v -> minOf(abs(v - a[index]), abs(v - b[index])) }
         }
 
         val diffInWeightArr =
-            minDiffInArr(childFlattenedWeightArr, parent1FlattenedWeightArr, parent2FlattenedWeightArr)
+            minDiffInList(childFlattenedWeightList, parent1FlattenedWeightList, parent2FlattenedWeightList)
         val diffInBiasesArr =
-            minDiffInArr(childFlattenedBiasesArr, parent1FlattenedBiasesArr, parent2FlattenedBiasesArr)
+            minDiffInList(childFlattenedBiasesList, parent1FlattenedBiasesList, parent2FlattenedBiasesList)
 
-        for (x in diffInWeightArr) {
-            assertEquals(0.0, x, 0.0001)
+        diffInWeightArr.forEach { x ->
+            assertTrue { abs(x) < 1e-6 }
         }
 
-        for (x in diffInBiasesArr) {
-            assertEquals(0.0, x, 0.0001)
+        diffInBiasesArr.forEach { x ->
+            assertTrue { abs(x) < 1e-6 }
         }
     }
 
@@ -300,35 +300,35 @@ class SnakeBrainTest {
         )
         val snakeBrain = SnakeBrain(options)
 
-        val originalWeightArr = snakeBrain.weights.flatten().flatten().toList()
-        val originalBiasesArr = snakeBrain.biases.flatten().toList()
+        val originalWeightList = snakeBrain.weights.flatten().flatMap { it.toList() }
+        val originalBiasesList = snakeBrain.biases.flatMap { it.toList() }
 
         snakeBrain.mutate(mutationRate, mutationAmount)
 
-        val mutatedWeightArr = snakeBrain.weights.flatten().flatten()
-        val mutatedBiasesArr = snakeBrain.biases.flatten()
+        val mutatedWeightList = snakeBrain.weights.flatten().flatMap { it.toList() }
+        val mutatedBiasesList = snakeBrain.biases.flatMap { it.toList() }
 
-        val diffInWeightArr = mutatedWeightArr.mapIndexed { index, v -> abs(v - originalWeightArr[index]) }
-        val diffInBiasesArr = mutatedBiasesArr.mapIndexed { index, v -> abs(v - originalBiasesArr[index]) }
+        val diffInWeightList = mutatedWeightList.mapIndexed { index, v -> abs(v - originalWeightList[index]) }
+        val diffInBiasesList = mutatedBiasesList.mapIndexed { index, v -> abs(v - originalBiasesList[index]) }
 
         var largerThanZeroCount = 0
-        for (x in diffInWeightArr) {
-            assertTrue(x <= mutationAmount)
+        diffInWeightList.forEach { x ->
+            assertTrue { x <= mutationAmount }
             if (x > 0.000001) {
                 largerThanZeroCount++
             }
         }
 
         var largerThanZeroCount2 = 0
-        for (x in diffInBiasesArr) {
-            assertTrue(x <= mutationAmount)
+        diffInBiasesList.forEach { x ->
+            assertTrue { x <= mutationAmount }
             if (x > 0.000001) {
                 largerThanZeroCount2++
             }
         }
 
         val tolerance = 0.01
-        assertTrue(abs(largerThanZeroCount.toDouble() / diffInWeightArr.size - mutationRate) < tolerance)
-        assertTrue(abs(largerThanZeroCount2.toDouble() / diffInBiasesArr.size - mutationRate) < tolerance)
+        assertTrue { abs(largerThanZeroCount.toDouble() / diffInWeightList.size - mutationRate) < tolerance }
+        assertTrue { abs(largerThanZeroCount2.toDouble() / diffInBiasesList.size - mutationRate) < tolerance }
     }
 }

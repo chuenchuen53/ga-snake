@@ -2,18 +2,17 @@ package snake.ai
 
 import com.example.snake.ai.ActivationFunction
 import com.example.snake.ai.CalcUtils
-import org.junit.jupiter.api.Assertions.assertAll
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import kotlin.test.Test
 
 class CalcUtilsTest {
     companion object {
-        fun List<Int>.toDoubleList(): List<Double> {
-            return this.map { it.toDouble() }
+        private fun List<Int>.toDoubleArray(): DoubleArray {
+            return this.map { it.toDouble() }.toDoubleArray()
         }
 
-        private fun List<List<Int>>.toDoubleNestedList(): List<List<Double>> {
-            return this.map { it.toDoubleList() }
+        private fun List<List<Int>>.toDoubleArray(): List<DoubleArray> {
+            return this.map { it.toDoubleArray() }
         }
 
         val M1 = listOf(
@@ -23,7 +22,7 @@ class CalcUtilsTest {
             listOf(18, 19, 20, 21, 22, 23),
             listOf(24, 25, 26, 27, 28, 29),
             listOf(30, 31, 32, 33, 34, 35)
-        ).toDoubleNestedList()
+        ).toDoubleArray()
 
         val M2 = listOf(
             listOf(10, 11, 12, 13, 14, 15),
@@ -32,18 +31,18 @@ class CalcUtilsTest {
             listOf(118, 119, 120, 121, 122, 123),
             listOf(124, 125, 126, 127, 128, 129),
             listOf(130, 131, 132, 133, 134, 135)
-        ).toDoubleNestedList()
+        ).toDoubleArray()
 
-        val X1 = listOf(0, 1, 2, 3, 4, 5).toDoubleList()
-        val X2 = listOf(55, 146, 237, 328, 419, 510).toDoubleList()
-        val X3 = listOf(22790, 116571, 195682, 205853, 216024, 226195).toDoubleList()
+        val X1 = listOf(0, 1, 2, 3, 4, 5).toDoubleArray()
+        val X2 = listOf(55, 146, 237, 328, 419, 510).toDoubleArray()
+        val X3 = listOf(22790, 116571, 195682, 205853, 216024, 226195).toDoubleArray()
 
-        val B1 = listOf(0, 1, 2, 3, 4, 5).toDoubleList()
-        val B2 = listOf(10, 11, 12, 13, 14, 15).toDoubleList()
+        val B1 = listOf(0, 1, 2, 3, 4, 5).toDoubleArray()
+        val B2 = listOf(10, 11, 12, 13, 14, 15).toDoubleArray()
 
-        val M1X1 = listOf(55, 145, 235, 325, 415, 505).toDoubleList()
+        val M1X1 = listOf(55, 145, 235, 325, 415, 505).toDoubleArray()
 
-        val statsSampleArr1 = listOf(-470, -386, 877, -769, -6, 799, 265, 487, -781, -360).toDoubleList()
+        val statsSampleArr1 = listOf(-470, -386, 877, -769, -6, 799, 265, 487, -781, -360).toDoubleArray()
         val statsSampleArr2 = listOf(
             0.39450487,
             -0.10545648,
@@ -55,32 +54,32 @@ class CalcUtilsTest {
             0.91963169,
             -0.93352642,
             -0.55964653
-        )
+        ).toDoubleArray()
 
-        val quartileSampleArr = listOf(6, 7, 15, 36, 39, 41, 41, 43, 43, 47, 49).toDoubleList()
+        val quartileSampleArr = doubleArrayOf(6.0, 7.0, 15.0, 36.0, 39.0, 41.0, 41.0, 43.0, 43.0, 47.0, 49.0)
     }
 
     @Test
     fun addition() {
-        assertEquals(X2, CalcUtils.addition(M1X1, B1))
+        assertArrayEquals(X2, CalcUtils.addition(M1X1, B1))
     }
 
     @Test
     fun multiplication() {
-        assertEquals(M1X1, CalcUtils.multiplication(M1, X1))
+        assertArrayEquals(M1X1, CalcUtils.multiplication(M1, X1))
     }
 
     @Test
     fun computeOneLayer() {
         assertAll(
-            { assertEquals(X2, CalcUtils.computeOneLayer(M1, X1, B1)) },
-            { assertEquals(X3, CalcUtils.computeOneLayer(M2, X2, B2)) }
+            { assertArrayEquals(X2, CalcUtils.computeOneLayer(M1, X1, B1)) },
+            { assertArrayEquals(X3, CalcUtils.computeOneLayer(M2, X2, B2)) }
         )
     }
 
     @Test
     fun computeMultipleLayer() {
-        assertEquals(
+        assertArrayEquals(
             X3,
             CalcUtils.computeMultipleLayer(
                 listOf(M1, M2),
@@ -94,10 +93,20 @@ class CalcUtilsTest {
     @Test
     fun indexOfMaxValueInArray() {
         assertAll(
-            { assertEquals(9, CalcUtils.indexOfMaxValueInArray(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).toDoubleList())) },
-            { assertEquals(4, CalcUtils.indexOfMaxValueInArray(listOf(6, 7, 8, 9, 10, 1, 2, 3, 4, 5).toDoubleList())) },
-            { assertEquals(0, CalcUtils.indexOfMaxValueInArray(listOf(-1, -2, -3, -4, -5, -6).toDoubleList())) },
-            { assertEquals(2, CalcUtils.indexOfMaxValueInArray(listOf(1, 2, 3, -1, -2, -3).toDoubleList())) }
+            {
+                assertEquals(
+                    9,
+                    CalcUtils.indexOfMaxValueInArray(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).toDoubleArray())
+                )
+            },
+            {
+                assertEquals(
+                    4,
+                    CalcUtils.indexOfMaxValueInArray(listOf(6, 7, 8, 9, 10, 1, 2, 3, 4, 5).toDoubleArray())
+                )
+            },
+            { assertEquals(0, CalcUtils.indexOfMaxValueInArray(listOf(-1, -2, -3, -4, -5, -6).toDoubleArray())) },
+            { assertEquals(2, CalcUtils.indexOfMaxValueInArray(listOf(1, 2, 3, -1, -2, -3).toDoubleArray())) }
         )
     }
 
@@ -116,12 +125,12 @@ class CalcUtilsTest {
     @Test
     fun `stats minOfArray`() {
         assertAll(
-            { assertEquals(1.0, CalcUtils.minOfArray(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).toDoubleList())) },
-            { assertEquals(1.0, CalcUtils.minOfArray(listOf(6, 7, 8, 9, 10, 1, 2, 3, 4, 5).toDoubleList())) },
+            { assertEquals(1.0, CalcUtils.minOfArray(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).toDoubleArray())) },
+            { assertEquals(1.0, CalcUtils.minOfArray(listOf(6, 7, 8, 9, 10, 1, 2, 3, 4, 5).toDoubleArray())) },
             {
                 assertEquals(
                     -10.0,
-                    CalcUtils.minOfArray(listOf(-6, -7, -8, -9, -10, -1, -2, -3, -4, -5).toDoubleList())
+                    CalcUtils.minOfArray(listOf(-6, -7, -8, -9, -10, -1, -2, -3, -4, -5).toDoubleArray())
                 )
             },
             { assertEquals(-781.0, CalcUtils.minOfArray(statsSampleArr1)) },
@@ -132,12 +141,12 @@ class CalcUtilsTest {
     @Test
     fun `stats maxOfArray`() {
         assertAll(
-            { assertEquals(10.0, CalcUtils.maxOfArray(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).toDoubleList())) },
-            { assertEquals(10.0, CalcUtils.maxOfArray(listOf(6, 7, 8, 9, 10, 1, 2, 3, 4, 5).toDoubleList())) },
+            { assertEquals(10.0, CalcUtils.maxOfArray(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).toDoubleArray())) },
+            { assertEquals(10.0, CalcUtils.maxOfArray(listOf(6, 7, 8, 9, 10, 1, 2, 3, 4, 5).toDoubleArray())) },
             {
                 assertEquals(
                     -1.0,
-                    CalcUtils.maxOfArray(listOf(-6, -7, -8, -9, -10, -1, -2, -3, -4, -5).toDoubleList())
+                    CalcUtils.maxOfArray(listOf(-6, -7, -8, -9, -10, -1, -2, -3, -4, -5).toDoubleArray())
                 )
             },
             { assertEquals(877.0, CalcUtils.maxOfArray(statsSampleArr1)) },

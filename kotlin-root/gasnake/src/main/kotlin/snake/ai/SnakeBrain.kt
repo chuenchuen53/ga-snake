@@ -7,8 +7,8 @@ import kotlin.random.Random
 typealias LayerShape = Pair<Int, Int>
 
 data class ProvidedWeightsAndBiases(
-    val weights: List<List<MutableList<Double>>>,
-    val biases: List<MutableList<Double>>
+    val weights: List<List<DoubleArray>>,
+    val biases: List<DoubleArray>
 )
 
 data class Options(
@@ -22,12 +22,12 @@ data class SnakeBrainData(
     val inputLength: Int,
     val layerShapes: List<LayerShape>,
     val hiddenLayerActivationFunction: ActivationFunction,
-    val weights: List<List<List<Double>>>,
-    val biases: List<List<Double>>
+    val weights: List<List<DoubleArray>>,
+    val biases: List<DoubleArray>
 )
 
 
-class SnakeBrain(private val options: Options) {
+class SnakeBrain(options: Options) {
     companion object {
         const val OUTPUT_LAYER_LENGTH = 4
         const val MIN_WEIGHT = -1.0
@@ -43,8 +43,8 @@ class SnakeBrain(private val options: Options) {
     val inputLength: Int = options.inputLength
     val layerShapes: List<LayerShape> = options.layerShapes
     val hiddenLayerActivationFunction: ActivationFunction = options.hiddenLayerActivationFunction
-    var weights: List<List<MutableList<Double>>>
-    var biases: List<MutableList<Double>>
+    var weights: List<List<DoubleArray>>
+    var biases: List<DoubleArray>
 
     init {
         if (!validateLayerShapes()) throw IllegalArgumentException("Invalid layer shapes")
@@ -64,8 +64,8 @@ class SnakeBrain(private val options: Options) {
         inputLength = inputLength,
         layerShapes = layerShapes,
         hiddenLayerActivationFunction = hiddenLayerActivationFunction,
-        weights = weights.map { x -> x.map { y -> y.toList() } },
-        biases = biases.map { it.toList() }
+        weights = weights.map { x -> x.map { y -> y.clone() } },
+        biases = biases.map { it.clone() }
     )
 
     fun validateWeightsAndBiases(): Boolean {
@@ -74,8 +74,8 @@ class SnakeBrain(private val options: Options) {
         if (weights.size != layerShapes.size) return false
         if (weights[0][0].size != inputLength) return false
         if (weights.last().size != OUTPUT_LAYER_LENGTH) return false
-        if (weights.flatten().flatten().any { it < MIN_WEIGHT || it > MAX_WEIGHT }) return false
-        if (biases.flatten().any { it < MIN_BIAS || it > MAX_BIAS }) return false
+        if (weights.flatten().any { arr -> arr.any { it < MIN_WEIGHT || it > MAX_WEIGHT } }) return false
+        if (biases.any { arr -> arr.any { it < MIN_BIAS || it > MAX_BIAS } }) return false
 
         for (i in 1 until weights.size) {
             if (weights[i].size != layerShapes[i].first) return false
@@ -89,7 +89,7 @@ class SnakeBrain(private val options: Options) {
         return true
     }
 
-    fun compute(input: List<Double>): Direction {
+    fun compute(input: DoubleArray): Direction {
         val output = CalcUtils.computeMultipleLayer(weights, input, biases, hiddenLayerActivationFunction)
         val index = CalcUtils.indexOfMaxValueInArray(output)
         return Direction.inverseDirectionMap(index)
@@ -147,13 +147,13 @@ class SnakeBrain(private val options: Options) {
         return true
     }
 
-    private fun generateRandomLayerWeight(layerShape: LayerShape): List<MutableList<Double>> {
+    private fun generateRandomLayerWeight(layerShape: LayerShape): List<DoubleArray> {
         val (row, col) = layerShape
-        return List(row) { MutableList(col) { Random.nextDouble(MIN_WEIGHT, MAX_WEIGHT) } }
+        return List(row) { DoubleArray(col) { Random.nextDouble(MIN_WEIGHT, MAX_WEIGHT) } }
     }
 
-    private fun generateRandomLayerBias(layerShape: LayerShape): MutableList<Double> {
+    private fun generateRandomLayerBias(layerShape: LayerShape): DoubleArray {
         val (row, _) = layerShape
-        return MutableList(row) { Random.nextDouble(MIN_BIAS, MAX_BIAS) }
+        return DoubleArray(row) { Random.nextDouble(MIN_BIAS, MAX_BIAS) }
     }
 }
