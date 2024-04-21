@@ -53,6 +53,7 @@ export default class CalcUtils {
   }
 
   public static indexOfMaxValueInArray(arr: number[]) {
+    if (arr.length === 0) return -1;
     let max = arr[0];
     let maxIndex = 0;
     for (let i = 1; i < arr.length; i++) {
