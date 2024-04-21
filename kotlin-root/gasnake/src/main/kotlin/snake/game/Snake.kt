@@ -45,14 +45,15 @@ class Snake(
         }
     }
 
-    val positions = positions.toMutableList()
+    val positions = ArrayDeque(positions)
+    val positionsSet = positions.toMutableSet()
     val head: Position
         get() = positions[0]
     val length: Int
         get() = positions.size
 
 
-    fun positionIsInSnake(position: Position): Boolean = positions.contains(position)
+    fun positionIsInSnake(position: Position): Boolean = positionsSet.contains(position)
 
     fun toPlainObject(): SnakeData = SnakeData(positions, direction, allPositions2D)
 
@@ -80,7 +81,7 @@ class Snake(
 
     fun getHeadPositionAndDirectionAfterMoveByDirection(direction: Direction): PositionAndDirection {
         val (x0, y0) = head
-        val (dx, dy) = Snake.directionDxDyMap(direction)
+        val (dx, dy) = directionDxDyMap(direction)
         val position: Position? = allPositions2D.getOrNull(y0 + dy)?.getOrNull(x0 + dx)
         return PositionAndDirection(position, direction)
     }
@@ -88,15 +89,21 @@ class Snake(
     fun move(direction: Direction) {
         val positionAndDirection =
             getHeadPositionAndDirectionAfterMoveByDirectionWithCheckingEatSelfAndOutOfBound(direction)
-        positions.add(0, positionAndDirection.position)
-        positions.removeAt(positions.size - 1)
+
+        positionsSet.remove(positions.last())
+        positionsSet.add(positionAndDirection.position)
+
+        positions.addFirst(positionAndDirection.position)
+        positions.removeLast()
+
         this.direction = positionAndDirection.direction
     }
 
     fun moveWithFoodEaten(direction: Direction) {
         val positionAndDirection =
             getHeadPositionAndDirectionAfterMoveByDirectionWithCheckingEatSelfAndOutOfBound(direction)
-        positions.add(0, positionAndDirection.position)
+        positionsSet.add(positionAndDirection.position)
+        positions.addFirst(positionAndDirection.position)
         this.direction = positionAndDirection.direction
     }
 
