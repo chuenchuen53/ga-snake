@@ -33,7 +33,7 @@ fun main() {
         )
     )
 
-    val games = 5000
+    val games = 1000
     val result = mutableListOf<Result>()
 
     for (i in 0 until games) {
@@ -50,11 +50,12 @@ fun main() {
         result.add(Result(snakeGame.snake.length, execTime))
     }
 
-    result.forEach { println(it) }
-
     val totalTime = result.sumOf { it.execTime }
     println("Total time: ${"%.3f".format(totalTime)}s")
 
     val bestScore = result.maxByOrNull { it.score }?.score ?: 0
     println("Best score: $bestScore")
+
+    val avgScore = result.sumOf { it.score } / games
+    println("Average score: $avgScore")
 }
