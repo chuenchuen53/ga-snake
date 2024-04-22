@@ -91,12 +91,12 @@ class InputLayer(val game: SnakeGame) {
         val food = game.food
         val snakeHead = game.snake.head
 
-        val top = (if (food.y <= snakeHead.y) snakeHead.y - food.y else 0).toDouble()
-        val bottom = (if (food.y >= snakeHead.y) food.y - snakeHead.y else 0).toDouble()
-        val left = (if (food.x <= snakeHead.x) snakeHead.x - food.x else 0).toDouble()
-        val right = (if (food.x >= snakeHead.x) food.x - snakeHead.x else 0).toDouble()
+        val top = (if (food.y < snakeHead.y) (1.0 / (snakeHead.y - food.y)) else 0).toDouble()
+        val bottom = (if (food.y > snakeHead.y) (1.0 / (food.y - snakeHead.y)) else 0).toDouble()
+        val left = (if (food.x < snakeHead.x) (1.0 / (snakeHead.x - food.x)) else 0).toDouble()
+        val right = (if (food.x > snakeHead.x) (1.0 / (food.x - snakeHead.x)) else 0).toDouble()
 
-        return doubleArrayOf(top, bottom, left, right).map { if (it <= 0) 0.0 else 1.0 / it }.toDoubleArray()
+        return doubleArrayOf(top, bottom, left, right)
     }
 
     fun snakePortionValue(): DoubleArray {

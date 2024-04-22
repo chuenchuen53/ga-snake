@@ -48,7 +48,9 @@ class Snake(
     val positions = ArrayDeque(positions)
     val positionsSet = positions.toMutableSet()
     val head: Position
-        get() = positions[0]
+        get() = positions.first()
+    val tail: Position
+        get() = positions.last()
     val length: Int
         get() = positions.size
 
