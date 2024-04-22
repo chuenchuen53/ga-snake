@@ -108,15 +108,17 @@ class InputLayer(val game: SnakeGame) {
         var rightCount = 0
 
         for (pos in game.snake.positions) {
-            if (pos.y < snakeHeadY) {
+            val (x, y) = pos
+
+            if (y < snakeHeadY) {
                 topCount++
-            } else if (pos.y > snakeHeadY) {
+            } else if (y > snakeHeadY) {
                 bottomCount++
             }
 
-            if (pos.x < snakeHeadX) {
+            if (x < snakeHeadX) {
                 leftCount++
-            } else if (pos.x > snakeHeadX) {
+            } else if (x > snakeHeadX) {
                 rightCount++
             }
         }
@@ -130,6 +132,6 @@ class InputLayer(val game: SnakeGame) {
     }
 
     fun getSnakeLengthWorldRatio(): Double {
-        return game.snake.length.toDouble() / (game.worldWidth * game.worldHeight)
+        return game.snake.length.toDouble() / numOfBoardCell
     }
 }
