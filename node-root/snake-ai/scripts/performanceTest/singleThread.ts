@@ -1,17 +1,17 @@
 import * as fs from "fs";
 import * as path from "path";
 import SnakeGame from "snake-game/SnakeGame";
-import InputLayer from "../InputLayer";
-import SnakeBrain from "../SnakeBrain";
+import InputLayer from "../../InputLayer";
+import SnakeBrain from "../../SnakeBrain";
 import { TimingUtils } from "./Timer";
-import type { ISnakeBrain } from "../SnakeBrain";
+import type { ISnakeBrain } from "../../SnakeBrain";
 
 interface Result {
   score: number;
   execTime: number;
 }
 
-function main() {
+async function main() {
   const brainDataPath = path.join(__dirname, "trained-brain.json");
   const brainData: ISnakeBrain = JSON.parse(fs.readFileSync(brainDataPath, "utf8"));
 
@@ -27,13 +27,13 @@ function main() {
     },
   });
 
-  const games = 5000;
+  const games = 1000;
   const result: Result[] = [];
 
   for (let i = 0; i < games; i++) {
     snakeGame.reset();
 
-    const execTime = TimingUtils.execTime(() => {
+    const execTime = await TimingUtils.execTime(async () => {
       while (!snakeGame.gameOver) {
         const input = inputLayer.compute();
         const direction = snakeBrain.compute(input);
@@ -47,13 +47,14 @@ function main() {
     });
   }
 
-  console.table(result);
-
   const totalTime = result.reduce((acc, curr) => acc + curr.execTime, 0);
   console.log(`Total time: ${totalTime.toFixed(3)}s`);
 
   const bestScore = result.reduce((acc, curr) => Math.max(acc, curr.score), 0);
   console.log(`Best score: ${bestScore}`);
+
+  const avgScore = result.reduce((acc, curr) => acc + curr.score, 0) / games;
+  console.log(`Average score: ${avgScore.toFixed(2)}`);
 }
 
 main();

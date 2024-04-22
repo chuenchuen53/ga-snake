@@ -12,10 +12,16 @@
     "coverage": "jest --coverage",
     "prebuild": "rimraf build",
     "build": "tsc --project tsconfig.build.json",
-    "tryModel": "pnpm run build && node ./build/scripts/tryModel.js"
+    "postbuild": "copyfiles -u 1 scripts/**/*.json build/scripts",
+    "tryModel": "pnpm run build && node ./build/scripts/tryModel.js",
+    "benchmark-single": "node ./build/scripts/performanceTest/singleThread.js",
+    "benchmark-multi": "node ./build/scripts/performanceTest/multiThread.js"
   },
   "dependencies": {
-    "snake-game": "workspace:*",
-    "piscina": "3.2.0"
+    "piscina": "3.2.0",
+    "snake-game": "workspace:*"
+  },
+  "devDependencies": {
+    "copyfiles": "2.4.1"
   }
 }
