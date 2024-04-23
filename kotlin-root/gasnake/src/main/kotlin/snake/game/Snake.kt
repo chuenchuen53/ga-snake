@@ -49,6 +49,8 @@ class Snake(
     val positionsSet = positions.toMutableSet()
     val head: Position
         get() = positions.first()
+    val tail: Position
+        get() = positions.last()
     val length: Int
         get() = positions.size
 

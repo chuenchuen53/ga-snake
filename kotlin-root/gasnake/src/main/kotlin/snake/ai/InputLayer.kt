@@ -36,6 +36,7 @@ class InputLayer(val game: SnakeGame) {
 
     val numOfBoardCell = game.worldWidth * game.worldHeight
     val template = DoubleArray(inputLayerLength)
+    val snakePortionHelper = SnakePortionHelper()
 
     fun compute(): DoubleArray {
         val result = template.clone()
@@ -52,7 +53,8 @@ class InputLayer(val game: SnakeGame) {
         val foodDistanceStartIndex = directionStartIndex + directionValue.size
         foodDistance.forEachIndexed { index, v -> result[foodDistanceStartIndex + index] = v }
 
-        val snakePortion = snakePortionValue()
+//        val snakePortion = snakePortionValue()
+        val snakePortion = snakePortionHelper.computeResult()
         val snakePortionStartIndex = foodDistanceStartIndex + foodDistance.size
         snakePortion.forEachIndexed { index, v -> result[snakePortionStartIndex + index] = v }
 
@@ -133,5 +135,117 @@ class InputLayer(val game: SnakeGame) {
 
     fun getSnakeLengthWorldRatio(): Double {
         return game.snake.length.toDouble() / numOfBoardCell
+    }
+
+    inner class SnakePortionHelper() {
+        var snapShotResetCount = game.resetCount
+        var snapShotMoves = game.moves
+        var snapShotHead = game.snake.head
+        var snapShotTail = game.snake.tail
+        var snapShotTopCount = 0
+        var snapShotLeftCount = 0
+        val occupiedMatrix = Array(game.worldHeight) { BooleanArray(game.worldWidth) }
+
+        init {
+            initOccupiedMatrix()
+        }
+
+        fun recomputeSnapshot() {
+            snapShotResetCount = game.resetCount
+            snapShotMoves = game.moves
+            snapShotHead = game.snake.head
+            snapShotTail = game.snake.tail
+            snapShotTopCount = 0
+            snapShotLeftCount = 0
+            initOccupiedMatrix()
+        }
+
+        fun initOccupiedMatrix() {
+            occupiedMatrix.forEach { row -> row.fill(false) }
+            val (snakeHeadX, snakeHeadY) = snapShotHead
+            for (pos in game.snake.positions) {
+                val (x, y) = pos
+                if (y < snakeHeadY) snapShotTopCount++
+                if (x < snakeHeadX) snapShotLeftCount++
+                occupiedMatrix[y][x] = true
+            }
+        }
+
+        fun computeResult(): DoubleArray {
+            updateSnapshot()
+
+            var exactXCount = 0
+            var exactYCount = 0
+            val (snakeHeadX, snakeHeadY) = snapShotHead
+            occupiedMatrix.forEach { row -> if (row[snakeHeadX]) exactXCount++ }
+            occupiedMatrix[snakeHeadY].forEach { if (it) exactYCount++ }
+
+            val total = game.snake.length
+            val bottomCount = total - snapShotTopCount - exactYCount
+            val rightCount = total - snapShotLeftCount - exactXCount
+
+            val topResult = snapShotTopCount.toDouble() / numOfBoardCell
+            val bottomResult = bottomCount.toDouble() / numOfBoardCell
+            val leftResult = snapShotLeftCount.toDouble() / numOfBoardCell
+            val rightResult = rightCount.toDouble() / numOfBoardCell
+
+            return doubleArrayOf(topResult, bottomResult, leftResult, rightResult)
+        }
+
+        private fun updateSnapshot() {
+            if (snapShotResetCount != game.resetCount) {
+                recomputeSnapshot()
+                return
+            }
+
+            if (snapShotMoves == game.moves) {
+                throw Error("testing, sld never happen")
+//                return
+            }
+
+            if (snapShotMoves + 1 != game.moves) {
+                recomputeSnapshot()
+                throw Error("testing, sld never happen")
+//                return
+            }
+
+            val curHead = game.snake.head
+            val curTail = game.snake.tail
+
+            // note must handle tail first
+            // coz the snake will have chance move its head to tail
+            if (snapShotTail != curTail) {
+                occupiedMatrix[snapShotTail.y][snapShotTail.x] = false
+                if (snapShotTail.x < snapShotHead.x) snapShotLeftCount--
+                if (snapShotTail.y < snapShotHead.y) snapShotTopCount--
+            }
+            occupiedMatrix[curHead.y][curHead.x] = true
+            if (curHead.x < snapShotHead.x) snapShotLeftCount++
+            if (curHead.y < snapShotHead.y) snapShotTopCount++
+
+            if (curHead.x == snapShotHead.x) {
+                // move vertically -> only need update top count
+                if (curHead.y > snapShotHead.y) {
+                    // move down -> add one row count
+                    occupiedMatrix[snapShotHead.y].forEach { if (it) snapShotTopCount++ }
+                } else {
+                    // move up -> deduct one row count
+                    occupiedMatrix[curHead.y].forEach { if (it) snapShotTopCount-- }
+                }
+            } else {
+                // move horizontally -> only need update left count
+                if (curHead.x > snapShotHead.x) {
+                    // move right -> add one col count
+                    occupiedMatrix.forEach { row -> if (row[snapShotHead.x]) snapShotLeftCount++ }
+                } else {
+                    // move left -> deduct one col count
+                    occupiedMatrix.forEach { row -> if (row[curHead.x]) snapShotLeftCount-- }
+                }
+            }
+
+            snapShotMoves = game.moves
+            snapShotHead = game.snake.head
+            snapShotTail = game.snake.tail
+        }
     }
 }

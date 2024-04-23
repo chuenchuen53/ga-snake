@@ -48,6 +48,7 @@ class SnakeGame(options: Options) {
     var initialSnakeDirection: Direction
     var initialFoodPosition: Position
     var moveRecord: MutableList<Int> = mutableListOf()
+    var resetCount = 0
 
     init {
         allPositions2D = List(worldHeight) { y -> List(worldWidth) { x -> Position(x, y) } }
@@ -158,6 +159,7 @@ class SnakeGame(options: Options) {
         initialFoodPosition = food
         moveRecord = mutableListOf()
         updateMaxTurnOfNoFood()
+        resetCount++
     }
 
     fun suicide(direction: Direction) {
