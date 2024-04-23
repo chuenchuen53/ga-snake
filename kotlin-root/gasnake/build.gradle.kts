@@ -12,6 +12,7 @@ repositories {
 dependencies {
     implementation(kotlin("reflect"))
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.3.1")

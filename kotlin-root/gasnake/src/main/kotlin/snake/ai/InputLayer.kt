@@ -53,8 +53,7 @@ class InputLayer(val game: SnakeGame) {
         val foodDistanceStartIndex = directionStartIndex + directionValue.size
         foodDistance.forEachIndexed { index, v -> result[foodDistanceStartIndex + index] = v }
 
-//        val snakePortion = snakePortionValue()
-        val snakePortion = snakePortionHelper.computeResult()
+        val snakePortion = snakePortionValue()
         val snakePortionStartIndex = foodDistanceStartIndex + foodDistance.size
         snakePortion.forEachIndexed { index, v -> result[snakePortionStartIndex + index] = v }
 
@@ -102,35 +101,10 @@ class InputLayer(val game: SnakeGame) {
     }
 
     fun snakePortionValue(): DoubleArray {
-        val (snakeHeadX, snakeHeadY) = game.snake.head
-
-        var topCount = 0
-        var bottomCount = 0
-        var leftCount = 0
-        var rightCount = 0
-
-        for (pos in game.snake.positions) {
-            val (x, y) = pos
-
-            if (y < snakeHeadY) {
-                topCount++
-            } else if (y > snakeHeadY) {
-                bottomCount++
-            }
-
-            if (x < snakeHeadX) {
-                leftCount++
-            } else if (x > snakeHeadX) {
-                rightCount++
-            }
+        if (game.snake.length > snakePortionHelper.lengthThreshold) {
+            return snakePortionHelper.computeResultBySnapShot()
         }
-
-        val topResult = topCount.toDouble() / numOfBoardCell
-        val bottomResult = bottomCount.toDouble() / numOfBoardCell
-        val leftResult = leftCount.toDouble() / numOfBoardCell
-        val rightResult = rightCount.toDouble() / numOfBoardCell
-
-        return doubleArrayOf(topResult, bottomResult, leftResult, rightResult)
+        return snakePortionHelper.simpleComputeResult()
     }
 
     fun getSnakeLengthWorldRatio(): Double {
@@ -138,6 +112,10 @@ class InputLayer(val game: SnakeGame) {
     }
 
     inner class SnakePortionHelper() {
+        // snapshot update will loop through whole width and height
+        // assume the snake length less than this value will not benefit from snapshot
+        val lengthThreshold = game.worldWidth + game.worldHeight
+
         var snapShotResetCount = game.resetCount
         var snapShotMoves = game.moves
         var snapShotHead = game.snake.head
@@ -171,7 +149,39 @@ class InputLayer(val game: SnakeGame) {
             }
         }
 
-        fun computeResult(): DoubleArray {
+        fun simpleComputeResult(): DoubleArray {
+            val (snakeHeadX, snakeHeadY) = game.snake.head
+
+            var topCount = 0
+            var bottomCount = 0
+            var leftCount = 0
+            var rightCount = 0
+
+            for (pos in game.snake.positions) {
+                val (x, y) = pos
+
+                if (y < snakeHeadY) {
+                    topCount++
+                } else if (y > snakeHeadY) {
+                    bottomCount++
+                }
+
+                if (x < snakeHeadX) {
+                    leftCount++
+                } else if (x > snakeHeadX) {
+                    rightCount++
+                }
+            }
+
+            val topResult = topCount.toDouble() / numOfBoardCell
+            val bottomResult = bottomCount.toDouble() / numOfBoardCell
+            val leftResult = leftCount.toDouble() / numOfBoardCell
+            val rightResult = rightCount.toDouble() / numOfBoardCell
+
+            return doubleArrayOf(topResult, bottomResult, leftResult, rightResult)
+        }
+
+        fun computeResultBySnapShot(): DoubleArray {
             updateSnapshot()
 
             var exactXCount = 0

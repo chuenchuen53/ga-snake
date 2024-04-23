@@ -1,6 +1,7 @@
 package com.example.snake.ai.performance
 
 
+import com.example.snake.ai.Options
 import com.example.snake.ai.ProvidedWeightsAndBiases
 import com.example.snake.ai.SnakeBrain
 import com.example.snake.ai.SnakeBrainData
@@ -16,7 +17,7 @@ fun main() {
     reader.close()
 
     val snakeBrain = SnakeBrain(
-        com.example.snake.ai.Options(
+        Options(
             brainData.inputLength,
             brainData.layerShapes,
             brainData.hiddenLayerActivationFunction,
