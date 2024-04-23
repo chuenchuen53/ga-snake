@@ -1,5 +1,5 @@
 {
-  "name": "snake-express",
+  "name": "snake-multi-play-server",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -8,21 +8,18 @@
     "coverage": "jest --coverage",
     "prebuild": "rimraf build",
     "build": "tsc --project tsconfig.build.json",
-    "prestart": "pnpm --filter snake-express... build",
+    "prestart": "pnpm --filter snake-multi-play-server... build",
     "start": "pnpm build && node build/app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cors": "2.8.5",
-    "dotenv": "16.0.3",
-    "express": "4.18.2",
-    "mongodb": "5.1.0",
-    "mongoose": "7.0.2",
     "snake-ai": "workspace:*",
     "snake-game": "workspace:*",
-    "zod": "3.21.4"
+    "cors": "2.8.5",
+    "dotenv": "16.0.3",
+    "express": "4.18.2"
   },
   "devDependencies": {
     "@types/cors": "2.8.13",

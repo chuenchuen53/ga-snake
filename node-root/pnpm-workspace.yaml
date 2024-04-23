@@ -1,6 +1,6 @@
 packages:
   - "snake-game"
   - "snake-ai"
+  - "snake-multi-play-server"
   - "snake-express"
   - "snake-react"
-

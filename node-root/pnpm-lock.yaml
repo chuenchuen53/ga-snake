@@ -103,6 +103,31 @@ importers:
 
   snake-game: {}
 
+  snake-multi-play-server:
+    dependencies:
+      cors:
+        specifier: 2.8.5
+        version: 2.8.5
+      dotenv:
+        specifier: 16.0.3
+        version: 16.0.3
+      express:
+        specifier: 4.18.2
+        version: 4.18.2
+      snake-ai:
+        specifier: workspace:*
+        version: link:../snake-ai
+      snake-game:
+        specifier: workspace:*
+        version: link:../snake-game
+    devDependencies:
+      '@types/cors':
+        specifier: 2.8.13
+        version: 2.8.13
+      '@types/express':
+        specifier: 4.17.17
+        version: 4.17.17
+
   snake-react:
     dependencies:
       '@emotion/react':

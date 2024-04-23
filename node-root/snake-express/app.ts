@@ -23,6 +23,28 @@ app.use((req, res, next) => {
 const API_VERSION = "/api";
 app.use(API_VERSION, routes);
 
+app.get("/testing", async (req, res) => {
+  try {
+    const resp = await fetch("http://localhost:8081/api/result", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ data: "hello" }),
+    });
+
+    if (resp.status === 200) {
+      const data = await resp.json();
+      res.json(data);
+    } else {
+      res.status(500);
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(500);
+  }
+});
+
 const db = AppDb.getInstance();
 db.connect().then(() => {
   const PORT = 8080;
