@@ -9,8 +9,9 @@ import com.example.snake.game.Options
 import com.example.snake.game.SnakeGame
 import com.google.gson.Gson
 import java.io.InputStreamReader
+import kotlin.system.measureTimeMillis
 
-data class Result(val score: Int, val execTime: Double)
+data class Result(val score: Int, val execTime: Long)
 
 fun main() {
     val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream("trained-brain.json")
@@ -39,7 +40,7 @@ fun main() {
     for (i in 0 until games) {
         snakeGame.reset()
 
-        val execTime = TimingUtils.execTime {
+        val execTime = measureTimeMillis {
             while (!snakeGame.gameOver) {
                 val input = inputLayer.compute()
                 val direction = snakeBrain.compute(input)
@@ -50,7 +51,7 @@ fun main() {
         result.add(Result(snakeGame.snake.length, execTime))
     }
 
-    val totalTime = result.sumOf { it.execTime }
+    val totalTime = result.sumOf { it.execTime }.toDouble() / 1000
     println("Total time: ${"%.3f".format(totalTime)}s")
 
     val bestScore = result.maxByOrNull { it.score }?.score ?: 0
