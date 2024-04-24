@@ -8,7 +8,6 @@ import com.example.snake.ai.SnakeBrainData
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import snake.ai.multithread.MultiThreadGames
 import java.io.InputStreamReader
 import kotlin.system.measureTimeMillis
 
@@ -31,7 +30,7 @@ suspend fun main() {
         )
     )
 
-    val multiThreadGames = MultiThreadGames()
+    val multiThreadGames = com.example.snake.ai.multithread.MultiThreadGames()
 
     val games = 10000
     val snakeBrains = List(games) { snakeBrain }

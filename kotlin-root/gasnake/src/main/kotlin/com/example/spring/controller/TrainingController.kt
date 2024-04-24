@@ -2,13 +2,13 @@ package com.example.spring.controller
 
 import com.example.spring.exception.BadRequestException
 import com.example.spring.request.InitModelRequest
+import com.example.spring.request.ResumeModelRequest
 import com.example.spring.response.InitModelResponse
 import com.example.spring.response.ResumeModelResponse
 import com.example.spring.service.TrainingService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
-import spring.request.ResumeModelRequest
 
 @RestController
 @RequestMapping("/training")

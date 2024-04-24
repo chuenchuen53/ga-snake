@@ -4,15 +4,14 @@ import com.example.snake.ai.ga.GaModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import snake.ai.ga.trymodel.setting
 
 fun main() = runBlocking {
     val printList = mutableListOf<Map<String, Any>>()
 
-    val gaModel = GaModel(setting.gaPlayerConfig, 20)
+    val gaModel = GaModel(com.example.snake.ai.ga.trymodel.setting.gaPlayerConfig, 20)
 
     launch(Dispatchers.Default) {
-        for (i in 0 until setting.evolveTimes) {
+        for (i in 0 until com.example.snake.ai.ga.trymodel.setting.evolveTimes) {
             val result = gaModel.evolve()
             printList.add(
                 mapOf(

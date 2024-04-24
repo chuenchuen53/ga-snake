@@ -1,8 +1,7 @@
-package snake.ai.multithread
+package com.example.snake.ai.multithread
 
 import com.example.snake.ai.InputLayer
 import com.example.snake.ai.SnakeBrain
-import com.example.snake.ai.multithread.WorkerResult
 import com.example.snake.game.GameRecord
 import com.example.snake.game.Options
 import com.example.snake.game.SnakeGame

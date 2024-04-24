@@ -3,10 +3,6 @@ package com.example.snake.ai.ga
 import com.example.snake.ai.*
 import com.example.snake.game.SnakeGame
 import com.example.snake.game.Utils
-import snake.ai.ga.EvolveResult
-import snake.ai.ga.GaModelData
-import snake.ai.ga.OverallStats
-import snake.ai.multithread.MultiThreadGames
 import kotlin.math.pow
 
 class GaModel(option: Options, numOfThreads: Int) {
@@ -63,7 +59,7 @@ class GaModel(option: Options, numOfThreads: Int) {
     private var _evolving: Boolean
     private val _numberOfSurvival: Int
     private val _maxPossibleSnakeLength: Int
-    private val multiThreadGames: MultiThreadGames
+    private val multiThreadGames: com.example.snake.ai.multithread.MultiThreadGames
 
     val generation: Int
         get() = _generation
@@ -132,13 +128,13 @@ class GaModel(option: Options, numOfThreads: Int) {
         }
 
         _evolving = false
-        multiThreadGames = MultiThreadGames()
+        multiThreadGames = com.example.snake.ai.multithread.MultiThreadGames()
         _numberOfSurvival = (populationSize * surviveRate).toInt()
         if (_numberOfSurvival < 2) throw Error("Survival less than 2, please increase survive rate or population size.")
         _maxPossibleSnakeLength = worldHeight * worldWidth
     }
 
-    fun exportModel(): GaModelData = GaModelData(
+    fun exportModel(): com.example.snake.ai.ga.GaModelData = com.example.snake.ai.ga.GaModelData(
         worldWidth = worldWidth,
         worldHeight = worldHeight,
         hiddenLayersLength = hiddenLayersLength,
@@ -162,7 +158,7 @@ class GaModel(option: Options, numOfThreads: Int) {
         }
     )
 
-    suspend fun evolve(): EvolveResult {
+    suspend fun evolve(): com.example.snake.ai.ga.EvolveResult {
         if (_evolving) throw Error("Evolve is still running.")
 
         _generation++
@@ -185,7 +181,7 @@ class GaModel(option: Options, numOfThreads: Int) {
             gameRecord = finalBestPlayer.gameRecord?.let { SnakeGame.cloneGameRecord(it) }
         )
 
-        val overallStats = OverallStats(
+        val overallStats = com.example.snake.ai.ga.OverallStats(
             fitness = CalcUtils.statsOfArray(population.map { it.fitness }.toDoubleArray()),
             snakeLength = CalcUtils.statsOfArray(population.map { it.snakeLength }.toDoubleArray()),
             moves = CalcUtils.statsOfArray(population.map { it.moves }.toDoubleArray())
@@ -194,7 +190,7 @@ class GaModel(option: Options, numOfThreads: Int) {
         val timeSpent = System.currentTimeMillis() - startTime
         _evolving = false
 
-        return EvolveResult(generation, bestIndividual, timeSpent, overallStats)
+        return com.example.snake.ai.ga.EvolveResult(generation, bestIndividual, timeSpent, overallStats)
     }
 
     private suspend fun evaluate() {

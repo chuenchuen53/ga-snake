@@ -1,4 +1,4 @@
-package spring.request
+package com.example.spring.request
 
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank

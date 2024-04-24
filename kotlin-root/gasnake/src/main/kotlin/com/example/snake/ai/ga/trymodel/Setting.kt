@@ -1,4 +1,4 @@
-package snake.ai.ga.trymodel
+package com.example.snake.ai.ga.trymodel
 
 import com.example.snake.ai.ActivationFunction
 import com.example.snake.ai.ga.GaConfig
@@ -10,7 +10,7 @@ data class Setting(
     val gaPlayerConfig: Options
 )
 
-val setting = Setting(
+val setting = com.example.snake.ai.ga.trymodel.Setting(
     evolveTimes = 2000,
     gaPlayerConfig = Options(
         worldWidth = 20,

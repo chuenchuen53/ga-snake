@@ -1,7 +1,6 @@
-package snake.ai.ga
+package com.example.snake.ai.ga
 
 import com.example.snake.ai.ActivationFunction
-import com.example.snake.ai.ga.IndividualPlainObject
 
 data class GaModelData(
     val worldWidth: Int,
