@@ -3,9 +3,6 @@ package com.example.snake.ai.ga
 import com.example.snake.ai.*
 import com.example.snake.game.SnakeGame
 import com.example.snake.game.Utils
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import snake.ai.ga.EvolveResult
 import snake.ai.ga.GaModelData
 import snake.ai.ga.OverallStats
@@ -230,18 +227,17 @@ class GaModel(option: Options, numOfThreads: Int) {
     }
 
     private fun crossover() {
-        population.forEachIndexed { childIdx, individual ->
-            if (individual.survive) return@forEachIndexed
+        population.forEach {
+            if (it.survive) return@forEach
 
-            val parent1 = pickParent(childIdx)
-            val parent2 = pickParent(childIdx, parent1)
-            individual.snakeBrain.crossOver(parent1.snakeBrain, parent2.snakeBrain)
+            val parent1 = pickParent(it)
+            val parent2 = pickParent(it, parent1)
+            it.snakeBrain.crossOver(parent1.snakeBrain, parent2.snakeBrain)
         }
     }
 
-    private fun pickParent(childIdx: Int, anotherParent: Individual? = null): Individual {
-        val anotherParentIdx = anotherParent?.let { population.indexOf(it) } ?: -1
-        val filteredPopulation = population.filterIndexed { idx, _ -> idx != childIdx && idx != anotherParentIdx }
+    private fun pickParent(child: Individual, anotherParent: Individual? = null): Individual {
+        val filteredPopulation = population.filter { it !== child && it !== anotherParent }
         return spinRouletteWheel(filteredPopulation)
     }
 
