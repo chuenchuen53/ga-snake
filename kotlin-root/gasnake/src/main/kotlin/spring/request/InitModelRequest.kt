@@ -11,7 +11,7 @@ data class InitModelRequest(
         val worldHeight: Int,
         val snakeBrainConfig: SnakeBrainConfig,
         val gaConfig: GaConfig,
-        val providedInfo: ProvidedInfo?
+        val providedInfo: ProvidedInfo
     ) {
         data class SnakeBrainConfig(
             val hiddenLayersLength: List<Int>,
