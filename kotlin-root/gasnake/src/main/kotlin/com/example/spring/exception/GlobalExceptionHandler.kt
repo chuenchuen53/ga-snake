@@ -28,13 +28,6 @@ class GlobalExceptionHandler {
         logger.error(ex.message, ex)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorMessage("internal server error"))
     }
-
-    @ExceptionHandler(Exception::class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    fun handleException(ex: Exception): ResponseEntity<ErrorMessage> {
-        logger.error(ex.message, ex)
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorMessage("internal server error"))
-    }
-
+    
     data class ErrorMessage(val message: String)
 }
