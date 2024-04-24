@@ -17,7 +17,7 @@ val setting = Setting(
         worldHeight = 20,
         snakeBrainConfig = SnakeBrainConfig(
             hiddenLayersLength = listOf(16, 8),
-            hiddenLayerActivationFunction = ActivationFunction.RELU
+            hiddenLayerActivationFunction = ActivationFunction.LINEAR
         ),
         gaConfig = GaConfig(
             populationSize = 5000,

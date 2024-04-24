@@ -3,8 +3,6 @@ package com.example.snake.ai.ga
 import com.example.snake.ai.*
 import com.example.snake.game.SnakeGame
 import com.example.snake.game.Utils
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import snake.ai.ga.EvolveResult
 import snake.ai.ga.GaModelData
@@ -208,23 +206,15 @@ class GaModel(option: Options, numOfThreads: Int) {
     }
 
     private suspend fun evaluate() {
-        val results = coroutineScope {
-            population.map { individual ->
-                async {
-                    multiThreadGames.playGames(
-                        worldWidth,
-                        worldHeight,
-                        trialTimes,
-                        individual.snakeBrain.toPlainObject()
-                    ).get()
-                }
-            }.map { it.await() }
-        }
-
+        val futureList =
+            multiThreadGames.playManyGames(worldWidth, worldHeight, trialTimes, population.map { it.snakeBrain })
+        val results = futureList.get()
+        
         for (i in population.indices) {
             val individual = population[i]
             val (snakeLengthArr, movesArr, gameRecordArr) = results[i]
-            val fitnessArr = Array(trialTimes) { fitness(movesArr[it], snakeLengthArr[it], _maxPossibleSnakeLength) }
+            val fitnessArr =
+                Array(trialTimes) { fitness(movesArr[it], snakeLengthArr[it], _maxPossibleSnakeLength) }
 
             individual.snakeLength = CalcUtils.meanOfArray(snakeLengthArr.map { it.toDouble() }.toDoubleArray())
             individual.moves = CalcUtils.meanOfArray(movesArr.map { it.toDouble() }.toDoubleArray())
@@ -232,6 +222,32 @@ class GaModel(option: Options, numOfThreads: Int) {
             individual.gameRecord =
                 gameRecordArr[CalcUtils.indexOfMaxValueInArray(fitnessArr.map { it }.toDoubleArray())]
         }
+
+//        runBlocking {
+//            launch {
+//                val deferredResults = multiThreadGames.playManyGamesAsync(
+//                    worldWidth,
+//                    worldHeight,
+//                    trialTimes,
+//                    population.map { it.snakeBrain })
+//                val results = deferredResults.await()
+//
+//                for (i in population.indices) {
+//                    val individual = population[i]
+//                    val (snakeLengthArr, movesArr, gameRecordArr) = results[i]
+//                    val fitnessArr =
+//                        Array(trialTimes) { fitness(movesArr[it], snakeLengthArr[it], _maxPossibleSnakeLength) }
+//
+//                    individual.snakeLength = CalcUtils.meanOfArray(snakeLengthArr.map { it.toDouble() }.toDoubleArray())
+//                    individual.moves = CalcUtils.meanOfArray(movesArr.map { it.toDouble() }.toDoubleArray())
+//                    individual.fitness = CalcUtils.meanOfArray(fitnessArr.map { it }.toDoubleArray())
+//                    individual.gameRecord =
+//                        gameRecordArr[CalcUtils.indexOfMaxValueInArray(fitnessArr.map { it }.toDoubleArray())]
+//                }
+//            }
+//        }
+
+
     }
 
     private fun select() {
