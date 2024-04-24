@@ -19,7 +19,7 @@ export interface PopulationHistory {
   generation: number;
 }
 
-export type ModelInfo = Omit<Omit<IGaModel, "parentModelId">, "population"> & {
+export type ModelInfo = Omit<IGaModel, "population"> & {
   _id: string;
   evolveResultHistory: EvolveResultWithId[];
   populationHistory: PopulationHistory[];
