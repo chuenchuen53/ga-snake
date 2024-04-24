@@ -7,8 +7,6 @@ import com.example.snake.ai.SnakeBrain
 import com.example.snake.ai.SnakeBrainData
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import snake.ai.multithread.MultiThreadGames
 import java.io.InputStreamReader
@@ -40,8 +38,7 @@ suspend fun main() {
     val scores = mutableListOf<Int>()
 
     val execTime = measureTimeMillis {
-        val workerResultsDeferred = multiThreadGames.playManyGames(20, 20, 1, snakeBrains)
-        val workerResults = runBlocking { workerResultsDeferred.awaitAll() }
+        val workerResults = multiThreadGames.playManyGames(20, 20, 1, snakeBrains)
         scores.addAll(workerResults.map { it.snakeLengthArr.average().toInt() })
     }
 

@@ -6,8 +6,8 @@ import com.example.snake.ai.multithread.WorkerResult
 import com.example.snake.game.GameRecord
 import com.example.snake.game.Options
 import com.example.snake.game.SnakeGame
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
 class MultiThreadGames {
@@ -16,12 +16,12 @@ class MultiThreadGames {
         worldHeight: Int,
         playTimes: Int,
         snakeBrainList: List<SnakeBrain>
-    ): List<Deferred<WorkerResult>> = coroutineScope {
+    ): List<WorkerResult> = coroutineScope {
         snakeBrainList.map {
             async {
                 playGame(worldWidth, worldHeight, playTimes, it)
             }
-        }
+        }.awaitAll()
     }
 
     private suspend fun playGame(

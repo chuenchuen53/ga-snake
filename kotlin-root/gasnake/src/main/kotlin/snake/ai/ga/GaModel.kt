@@ -172,9 +172,7 @@ class GaModel(option: Options, numOfThreads: Int) {
         _evolving = true
         val startTime = System.currentTimeMillis()
 
-        runBlocking {
-            evaluate()
-        }
+        evaluate()
         select()
         crossover()
         mutate()
@@ -203,28 +201,23 @@ class GaModel(option: Options, numOfThreads: Int) {
     }
 
     private suspend fun evaluate() {
-        runBlocking {
-            launch {
-                val deferredResults = multiThreadGames.playManyGames(
-                    worldWidth,
-                    worldHeight,
-                    trialTimes,
-                    population.map { it.snakeBrain })
-                val results = deferredResults.awaitAll()
+        val results = multiThreadGames.playManyGames(
+            worldWidth,
+            worldHeight,
+            trialTimes,
+            population.map { it.snakeBrain })
 
-                for (i in population.indices) {
-                    val individual = population[i]
-                    val (snakeLengthArr, movesArr, gameRecordArr) = results[i]
-                    val fitnessArr =
-                        Array(trialTimes) { fitness(movesArr[it], snakeLengthArr[it], _maxPossibleSnakeLength) }
+        for (i in population.indices) {
+            val individual = population[i]
+            val (snakeLengthArr, movesArr, gameRecordArr) = results[i]
+            val fitnessArr =
+                Array(trialTimes) { fitness(movesArr[it], snakeLengthArr[it], _maxPossibleSnakeLength) }
 
-                    individual.snakeLength = CalcUtils.meanOfArray(snakeLengthArr.map { it.toDouble() }.toDoubleArray())
-                    individual.moves = CalcUtils.meanOfArray(movesArr.map { it.toDouble() }.toDoubleArray())
-                    individual.fitness = CalcUtils.meanOfArray(fitnessArr.map { it }.toDoubleArray())
-                    individual.gameRecord =
-                        gameRecordArr[CalcUtils.indexOfMaxValueInArray(fitnessArr.map { it }.toDoubleArray())]
-                }
-            }
+            individual.snakeLength = CalcUtils.meanOfArray(snakeLengthArr.map { it.toDouble() }.toDoubleArray())
+            individual.moves = CalcUtils.meanOfArray(movesArr.map { it.toDouble() }.toDoubleArray())
+            individual.fitness = CalcUtils.meanOfArray(fitnessArr.map { it }.toDoubleArray())
+            individual.gameRecord =
+                gameRecordArr[CalcUtils.indexOfMaxValueInArray(fitnessArr.map { it }.toDoubleArray())]
         }
     }
 
