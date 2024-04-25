@@ -8,3 +8,9 @@ cors:
 
 springdoc:
   packages-to-scan: com.example.spring.controller
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://127.0.0.1:27017
+      database: sample_restaurants

@@ -5,20 +5,41 @@ import com.example.snake.ai.ga.GaConfig
 import com.example.snake.ai.ga.GaModel
 import com.example.snake.ai.ga.Options
 import com.example.snake.ai.ga.SnakeBrainConfig
+import com.example.spring.entity.EvolveResultEntity
+import com.example.spring.entity.GaModelEntity
 import com.example.spring.exception.BadRequestException
+import com.example.spring.repo.EvolveResultRepo
+import com.example.spring.repo.GaModelRepo
 import com.example.spring.request.InitModelRequest
 import com.example.spring.response.PollingInfoResponse
 import com.example.spring.response.shared.EvolveResultWithId
 import com.example.spring.response.shared.ModelInfo
 import com.example.spring.response.shared.PopulationHistory
 import com.example.spring.utils.event.EventEmitter
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.bson.types.ObjectId
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
-import kotlin.random.Random
 
 @Service
 class TrainingServiceImpl() : TrainingService {
+    @Autowired
+    private lateinit var gaModelRepo: GaModelRepo
+
+    @Autowired
+    private lateinit var evolveResultRepo: EvolveResultRepo
+
+    @Autowired
+    private lateinit var mongoTemplate: MongoTemplate
+
+    val trainingScope = CoroutineScope(Dispatchers.Default)
+
     override var currentModelId: String? = null
 
     override var emitter: EventEmitter = EventEmitter()
@@ -55,10 +76,29 @@ class TrainingServiceImpl() : TrainingService {
         )
 
         val modelData = model.exportModel()
+        val now = java.util.Date()
+        val entity = GaModelEntity(
+            id = ObjectId(),
+            worldWidth = modelData.worldWidth,
+            worldHeight = modelData.worldHeight,
+            hiddenLayersLength = modelData.hiddenLayersLength,
+            hiddenLayerActivationFunction = modelData.hiddenLayerActivationFunction,
+            populationSize = modelData.populationSize,
+            surviveRate = modelData.surviveRate,
+            populationMutationRate = modelData.populationMutationRate,
+            geneMutationRate = modelData.geneMutationRate,
+            mutationAmount = modelData.mutationAmount,
+            trialTimes = modelData.trialTimes,
+            generation = modelData.generation,
+            populationHistory = emptyList(),
+            evolveResultHistory = emptyList(),
+            createdAt = now,
+            updatedAt = now,
+        )
 
-        // todo insert into db
+        val saveEntity = gaModelRepo.save(entity)
 
-        currentModelId = "testing_id"
+        currentModelId = saveEntity.id.toString()
         worker = model
     }
 
@@ -87,9 +127,7 @@ class TrainingServiceImpl() : TrainingService {
         if (currentModelId == null) throw BadRequestException("model does not exists")
         if (queueTraining > 0) throw BadRequestException("training already started")
         queueTraining = times
-        GlobalScope.launch {
-            startTraining()
-        }
+        trainingScope.launch { startTraining() }
     }
 
     override fun stopEvolve() {
@@ -187,10 +225,28 @@ class TrainingServiceImpl() : TrainingService {
             modelEvolving = false
             if (queueTraining > 0) queueTraining--
 
-            //todo db
-            val id = Random.nextInt(10000000).toString()
+            val now = java.util.Date()
+            val entity = EvolveResultEntity(
+                id = ObjectId(),
+                generation = evolveResult.generation,
+                bestIndividual = evolveResult.bestIndividual,
+                timeSpent = evolveResult.timeSpent.toLong(), // todo
+                overallStats = evolveResult.overallStats,
+                createdAt = now,
+                updatedAt = now,
+            )
+            val savedEntity = evolveResultRepo.save(entity)
+
+            val query = Query()
+            query.addCriteria(Criteria.where("id").`is`(currentModelId))
+            val update = Update()
+            update.set("updatedAt", now)
+            update.set("generation", evolveResult.generation)
+            update.push("evolveResultHistory", entity.id)
+            mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
+
             val evolveResultWithId = EvolveResultWithId(
-                id,
+                savedEntity.id.toString(),
                 evolveResult.generation,
                 evolveResult.bestIndividual,
                 evolveResult.timeSpent,

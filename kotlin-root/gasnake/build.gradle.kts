@@ -21,6 +21,8 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0")
+    implementation("org.mongodb:mongodb-driver-kotlin-coroutine:4.10.1")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.3.1")
