@@ -4,8 +4,6 @@ import com.example.snake.game.Utils
 import com.example.snake.game.typing.Direction
 import kotlin.random.Random
 
-typealias LayerShape = Pair<Int, Int>
-
 data class ProvidedWeightsAndBiases(
     val weights: List<List<DoubleArray>>,
     val biases: List<DoubleArray>
@@ -13,14 +11,14 @@ data class ProvidedWeightsAndBiases(
 
 data class Options(
     val inputLength: Int,
-    val layerShapes: List<LayerShape>,
+    val layerShapes: List<List<Int>>,
     val hiddenLayerActivationFunction: ActivationFunction,
     val providedWeightsAndBiases: ProvidedWeightsAndBiases?
 )
 
 data class SnakeBrainData(
     val inputLength: Int,
-    val layerShapes: List<LayerShape>,
+    val layerShapes: List<List<Int>>,
     val hiddenLayerActivationFunction: ActivationFunction,
     val weights: List<List<DoubleArray>>,
     val biases: List<DoubleArray>
@@ -41,7 +39,7 @@ class SnakeBrain(options: Options) {
     }
 
     val inputLength: Int = options.inputLength
-    val layerShapes: List<LayerShape> = options.layerShapes
+    val layerShapes: List<List<Int>> = options.layerShapes
     val hiddenLayerActivationFunction: ActivationFunction = options.hiddenLayerActivationFunction
     var weights: List<List<DoubleArray>>
     var biases: List<DoubleArray>
@@ -78,12 +76,12 @@ class SnakeBrain(options: Options) {
         if (biases.any { arr -> arr.any { it < MIN_BIAS || it > MAX_BIAS } }) return false
 
         for (i in 1 until weights.size) {
-            if (weights[i].size != layerShapes[i].first) return false
-            if (weights[i][0].size != layerShapes[i].second) return false
+            if (weights[i].size != layerShapes[i][0]) return false
+            if (weights[i][0].size != layerShapes[i][1]) return false
         }
 
         for (i in biases.indices) {
-            if (biases[i].size != layerShapes[i].first) return false
+            if (biases[i].size != layerShapes[i][0]) return false
         }
 
         return true
@@ -136,23 +134,23 @@ class SnakeBrain(options: Options) {
 
         if (numOfLayer < 1) return false
 
-        if (layerShapes[0].second != inputLength) return false
+        if (layerShapes[0][1] != inputLength) return false
 
-        if (layerShapes[numOfLayer - 1].first != OUTPUT_LAYER_LENGTH) return false
+        if (layerShapes[numOfLayer - 1][0] != OUTPUT_LAYER_LENGTH) return false
 
         for (i in 1 until numOfLayer) {
-            if (layerShapes[i].second != layerShapes[i - 1].first) return false
+            if (layerShapes[i][1] != layerShapes[i - 1][0]) return false
         }
 
         return true
     }
 
-    private fun generateRandomLayerWeight(layerShape: LayerShape): List<DoubleArray> {
+    private fun generateRandomLayerWeight(layerShape: List<Int>): List<DoubleArray> {
         val (row, col) = layerShape
         return List(row) { DoubleArray(col) { Random.nextDouble(MIN_WEIGHT, MAX_WEIGHT) } }
     }
 
-    private fun generateRandomLayerBias(layerShape: LayerShape): DoubleArray {
+    private fun generateRandomLayerBias(layerShape: List<Int>): DoubleArray {
         val (row, _) = layerShape
         return DoubleArray(row) { Random.nextDouble(MIN_BIAS, MAX_BIAS) }
     }

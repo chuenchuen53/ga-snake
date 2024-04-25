@@ -7,10 +7,10 @@ import kotlin.math.pow
 
 class GaModel(options: Options) {
     companion object {
-        fun generateLayerShape(vararg args: Int): List<Pair<Int, Int>> {
-            val shapes = mutableListOf<Pair<Int, Int>>()
+        fun generateLayerShape(vararg args: Int): List<List<Int>> {
+            val shapes = mutableListOf<List<Int>>()
             for (i in 0 until args.size - 1) {
-                shapes.add(Pair(args[i + 1], args[i]))
+                shapes.add(listOf(args[i + 1], args[i]))
             }
             return shapes
         }

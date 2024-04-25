@@ -12,19 +12,22 @@ import com.example.spring.response.ResumeModelResponse
 import com.example.spring.service.TrainingService
 import com.example.spring.utils.event.OnceEventListener
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/training")
+@RequestMapping("/api/training")
 class TrainingController(
     @Autowired
     private val service: TrainingService,
 ) {
     companion object {
-        const val pollingTimeOut = 30000L
+        const val pollingTimeOut = 10000L
+//        const val pollingTimeOut = 30000L
     }
 
     @PostMapping("/init-model")
@@ -107,8 +110,9 @@ class TrainingController(
         service.removeCurrentModel()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @GetMapping("/polling-info/{currentEvolvingResultHistoryGeneration}/{currentPopulationHistoryGeneration}/{currentBackupPopulationInProgress}/{currentBackupPopulationWhenFinish}/{currentEvolving}")
-    suspend fun pollingInfo(
+    fun pollingInfo(
         @PathVariable currentEvolvingResultHistoryGeneration: Int,
         @PathVariable currentPopulationHistoryGeneration: Int,
         @PathVariable currentBackupPopulationInProgress: Boolean,
@@ -141,7 +145,11 @@ class TrainingController(
             deferred.complete(info)
         }
 
-        return deferred.await()
+        runBlocking {
+            deferred.await()
+        }
+
+        return deferred.getCompleted()
     }
 
     private fun haveModelGuard() {

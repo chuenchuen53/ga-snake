@@ -1,27 +1,27 @@
 package com.example.spring.utils.event
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class OnceEventListener(
     private val emitter: EventEmitter,
     private val timeout: Long,
     private val onEventAction: () -> Unit,
-) : EventListener {
-    private val job: Job
+) : EventListener, CoroutineScope {
+    private val job = Job()
+    override val coroutineContext = Dispatchers.Default + job
 
     init {
         emitter.addListener(this)
-        job = GlobalScope.launch {
+        val self = this
+        launch {
             delay(timeout)
-            onEvent()
+            onEventAction()
+            emitter.removeListener(self)
         }
     }
 
     override fun onEvent() {
-        job.cancel() // todo test bug
+        job.cancel()
         onEventAction()
         emitter.removeListener(this)
     }

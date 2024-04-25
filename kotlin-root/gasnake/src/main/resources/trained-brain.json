@@ -1,18 +1,18 @@
 {
   "inputLength": 25,
   "layerShapes": [
-    {
-      "first": 16,
-      "second": 25
-    },
-    {
-      "first": 8,
-      "second": 16
-    },
-    {
-      "first": 4,
-      "second": 8
-    }
+    [
+      16,
+      25
+    ],
+    [
+      8,
+      16
+    ],
+    [
+      4,
+      8
+    ]
   ],
   "hiddenLayerActivationFunction": "LINEAR",
   "weights": [
