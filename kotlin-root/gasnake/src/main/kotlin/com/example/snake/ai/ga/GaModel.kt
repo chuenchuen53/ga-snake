@@ -5,7 +5,7 @@ import com.example.snake.game.SnakeGame
 import com.example.snake.game.Utils
 import kotlin.math.pow
 
-class GaModel(option: Options, numOfThreads: Int) {
+class GaModel(options: Options) {
     companion object {
         fun generateLayerShape(vararg args: Int): List<Pair<Int, Int>> {
             val shapes = mutableListOf<Pair<Int, Int>>()
@@ -25,7 +25,8 @@ class GaModel(option: Options, numOfThreads: Int) {
             val cyclicPenalty = moves * 6 * (1 - ratioOfLength).pow(2)
 
             // for long snake
-            val lengthScore = (snakeLength - 1).toDouble().pow(2 + 6 * ratioOfLength) * maxPossibleSnakeLength * moves
+            val lengthScore = (snakeLength - 1).toDouble()
+                .pow(2 + 6 * ratioOfLength) * maxPossibleSnakeLength * moves
 
             return moveScore - cyclicPenalty + lengthScore
         }
@@ -67,16 +68,16 @@ class GaModel(option: Options, numOfThreads: Int) {
         get() = _evolving
 
     init {
-        worldHeight = option.worldHeight
-        worldWidth = option.worldWidth
-        hiddenLayersLength = option.snakeBrainConfig.hiddenLayersLength
-        hiddenLayerActivationFunction = option.snakeBrainConfig.hiddenLayerActivationFunction
-        populationSize = option.gaConfig.populationSize
-        surviveRate = option.gaConfig.surviveRate
-        populationMutationRate = option.gaConfig.populationMutationRate
-        geneMutationRate = option.gaConfig.geneMutationRate
-        mutationAmount = option.gaConfig.mutationAmount
-        trialTimes = option.gaConfig.trialTimes
+        worldHeight = options.worldHeight
+        worldWidth = options.worldWidth
+        hiddenLayersLength = options.snakeBrainConfig.hiddenLayersLength
+        hiddenLayerActivationFunction = options.snakeBrainConfig.hiddenLayerActivationFunction
+        populationSize = options.gaConfig.populationSize
+        surviveRate = options.gaConfig.surviveRate
+        populationMutationRate = options.gaConfig.populationMutationRate
+        geneMutationRate = options.gaConfig.geneMutationRate
+        mutationAmount = options.gaConfig.mutationAmount
+        trialTimes = options.gaConfig.trialTimes
 
         val inputLayerLength = InputLayer.inputLayerLength
         val layerShapes = GaModel.generateLayerShape(
@@ -85,8 +86,8 @@ class GaModel(option: Options, numOfThreads: Int) {
             SnakeBrain.OUTPUT_LAYER_LENGTH
         )
 
-        if (option.providedInfo != null) {
-            val (generation, snakeBrains) = option.providedInfo
+        if (options.providedInfo != null) {
+            val (generation, snakeBrains) = options.providedInfo
             if (populationSize != snakeBrains.size) throw Error("Provided snake brains length not equal to population size.")
             _generation = generation
             population = snakeBrains.map { x ->
@@ -158,7 +159,7 @@ class GaModel(option: Options, numOfThreads: Int) {
         }
     )
 
-    suspend fun evolve(): com.example.snake.ai.ga.EvolveResult {
+    suspend fun evolve(): EvolveResult {
         if (_evolving) throw Error("Evolve is still running.")
 
         _generation++
@@ -187,10 +188,15 @@ class GaModel(option: Options, numOfThreads: Int) {
             moves = CalcUtils.statsOfArray(population.map { it.moves }.toDoubleArray())
         )
 
-        val timeSpent = System.currentTimeMillis() - startTime
+        val timeSpent = (System.currentTimeMillis() - startTime).toDouble()
         _evolving = false
 
-        return com.example.snake.ai.ga.EvolveResult(generation, bestIndividual, timeSpent, overallStats)
+        return EvolveResult(
+            generation,
+            bestIndividual,
+            timeSpent,
+            overallStats
+        )
     }
 
     private suspend fun evaluate() {
@@ -204,13 +210,21 @@ class GaModel(option: Options, numOfThreads: Int) {
             val individual = population[i]
             val (snakeLengthArr, movesArr, gameRecordArr) = results[i]
             val fitnessArr =
-                Array(trialTimes) { fitness(movesArr[it], snakeLengthArr[it], _maxPossibleSnakeLength) }
+                Array(trialTimes) {
+                    fitness(
+                        movesArr[it],
+                        snakeLengthArr[it],
+                        _maxPossibleSnakeLength
+                    )
+                }
 
-            individual.snakeLength = CalcUtils.meanOfArray(snakeLengthArr.map { it.toDouble() }.toDoubleArray())
+            individual.snakeLength =
+                CalcUtils.meanOfArray(snakeLengthArr.map { it.toDouble() }.toDoubleArray())
             individual.moves = CalcUtils.meanOfArray(movesArr.map { it.toDouble() }.toDoubleArray())
             individual.fitness = CalcUtils.meanOfArray(fitnessArr.map { it }.toDoubleArray())
             individual.gameRecord =
-                gameRecordArr[CalcUtils.indexOfMaxValueInArray(fitnessArr.map { it }.toDoubleArray())]
+                gameRecordArr[CalcUtils.indexOfMaxValueInArray(fitnessArr.map { it }
+                    .toDoubleArray())]
         }
     }
 

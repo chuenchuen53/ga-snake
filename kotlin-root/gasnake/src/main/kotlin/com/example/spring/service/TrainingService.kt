@@ -6,10 +6,10 @@ import com.example.spring.response.shared.ModelInfo
 import com.example.spring.utils.event.EventEmitter
 
 interface TrainingService {
-    var currentModelId: String?
-    var queueTraining: Int
-    var backupPopulationInProgress: Boolean
-    var emitter: EventEmitter
+    val currentModelId: String?
+    val queueTraining: Int
+    val backupPopulationInProgress: Boolean
+    val emitter: EventEmitter
 
     fun initModel(options: InitModelRequest.Options)
 
@@ -23,7 +23,7 @@ interface TrainingService {
 
     fun toggleBackupPopulationWhenFinish(backup: Boolean)
 
-    fun backupCurrentPopulation(): Boolean
+    fun backupCurrentPopulation(skipQueueTrainingCheck: Boolean): Boolean
 
     fun removeCurrentModel()
 

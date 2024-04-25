@@ -83,7 +83,7 @@ class TrainingController(
             throw BadRequestException("previous backup still in progress")
         }
 
-        val result = service.backupCurrentPopulation()
+        val result = service.backupCurrentPopulation(false)
         if (!result) {
             throw BadRequestException("population already backup")
         }
@@ -132,7 +132,7 @@ class TrainingController(
         }
 
         val deferred = CompletableDeferred<PollingInfoResponse>()
-        
+
         OnceEventListener(service.emitter, pollingTimeOut) {
             val info = service.pollingInfo(
                 currentEvolvingResultHistoryGeneration,

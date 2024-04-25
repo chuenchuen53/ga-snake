@@ -6,8 +6,8 @@ import com.example.snake.ai.BaseStats
 data class EvolveResult(
     val generation: Int,
     val bestIndividual: IndividualPlainObject,
-    val timeSpent: Long,
-    val overallStats: com.example.snake.ai.ga.OverallStats
+    val timeSpent: Double,
+    val overallStats: OverallStats
 )
 
 data class OverallStats(
