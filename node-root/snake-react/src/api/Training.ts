@@ -8,9 +8,9 @@ import type {
   toggleBackupPopulationWhenFinishRequest,
 } from "snake-express/api-typing/training";
 
-const { REACT_APP_SERVER_HOST } = process.env;
+const { REACT_APP_TRAINING_SERVICE } = process.env;
 
-const trainingRoute = `${REACT_APP_SERVER_HOST}/api/training`;
+const trainingRoute = `${REACT_APP_TRAINING_SERVICE}/api/training`;
 
 async function initModel(body: InitModelRequest): Promise<InitModelResponse> {
   const resp = await fetch(`${trainingRoute}/init-model`, {

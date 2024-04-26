@@ -1,8 +1,8 @@
 import type { GetAllTrainedModelsResponse, GetModelDetailResponse } from "snake-express/api-typing/trained-models";
 
-const { REACT_APP_SERVER_HOST } = process.env;
+const { REACT_APP_TRAINED_SERVICE } = process.env;
 
-const trainedModelsRoute = `${REACT_APP_SERVER_HOST}/api/trained-models`;
+const trainedModelsRoute = `${REACT_APP_TRAINED_SERVICE}/api/trained-models`;
 
 async function getAllTrainedModels(): Promise<GetAllTrainedModelsResponse> {
   const resp = await fetch(`${trainedModelsRoute}/all`, {
