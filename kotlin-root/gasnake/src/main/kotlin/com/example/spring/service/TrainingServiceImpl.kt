@@ -22,10 +22,17 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import kotlin.jvm.optionals.getOrElse
 
 @Service
 class TrainingServiceImpl() : TrainingService {
+    override var currentModelId: String? = null
+    override var emitter: EventEmitter = EventEmitter()
+    override var queueTraining: Int = 0
+    override var backupPopulationInProgress: Boolean = false
+
+    @Autowired
+    private lateinit var mongoTemplate: MongoTemplate
+
     @Autowired
     private lateinit var gaModelRepo: GaModelRepo
 
@@ -38,20 +45,12 @@ class TrainingServiceImpl() : TrainingService {
     @Autowired
     private lateinit var individualRepo: IndividualRepo
 
-    @Autowired
-    private lateinit var mongoTemplate: MongoTemplate
+    private val trainingScope = CoroutineScope(Dispatchers.Default)
 
-    val trainingScope = CoroutineScope(Dispatchers.Default)
-
-    override var currentModelId: String? = null
-
-    override var emitter: EventEmitter = EventEmitter()
-    override var queueTraining: Int = 0
-    override var backupPopulationInProgress: Boolean = false
     private var evolveResultHistoryCache: MutableList<EvolveResultWithId> = mutableListOf()
     private var backupPopulationWhenFinish: Boolean = false
     private var populationHistoryCache: MutableList<PopulationHistory> = mutableListOf()
-    private var worker: GaModel? = null
+    private var serviceModel: GaModel? = null
     private var modelEvolving = false
 
     private fun publishChange() {
@@ -106,17 +105,17 @@ class TrainingServiceImpl() : TrainingService {
         val saveEntity = gaModelRepo.save(entity)
 
         currentModelId = saveEntity.id.toString()
-        worker = model
+        serviceModel = model
     }
 
 
     override fun resumeModel(modelId: String, generation: Int) {
-        val gaModelEntity = gaModelRepo.findById(ObjectId(modelId))
-            .getOrElse { throw BadRequestException("model not found") }
+        val gaModelEntity = gaModelRepo.findByIdOrNull(ObjectId(modelId))
+            ?: throw BadRequestException("model not found")
 
-        val populationEntity =
-            populationRepo.findOneByIdInAndGeneration(gaModelEntity.populationHistory, generation)
-                ?: throw BadRequestException("population not found")
+        val populationEntity = populationRepo.findOneByIdInAndGeneration(gaModelEntity.populationHistory, generation)
+            ?: throw BadRequestException("population not found")
+
         val individualEntities = individualRepo.findAllById(populationEntity.population)
         val snakeBrainDataList = individualEntities.map { it.snakeBrain }
 
@@ -150,11 +149,10 @@ class TrainingServiceImpl() : TrainingService {
         val insertedEvolveResultEntities = evolveResultRepo.saveAll(newModelEvolveResultEntities)
         val insertedEvolveResultIds = insertedEvolveResultEntities.map { it.id }
 
-        val query = Query()
-        query.addCriteria(Criteria.where("id").`is`(currentModelId))
+        val query = Query().addCriteria(Criteria.where("id").`is`(currentModelId))
         val update = Update()
-        update.set("updatedAt", java.util.Date())
-        update.set("evolveResultHistory", insertedEvolveResultIds)
+        update.currentTimestamp("updatedAt")
+            .set("evolveResultHistory", insertedEvolveResultIds)
         mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
     }
 
@@ -174,63 +172,58 @@ class TrainingServiceImpl() : TrainingService {
     }
 
     override fun backupCurrentPopulation(skipQueueTrainingCheck: Boolean): Boolean {
-        if (currentModelId == null) throw BadRequestException("model does not exists")
+        if (currentModelId == null || serviceModel == null) throw BadRequestException("model does not exists")
         if (backupPopulationInProgress) throw BadRequestException("previous backup still in progress")
         if (!skipQueueTrainingCheck && queueTraining > 0) throw BadRequestException("model is evolving") // population will change during evolving
 
-        worker?.let { model ->
-            if (model.generation == -1) throw BadRequestException("model generation is -1, has not evolved yet")
+        currentModelId?.let { nonNullCurrentModelId ->
+            serviceModel?.let { model ->
+                if (model.generation == -1) throw BadRequestException("model generation is -1, has not evolved yet")
 
-            val gaModel = gaModelRepo.findByIdOrNull(ObjectId(currentModelId))
-                ?: throw BadRequestException("model not found")
+                val gaModel = gaModelRepo.findByIdOrNull(ObjectId(nonNullCurrentModelId))
+                    ?: throw BadRequestException("model not found")
 
-            val populationHistory = gaModel.populationHistory
-            if (populationHistory.size > 0) {
-                val lastPopulationId = populationHistory.last()
-                val lastPopulation = populationRepo.findByIdOrNull(lastPopulationId)
-                    ?: throw BadRequestException("population not found")
-                if (lastPopulation.generation == model.generation) return false
+                val populationHistory = gaModel.populationHistory
+                if (populationHistory.isNotEmpty()) {
+                    val lastPopulationId = populationHistory.last()
+                    val lastPopulation = populationRepo.findByIdOrNull(lastPopulationId)
+                        ?: throw BadRequestException("population not found")
+                    if (lastPopulation.generation == model.generation) return false
+                }
+
+                backupPopulationInProgress = true
+
+                publishChange()
+
+                val savedEntity = populationRepo.insertNewPopulation(
+                    individualRepo,
+                    model.generation,
+                    model.population
+                )
+
+                val query = Query().addCriteria(Criteria.where("id").`is`(nonNullCurrentModelId))
+                val update = Update().currentTimestamp("updatedAt")
+                    .push("populationHistory", savedEntity.id)
+                mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
+
+                populationHistoryCache.add(PopulationHistory(savedEntity.id.toString(), model.generation))
+                publishChange()
+
+                backupPopulationInProgress = false
+                return true
             }
 
-            backupPopulationInProgress = true
-            publishChange()
-
-            val savedEntity = populationRepo.insertNewPopulation(
-                individualRepo,
-                model.generation,
-                model.population
-            )
-
-            val query = Query()
-            query.addCriteria(Criteria.where("id").`is`(currentModelId))
-            val update = Update()
-            update.set("updatedAt", java.util.Date())
-            update.push("populationHistory", savedEntity.id)
-            mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
-
-            populationHistoryCache.add(
-                PopulationHistory(
-                    savedEntity.id.toString(),
-                    model.generation,
-                )
-            )
-            publishChange()
-
-            backupPopulationInProgress = false
-            return true
         }
 
-        return false
+        throw Error("logic error, should not reach here")
     }
 
     override fun getCurrentModelInfo(): ModelInfo {
         if (currentModelId == null) throw BadRequestException("model does not exists")
-        val model = gaModelRepo.findById(ObjectId(currentModelId))
-            .getOrElse { throw BadRequestException("model not found") }
+        val model = gaModelRepo.findByIdOrNull(ObjectId(currentModelId))
+            ?: throw BadRequestException("model not found")
         val evolveResultEntities = evolveResultRepo.findAllById(model.evolveResultHistory)
-        println(evolveResultEntities.size)
         val populationEntities = populationRepo.findAllById(model.populationHistory)
-        println(populationEntities.size)
 
         val evolveResultWithIdList = evolveResultEntities.map {
             EvolveResultWithId(
@@ -273,7 +266,7 @@ class TrainingServiceImpl() : TrainingService {
 
         if (currentModelId != null) {
             currentModelId = null
-            worker = null
+            serviceModel = null
             queueTraining = 0
             backupPopulationInProgress = false
             evolveResultHistoryCache.clear()
@@ -322,52 +315,53 @@ class TrainingServiceImpl() : TrainingService {
     }
 
     private suspend fun startTraining() {
-        worker?.let { localWorker ->
-            if (currentModelId == null || queueTraining == 0) return
-            modelEvolving = true
-            val evolveResult = localWorker.evolve()
-            modelEvolving = false
-            if (queueTraining > 0) queueTraining--
+        if (currentModelId == null || queueTraining == 0) return
+        currentModelId?.let { nonNullCurrentModelId ->
+            serviceModel?.let { model ->
+                modelEvolving = true
+                val evolveResult = model.evolve()
+                modelEvolving = false
+                if (queueTraining > 0) queueTraining--
 
-            val now = java.util.Date()
-            val entity = EvolveResultEntity(
-                id = ObjectId(),
-                generation = evolveResult.generation,
-                bestIndividual = evolveResult.bestIndividual,
-                timeSpent = evolveResult.timeSpent.toLong(), // todo
-                overallStats = evolveResult.overallStats,
-                createdAt = now,
-                updatedAt = now,
-            )
-            val savedEntity = evolveResultRepo.save(entity)
+                val now = java.util.Date()
+                val entity = EvolveResultEntity(
+                    id = ObjectId(),
+                    generation = evolveResult.generation,
+                    bestIndividual = evolveResult.bestIndividual,
+                    timeSpent = evolveResult.timeSpent.toLong(), // todo
+                    overallStats = evolveResult.overallStats,
+                    createdAt = now,
+                    updatedAt = now,
+                )
+                val savedEvolveResultEntity = evolveResultRepo.save(entity)
 
-            val query = Query()
-            query.addCriteria(Criteria.where("id").`is`(currentModelId))
-            val update = Update()
-            update.set("updatedAt", now)
-            update.set("generation", evolveResult.generation)
-            update.push("evolveResultHistory", entity.id)
-            mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
+                val query = Query().addCriteria(Criteria.where("id").`is`(nonNullCurrentModelId))
+                val update = Update()
+                    .currentTimestamp("updatedAt")
+                    .set("generation", evolveResult.generation)
+                    .push("evolveResultHistory", entity.id)
+                mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
 
-            val evolveResultWithId = EvolveResultWithId(
-                savedEntity.id.toString(),
-                evolveResult.generation,
-                evolveResult.bestIndividual,
-                evolveResult.timeSpent,
-                evolveResult.overallStats
-            )
-            evolveResultHistoryCache.add(evolveResultWithId)
-            publishChange()
+                val evolveResultWithId = EvolveResultWithId(
+                    savedEvolveResultEntity.id.toString(),
+                    evolveResult.generation,
+                    evolveResult.bestIndividual,
+                    evolveResult.timeSpent,
+                    evolveResult.overallStats
+                )
+                evolveResultHistoryCache.add(evolveResultWithId)
+                publishChange()
 
-            if (queueTraining > 0) {
-                val maxScore = localWorker.worldWidth * localWorker.worldHeight
-                if (evolveResultHistoryCache.indexOfFirst { it.bestIndividual.snakeLength.toInt() == maxScore } == (evolveResultHistoryCache.size - 1)) {
-                    backupCurrentPopulation(true)
+                if (queueTraining > 0) {
+                    val maxScore = model.worldWidth * model.worldHeight
+                    if (evolveResultHistoryCache.indexOfFirst { it.bestIndividual.snakeLength.toInt() == maxScore } == (evolveResultHistoryCache.size - 1)) {
+                        backupCurrentPopulation(true)
+                    }
+
+                    startTraining()
+                } else if (queueTraining == 0 && backupPopulationWhenFinish) {
+                    backupCurrentPopulation(false)
                 }
-
-                startTraining()
-            } else if (queueTraining == 0 && backupPopulationWhenFinish) {
-                backupCurrentPopulation(false)
             }
         }
     }

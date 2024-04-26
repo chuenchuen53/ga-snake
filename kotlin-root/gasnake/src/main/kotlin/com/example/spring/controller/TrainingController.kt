@@ -26,8 +26,7 @@ class TrainingController(
     private val service: TrainingService,
 ) {
     companion object {
-        const val pollingTimeOut = 10000L
-//        const val pollingTimeOut = 30000L
+        const val pollingTimeOut = 30000L
     }
 
     @PostMapping("/init-model")
@@ -83,7 +82,7 @@ class TrainingController(
     fun backupCurrentPopulation() {
         haveModelGuard()
 
-        if (this.service.backupPopulationInProgress) {
+        if (service.backupPopulationInProgress) {
             throw BadRequestException("previous backup still in progress")
         }
 

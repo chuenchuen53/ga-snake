@@ -13,17 +13,23 @@ interface TrainingService {
 
     fun initModel(options: InitModelRequest.Options)
 
-    fun getCurrentModelInfo(): ModelInfo
-
     fun resumeModel(modelId: String, generation: Int)
-
+    
     fun evolve(times: Int)
 
     fun stopEvolve()
 
     fun toggleBackupPopulationWhenFinish(backup: Boolean)
 
+    /**
+     * Backs up the current population.
+     *
+     * @param skipQueueTrainingCheck If true, the check for queue training is skipped.
+     * @return true if backup is successful, false if backup already exists.
+     */
     fun backupCurrentPopulation(skipQueueTrainingCheck: Boolean): Boolean
+
+    fun getCurrentModelInfo(): ModelInfo
 
     fun removeCurrentModel()
 
