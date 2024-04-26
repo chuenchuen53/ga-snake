@@ -1,15 +1,10 @@
 package com.example.spring.service
 
-import com.example.snake.ai.ActivationFunction
-import com.example.snake.ai.ga.GaConfig
-import com.example.snake.ai.ga.GaModel
-import com.example.snake.ai.ga.Options
-import com.example.snake.ai.ga.SnakeBrainConfig
+import com.example.snake.ai.ga.*
 import com.example.spring.entity.EvolveResultEntity
 import com.example.spring.entity.GaModelEntity
 import com.example.spring.exception.BadRequestException
-import com.example.spring.repo.EvolveResultRepo
-import com.example.spring.repo.GaModelRepo
+import com.example.spring.repo.*
 import com.example.spring.request.InitModelRequest
 import com.example.spring.response.PollingInfoResponse
 import com.example.spring.response.shared.EvolveResultWithId
@@ -25,7 +20,9 @@ import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import kotlin.jvm.optionals.getOrElse
 
 @Service
 class TrainingServiceImpl() : TrainingService {
@@ -34,6 +31,12 @@ class TrainingServiceImpl() : TrainingService {
 
     @Autowired
     private lateinit var evolveResultRepo: EvolveResultRepo
+
+    @Autowired
+    private lateinit var populationRepo: PopulationRepo
+
+    @Autowired
+    private lateinit var individualRepo: IndividualRepo
 
     @Autowired
     private lateinit var mongoTemplate: MongoTemplate
@@ -71,7 +74,11 @@ class TrainingServiceImpl() : TrainingService {
                     options.gaConfig.geneMutationRate,
                     options.gaConfig.mutationAmount,
                     options.gaConfig.trialTimes
-                )
+                ),
+                providedInfo = if (options.providedInfo != null) ProvidedInfo(
+                    generation = options.providedInfo.generation,
+                    snakeBrains = options.providedInfo.snakeBrains
+                ) else null
             )
         )
 
@@ -103,24 +110,52 @@ class TrainingServiceImpl() : TrainingService {
     }
 
 
-    override fun resumeModel(modelId: String, generation: Int): ModelInfo {
-        // todo
-        return ModelInfo(
-            "testing_id",
-            10,
-            10,
-            listOf(10, 10),
-            ActivationFunction.RELU,
-            5000,
-            0.5,
-            0.2,
-            0.5,
-            0.2,
-            1,
-            1,
-            emptyList(),
-            emptyList()
+    override fun resumeModel(modelId: String, generation: Int) {
+        val gaModelEntity = gaModelRepo.findById(ObjectId(modelId))
+            .getOrElse { throw BadRequestException("model not found") }
+
+        val populationEntity =
+            populationRepo.findOneByIdInAndGeneration(gaModelEntity.populationHistory, generation)
+                ?: throw BadRequestException("population not found")
+        val individualEntities = individualRepo.findAllById(populationEntity.population)
+        val snakeBrainDataList = individualEntities.map { it.snakeBrain }
+
+        val gaOptions = InitModelRequest.Options(
+            worldWidth = gaModelEntity.worldWidth,
+            worldHeight = gaModelEntity.worldHeight,
+            snakeBrainConfig = InitModelRequest.Options.SnakeBrainConfig(
+                gaModelEntity.hiddenLayersLength,
+                gaModelEntity.hiddenLayerActivationFunction
+            ),
+            gaConfig = InitModelRequest.Options.GaConfig(
+                gaModelEntity.populationSize,
+                gaModelEntity.surviveRate,
+                gaModelEntity.populationMutationRate,
+                gaModelEntity.geneMutationRate,
+                gaModelEntity.mutationAmount,
+                gaModelEntity.trialTimes
+            ),
+            providedInfo = InitModelRequest.Options.ProvidedInfo(
+                generation = generation,
+                snakeBrains = snakeBrainDataList
+            )
         )
+        initModel(gaOptions)
+
+        val parentModelEvolveResultEntities =
+            evolveResultRepo.findAllById(gaModelEntity.evolveResultHistory)
+        val newModelEvolveResultEntities = parentModelEvolveResultEntities
+            .filter { it.generation <= generation }
+            .map { it.copy(id = ObjectId()) }
+        val insertedEvolveResultEntities = evolveResultRepo.saveAll(newModelEvolveResultEntities)
+        val insertedEvolveResultIds = insertedEvolveResultEntities.map { it.id }
+
+        val query = Query()
+        query.addCriteria(Criteria.where("id").`is`(currentModelId))
+        val update = Update()
+        update.set("updatedAt", java.util.Date())
+        update.set("evolveResultHistory", insertedEvolveResultIds)
+        mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
     }
 
     override fun evolve(times: Int) {
@@ -139,33 +174,102 @@ class TrainingServiceImpl() : TrainingService {
     }
 
     override fun backupCurrentPopulation(skipQueueTrainingCheck: Boolean): Boolean {
-        // todo
+        if (currentModelId == null) throw BadRequestException("model does not exists")
+        if (backupPopulationInProgress) throw BadRequestException("previous backup still in progress")
+        if (!skipQueueTrainingCheck && queueTraining > 0) throw BadRequestException("model is evolving") // population will change during evolving
+
+        worker?.let { model ->
+            if (model.generation == -1) throw BadRequestException("model generation is -1, has not evolved yet")
+
+            val gaModel = gaModelRepo.findByIdOrNull(ObjectId(currentModelId))
+                ?: throw BadRequestException("model not found")
+
+            val populationHistory = gaModel.populationHistory
+            if (populationHistory.size > 0) {
+                val lastPopulationId = populationHistory.last()
+                val lastPopulation = populationRepo.findByIdOrNull(lastPopulationId)
+                    ?: throw BadRequestException("population not found")
+                if (lastPopulation.generation == model.generation) return false
+            }
+
+            backupPopulationInProgress = true
+            publishChange()
+
+            val savedEntity = populationRepo.insertNewPopulation(
+                individualRepo,
+                model.generation,
+                model.population
+            )
+
+            val query = Query()
+            query.addCriteria(Criteria.where("id").`is`(currentModelId))
+            val update = Update()
+            update.set("updatedAt", java.util.Date())
+            update.push("populationHistory", savedEntity.id)
+            mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
+
+            populationHistoryCache.add(
+                PopulationHistory(
+                    savedEntity.id.toString(),
+                    model.generation,
+                )
+            )
+            publishChange()
+
+            backupPopulationInProgress = false
+            return true
+        }
+
         return false
     }
 
     override fun getCurrentModelInfo(): ModelInfo {
+        if (currentModelId == null) throw BadRequestException("model does not exists")
+        val model = gaModelRepo.findById(ObjectId(currentModelId))
+            .getOrElse { throw BadRequestException("model not found") }
+        val evolveResultEntities = evolveResultRepo.findAllById(model.evolveResultHistory)
+        println(evolveResultEntities.size)
+        val populationEntities = populationRepo.findAllById(model.populationHistory)
+        println(populationEntities.size)
+
+        val evolveResultWithIdList = evolveResultEntities.map {
+            EvolveResultWithId(
+                _id = it.id.toString(),
+                generation = it.generation,
+                bestIndividual = it.bestIndividual,
+                timeSpent = it.timeSpent.toDouble(),
+                overallStats = it.overallStats
+            )
+        }
+
+        val populationHistory = populationEntities.map {
+            PopulationHistory(
+                _id = it.id.toString(),
+                generation = it.generation
+            )
+        }
+
         return ModelInfo(
-            "testing_id",
-            10,
-            10,
-            listOf(10, 10),
-            ActivationFunction.RELU,
-            5000,
-            0.5,
-            0.2,
-            0.5,
-            0.2,
-            1,
-            1,
-            emptyList(),
-            emptyList()
+            _id = model.id.toString(),
+            worldWidth = model.worldWidth,
+            worldHeight = model.worldHeight,
+            hiddenLayersLength = model.hiddenLayersLength,
+            hiddenLayerActivationFunction = model.hiddenLayerActivationFunction,
+            populationSize = model.populationSize,
+            surviveRate = model.surviveRate,
+            populationMutationRate = model.populationMutationRate,
+            geneMutationRate = model.geneMutationRate,
+            mutationAmount = model.mutationAmount,
+            trialTimes = model.trialTimes,
+            generation = model.generation,
+            evolveResultHistory = evolveResultWithIdList,
+            populationHistory = populationHistory,
         )
     }
 
     override fun removeCurrentModel() {
-        //todo
-//        if (modelEvolving)
-//         if(backupPopulationInProgress)
+        if (modelEvolving) throw BadRequestException("model is evolving")
+        if (backupPopulationInProgress) throw BadRequestException("backup population in progress")
 
         if (currentModelId != null) {
             currentModelId = null

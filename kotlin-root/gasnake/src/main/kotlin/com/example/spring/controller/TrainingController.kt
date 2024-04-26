@@ -72,6 +72,7 @@ class TrainingController(
     }
 
     @PutMapping("/toggle-backup-population-when-finish")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun toggleBackupPopulationWhenFinish(@Validated @RequestBody req: ToggleBackupPopulationWhenFinishRequest) {
         val backup = req.backup
         service.toggleBackupPopulationWhenFinish(backup)

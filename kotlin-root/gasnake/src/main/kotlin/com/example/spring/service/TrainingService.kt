@@ -15,7 +15,7 @@ interface TrainingService {
 
     fun getCurrentModelInfo(): ModelInfo
 
-    fun resumeModel(modelId: String, generation: Int): ModelInfo
+    fun resumeModel(modelId: String, generation: Int)
 
     fun evolve(times: Int)
 
