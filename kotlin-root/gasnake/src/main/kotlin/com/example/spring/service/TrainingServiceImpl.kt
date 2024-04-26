@@ -24,7 +24,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
-class TrainingServiceImpl() : TrainingService {
+class TrainingServiceImpl : TrainingService {
     override var currentModelId: String? = null
     override var emitter: EventEmitter = EventEmitter()
     override var queueTraining: Int = 0
@@ -151,9 +151,20 @@ class TrainingServiceImpl() : TrainingService {
 
         val query = Query().addCriteria(Criteria.where("id").`is`(currentModelId))
         val update = Update()
-        update.currentTimestamp("updatedAt")
+        update.set("updatedAt", java.util.Date())
             .set("evolveResultHistory", insertedEvolveResultIds)
         mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
+
+        val evolveResultWithIdList = insertedEvolveResultEntities.map {
+            EvolveResultWithId(
+                _id = it.id.toString(),
+                generation = it.generation,
+                bestIndividual = it.bestIndividual,
+                timeSpent = it.timeSpent.toDouble(),
+                overallStats = it.overallStats
+            )
+        }
+        evolveResultHistoryCache.addAll(evolveResultWithIdList)
     }
 
     override fun evolve(times: Int) {
@@ -202,7 +213,7 @@ class TrainingServiceImpl() : TrainingService {
                 )
 
                 val query = Query().addCriteria(Criteria.where("id").`is`(nonNullCurrentModelId))
-                val update = Update().currentTimestamp("updatedAt")
+                val update = Update().set("updatedAt", java.util.Date())
                     .push("populationHistory", savedEntity.id)
                 mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
 
@@ -337,7 +348,7 @@ class TrainingServiceImpl() : TrainingService {
 
                 val query = Query().addCriteria(Criteria.where("id").`is`(nonNullCurrentModelId))
                 val update = Update()
-                    .currentTimestamp("updatedAt")
+                    .set("updatedAt", java.util.Date())
                     .set("generation", evolveResult.generation)
                     .push("evolveResultHistory", entity.id)
                 mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)

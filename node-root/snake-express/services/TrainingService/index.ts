@@ -134,6 +134,7 @@ export default class TrainingService {
         if (evolveResult.id) throw new Error("evolveResult.id should not exists");
         const newEvolveResult = await this.db.EvolveResult.create(clonedEvolveResult);
         evolveResultIds.push(newEvolveResult._id);
+        this.evolveResultHistoryCache.push({ ...clonedEvolveResult, _id: newEvolveResult._id.toString() });
       }
     }
 
