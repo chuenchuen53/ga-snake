@@ -1,14 +1,9 @@
 package com.example.snake.game
 
-import com.example.snake.game.typing.Direction
-import com.example.snake.game.typing.NotNullPositionAndDirection
-import com.example.snake.game.typing.PositionAndDirection
-import com.example.snake.game.typing.SnakeAction
-
 class Snake(
     positions: MutableList<Position>,
     var direction: Direction,
-    val allPositions2D: List<List<Position>>
+    private val allPositions2D: List<List<Position>>
 ) {
     companion object {
         fun actionMap(direction: Direction, snakeAction: SnakeAction): DirectionAndDxDy = when (direction) {
@@ -57,9 +52,9 @@ class Snake(
 
     fun positionIsInSnake(position: Position): Boolean = positionsSet.contains(position)
 
-    fun toPlainObject(): SnakeData = SnakeData(positions, direction, allPositions2D)
+    fun toPlainObject(): SnakeData = SnakeData(positions.toList(), direction, allPositions2D)
 
-    fun toPlainObjectWithoutAllPositions2D(): SnakeData = SnakeData(positions, direction, emptyList())
+    fun toPlainObjectWithoutAllPositions2D(): SnakeData = SnakeData(positions.toList(), direction, emptyList())
 
     /**
      * Checks if the snake will eat itself after moving to a new position.
@@ -67,12 +62,13 @@ class Snake(
      * @param position The new position of the head (assumes this position is not the food position).
      * @return True if the new position is occupied by the snake, false otherwise.
      */
-    fun checkEatSelfAfterMove(position: Position): Boolean {
+    fun checkEatSelfAfterMove(position: Position): Boolean =
         // Ignore the tail as it will move
-        val lastIndex = this.positions.size - 1
-        return if (this.positions[lastIndex] == position) false else positionIsInSnake(position)
-    }
+        if (tail == position) false else positionIsInSnake(position)
 
+    /**
+     * return null position if snake will be out of bounds
+     */
     fun getHeadPositionAndDirectionAfterMoveBySnakeAction(action: SnakeAction): PositionAndDirection {
         val (x0, y0) = head
         val (direction, positionChange) = actionMap(direction, action)
@@ -81,6 +77,9 @@ class Snake(
         return PositionAndDirection(position, direction)
     }
 
+    /**
+     * return null position if snake will be out of bounds
+     */
     fun getHeadPositionAndDirectionAfterMoveByDirection(direction: Direction): PositionAndDirection {
         val (x0, y0) = head
         val (dx, dy) = directionDxDyMap(direction)
@@ -115,48 +114,4 @@ class Snake(
         positionAndDirection.position ?: throw IllegalArgumentException("Snake move will be out of bounds")
         return NotNullPositionAndDirection(positionAndDirection.position, positionAndDirection.direction)
     }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Snake
-
-        if (direction != other.direction) return false
-        if (allPositions2D != other.allPositions2D) return false
-        if (positions != other.positions) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = direction.hashCode()
-        result = 31 * result + allPositions2D.hashCode()
-        result = 31 * result + positions.hashCode()
-        return result
-    }
 }
-
-data class DxDy(val dx: Int, val dy: Int) {
-    companion object {
-        val UP = DxDy(0, -1)
-        val DOWN = DxDy(0, 1)
-        val LEFT = DxDy(-1, 0)
-        val RIGHT = DxDy(1, 0)
-    }
-}
-
-data class DirectionAndDxDy(val direction: Direction, val dxDy: DxDy) {
-    companion object {
-        val UP = DirectionAndDxDy(Direction.UP, DxDy.UP)
-        val DOWN = DirectionAndDxDy(Direction.DOWN, DxDy.DOWN)
-        val LEFT = DirectionAndDxDy(Direction.LEFT, DxDy.LEFT)
-        val RIGHT = DirectionAndDxDy(Direction.RIGHT, DxDy.RIGHT)
-    }
-}
-
-data class SnakeData(
-    val positions: List<Position>,
-    val direction: Direction,
-    val allPositions2D: List<List<Position>>
-)

@@ -1,4 +1,4 @@
-package com.example.snake.game.typing
+package com.example.snake.game
 
 enum class Direction(val value: Int) {
     UP(0),

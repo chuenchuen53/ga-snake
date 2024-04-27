@@ -1,29 +1,7 @@
 package com.example.snake.game
 
-import com.example.snake.game.typing.Direction
-import com.example.snake.game.typing.PositionAndDirection
-import com.example.snake.game.typing.SnakeAction
-
 class SnakeGame(options: Options) {
     companion object {
-        fun clone(snakeGame: SnakeGame): SnakeGame = SnakeGame(
-            Options(
-                snakeGame.worldWidth,
-                snakeGame.worldHeight,
-                ProvidedInitialStatus(
-                    snakeGame.snake.toPlainObject(),
-                    snakeGame.food,
-                    snakeGame.gameOver,
-                    snakeGame.moves,
-                    snakeGame.movesForNoFood,
-                    snakeGame.initialSnakePosition,
-                    snakeGame.initialSnakeDirection,
-                    snakeGame.initialFoodPosition,
-                    snakeGame.moveRecord.toList()
-                )
-            )
-        )
-
         fun cloneGameRecord(gameRecord: GameRecord): GameRecord = GameRecord(
             gameRecord.worldWidth,
             gameRecord.worldHeight,
@@ -34,10 +12,10 @@ class SnakeGame(options: Options) {
         )
     }
 
-    var worldWidth: Int = options.worldWidth
-    var worldHeight: Int = options.worldHeight
-    var allPositions: List<Position>
-    var allPositions2D: List<List<Position>>
+    val worldWidth: Int = options.worldWidth
+    val worldHeight: Int = options.worldHeight
+    val allPositions: List<Position>
+    val allPositions2D: List<List<Position>> = List(worldHeight) { y -> List(worldWidth) { x -> Position(x, y) } }
     var snake: Snake
     var food: Position
     var gameOver: Boolean
@@ -50,8 +28,9 @@ class SnakeGame(options: Options) {
     var moveRecord: MutableList<Int> = mutableListOf()
     var resetCount = 0
 
+    private val maxSnakeLength = worldWidth * worldHeight
+
     init {
-        allPositions2D = List(worldHeight) { y -> List(worldWidth) { x -> Position(x, y) } }
         allPositions = allPositions2D.flatten()
 
         val providedInitialStatus = options.providedInitialStatus
@@ -134,18 +113,6 @@ class SnakeGame(options: Options) {
     )
 
     fun indexInAllPositions(x: Int, y: Int): Int = x + worldWidth * y
-
-    fun encodeMoveRecord(direction: Direction, newFoodPos: Position? = null): Int {
-        val encodedDirection = direction.value
-
-        newFoodPos?.let {
-            val newFoodPosIn1D = indexInAllPositions(it.x, it.y)
-            // add 1 to avoid 0
-            return 10 * (newFoodPosIn1D + 1) + encodedDirection
-        }
-
-        return encodedDirection
-    }
 
     fun reset() {
         snake = getInitSnake()
@@ -238,20 +205,30 @@ class SnakeGame(options: Options) {
         moveRecord.add(encodedMove)
     }
 
+    private fun encodeMoveRecord(direction: Direction, newFoodPos: Position? = null): Int {
+        val encodedDirection = direction.value
+
+        newFoodPos?.let {
+            val newFoodPosIn1D = indexInAllPositions(it.x, it.y)
+            // add 1 to avoid 0
+            return 10 * (newFoodPosIn1D + 1) + encodedDirection
+        }
+
+        return encodedDirection
+    }
 
     private fun updateMaxTurnOfNoFood() {
         val snakeLength = snake.length
-        val size = worldWidth * worldHeight
         maxMovesOfNoFood = when {
-            snakeLength < 0.2 * size -> size / 2
-            snakeLength < 0.5 * size -> size
-            else -> 2 * size
+            snakeLength < 0.2 * maxSnakeLength -> maxSnakeLength / 2
+            snakeLength < 0.5 * maxSnakeLength -> maxSnakeLength
+            else -> 2 * maxSnakeLength
         }
     }
 
     private fun getInitSnake(): Snake {
         val position = allPositions2D[worldHeight / 2][worldWidth / 2]
-        val direction = Direction.entries.toTypedArray().random()
+        val direction = Direction.entries.random()
         return Snake(mutableListOf(position), direction, allPositions2D)
     }
 
@@ -262,48 +239,6 @@ class SnakeGame(options: Options) {
         val positions = positionsPlainObject.mapNotNull { p -> allPositions.find { p2 -> p2 == p } }.toMutableList()
         if (positions.size != positionsPlainObject.size) throw IllegalArgumentException("Provided snake position is not valid")
         return Snake(positions, direction, allPositions2D)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as SnakeGame
-
-        if (worldWidth != other.worldWidth) return false
-        if (worldHeight != other.worldHeight) return false
-        if (allPositions != other.allPositions) return false
-        if (allPositions2D != other.allPositions2D) return false
-        if (snake != other.snake) return false
-        if (food != other.food) return false
-        if (gameOver != other.gameOver) return false
-        if (moves != other.moves) return false
-        if (movesForNoFood != other.movesForNoFood) return false
-        if (maxMovesOfNoFood != other.maxMovesOfNoFood) return false
-        if (initialSnakePosition != other.initialSnakePosition) return false
-        if (initialSnakeDirection != other.initialSnakeDirection) return false
-        if (initialFoodPosition != other.initialFoodPosition) return false
-        if (moveRecord != other.moveRecord) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = worldWidth
-        result = 31 * result + worldHeight
-        result = 31 * result + allPositions.hashCode()
-        result = 31 * result + allPositions2D.hashCode()
-        result = 31 * result + snake.hashCode()
-        result = 31 * result + food.hashCode()
-        result = 31 * result + gameOver.hashCode()
-        result = 31 * result + moves
-        result = 31 * result + movesForNoFood
-        result = 31 * result + maxMovesOfNoFood
-        result = 31 * result + initialSnakePosition.hashCode()
-        result = 31 * result + initialSnakeDirection.hashCode()
-        result = 31 * result + initialFoodPosition.hashCode()
-        result = 31 * result + moveRecord.hashCode()
-        return result
     }
 }
 

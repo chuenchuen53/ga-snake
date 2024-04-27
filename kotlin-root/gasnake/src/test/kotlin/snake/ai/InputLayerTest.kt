@@ -3,7 +3,6 @@ package snake.ai
 import com.example.snake.ai.InputLayer
 import com.example.snake.ai.RelativePosition.Companion.slopeMap4
 import com.example.snake.game.*
-import com.example.snake.game.typing.Direction
 import com.google.gson.Gson
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals

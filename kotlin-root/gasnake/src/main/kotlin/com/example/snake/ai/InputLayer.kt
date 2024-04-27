@@ -1,8 +1,8 @@
 package com.example.snake.ai
 
+import com.example.snake.game.Direction
 import com.example.snake.game.Position
 import com.example.snake.game.SnakeGame
-import com.example.snake.game.typing.Direction
 
 data class RelativePosition(val dx: Int, val dy: Int) {
     companion object {
@@ -209,14 +209,12 @@ class InputLayer(val game: SnakeGame) {
             }
 
             if (snapShotMoves == game.moves) {
-                throw Error("testing, sld never happen")
-//                return
+                return
             }
 
             if (snapShotMoves + 1 != game.moves) {
                 recomputeSnapshot()
-                throw Error("testing, sld never happen")
-//                return
+                return
             }
 
             val curHead = game.snake.head

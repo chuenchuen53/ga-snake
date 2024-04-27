@@ -25,8 +25,8 @@ class GaModelTest {
                 Options(
                     inputLength = 10,
                     layerShapes = listOf(
-                        Pair(8, 10),
-                        Pair(4, 8),
+                        listOf(8, 10),
+                        listOf(4, 8),
                     ),
                     hiddenLayerActivationFunction = ActivationFunction.LINEAR,
                     providedWeightsAndBiases = null,

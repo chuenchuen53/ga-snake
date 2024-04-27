@@ -1,5 +1,3 @@
-package com.example.snake.game.typing
-
-import com.example.snake.game.Position
+package com.example.snake.game
 
 data class PositionAndDirection(val position: Position?, val direction: Direction)

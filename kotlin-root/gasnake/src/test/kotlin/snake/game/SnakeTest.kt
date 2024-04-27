@@ -1,10 +1,6 @@
 package snake.game
 
-import com.example.snake.game.Position
-import com.example.snake.game.Snake
-import com.example.snake.game.SnakeData
-import com.example.snake.game.typing.Direction
-import com.example.snake.game.typing.SnakeAction
+import com.example.snake.game.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest

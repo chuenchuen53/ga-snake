@@ -1,7 +1,7 @@
 package com.example.snake.ai
 
+import com.example.snake.game.Direction
 import com.example.snake.game.Utils
-import com.example.snake.game.typing.Direction
 import kotlin.random.Random
 
 data class ProvidedWeightsAndBiases(

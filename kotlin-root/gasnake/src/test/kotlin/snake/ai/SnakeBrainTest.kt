@@ -4,7 +4,7 @@ import com.example.snake.ai.ActivationFunction
 import com.example.snake.ai.Options
 import com.example.snake.ai.ProvidedWeightsAndBiases
 import com.example.snake.ai.SnakeBrain
-import com.example.snake.game.typing.Direction
+import com.example.snake.game.Direction
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
@@ -32,7 +32,7 @@ class SnakeBrainTest {
             SnakeBrain(
                 Options(
                     inputLength = 3,
-                    layerShapes = listOf(Pair(4, 4)),
+                    layerShapes = listOf(listOf(4, 4)),
                     hiddenLayerActivationFunction = ActivationFunction.LINEAR,
                     providedWeightsAndBiases = null
                 )
@@ -47,7 +47,7 @@ class SnakeBrainTest {
             SnakeBrain(
                 Options(
                     inputLength = 3,
-                    layerShapes = listOf(Pair(3, 3)),
+                    layerShapes = listOf(listOf(3, 3)),
                     hiddenLayerActivationFunction = ActivationFunction.LINEAR,
                     providedWeightsAndBiases = null
                 )
@@ -62,7 +62,7 @@ class SnakeBrainTest {
             SnakeBrain(
                 Options(
                     inputLength = 3,
-                    layerShapes = listOf(Pair(3, 3), Pair(5, 5), Pair(4, 4)),
+                    layerShapes = listOf(listOf(3, 3), listOf(5, 5), listOf(4, 4)),
                     hiddenLayerActivationFunction = ActivationFunction.LINEAR,
                     providedWeightsAndBiases = null
                 )
@@ -76,7 +76,7 @@ class SnakeBrainTest {
         val snakeBrain = SnakeBrain(
             Options(
                 inputLength = 3,
-                layerShapes = listOf(Pair(4, 3)),
+                layerShapes = listOf(listOf(4, 3)),
                 hiddenLayerActivationFunction = ActivationFunction.RELU,
                 providedWeightsAndBiases = null
             )
@@ -84,7 +84,7 @@ class SnakeBrainTest {
 
         assertNotNull(snakeBrain)
         assertEquals(3, snakeBrain.inputLength)
-        assertEquals(listOf(Pair(4, 3)), snakeBrain.layerShapes)
+        assertEquals(listOf(listOf(4, 3)), snakeBrain.layerShapes)
         assertEquals(ActivationFunction.RELU, snakeBrain.hiddenLayerActivationFunction)
         assertEquals(1, snakeBrain.weights.size)
         assertEquals(4, snakeBrain.weights[0].size)
@@ -99,7 +99,7 @@ class SnakeBrainTest {
         val snakeBrain = SnakeBrain(
             Options(
                 inputLength = 5,
-                layerShapes = listOf(Pair(7, 5), Pair(4, 7)),
+                layerShapes = listOf(listOf(7, 5), listOf(4, 7)),
                 hiddenLayerActivationFunction = ActivationFunction.LINEAR,
                 providedWeightsAndBiases = null
             )
@@ -107,7 +107,7 @@ class SnakeBrainTest {
 
         assertNotNull(snakeBrain)
         assertEquals(5, snakeBrain.inputLength)
-        assertEquals(listOf(Pair(7, 5), Pair(4, 7)), snakeBrain.layerShapes)
+        assertEquals(listOf(listOf(7, 5), listOf(4, 7)), snakeBrain.layerShapes)
         assertEquals(ActivationFunction.LINEAR, snakeBrain.hiddenLayerActivationFunction)
         assertEquals(2, snakeBrain.weights.size)
         assertEquals(7, snakeBrain.weights[0].size)
@@ -125,7 +125,7 @@ class SnakeBrainTest {
         val snakeBrain = SnakeBrain(
             Options(
                 inputLength = 9,
-                layerShapes = listOf(Pair(8, 9), Pair(7, 8), Pair(4, 7)),
+                layerShapes = listOf(listOf(8, 9), listOf(7, 8), listOf(4, 7)),
                 hiddenLayerActivationFunction = ActivationFunction.TANH,
                 providedWeightsAndBiases = null
             )
@@ -133,7 +133,7 @@ class SnakeBrainTest {
 
         assertNotNull(snakeBrain)
         assertEquals(9, snakeBrain.inputLength)
-        assertEquals(listOf(Pair(8, 9), Pair(7, 8), Pair(4, 7)), snakeBrain.layerShapes)
+        assertEquals(listOf(listOf(8, 9), listOf(7, 8), listOf(4, 7)), snakeBrain.layerShapes)
         assertEquals(ActivationFunction.TANH, snakeBrain.hiddenLayerActivationFunction)
         assertEquals(3, snakeBrain.weights.size)
         assertEquals(8, snakeBrain.weights[0].size)
@@ -155,7 +155,7 @@ class SnakeBrainTest {
             SnakeBrain(
                 Options(
                     inputLength = 3,
-                    layerShapes = listOf(Pair(4, 3)),
+                    layerShapes = listOf(listOf(4, 3)),
                     hiddenLayerActivationFunction = ActivationFunction.RELU,
                     providedWeightsAndBiases = ProvidedWeightsAndBiases(
                         weights = emptyList(),
@@ -170,7 +170,7 @@ class SnakeBrainTest {
             SnakeBrain(
                 Options(
                     inputLength = 3,
-                    layerShapes = listOf(Pair(4, 3)),
+                    layerShapes = listOf(listOf(4, 3)),
                     hiddenLayerActivationFunction = ActivationFunction.RELU,
                     providedWeightsAndBiases = ProvidedWeightsAndBiases(
                         weights = listOf(
@@ -192,7 +192,7 @@ class SnakeBrainTest {
             SnakeBrain(
                 Options(
                     inputLength = 3,
-                    layerShapes = listOf(Pair(4, 3)),
+                    layerShapes = listOf(listOf(4, 3)),
                     hiddenLayerActivationFunction = ActivationFunction.RELU,
                     providedWeightsAndBiases = ProvidedWeightsAndBiases(
                         weights = listOf(
@@ -216,7 +216,7 @@ class SnakeBrainTest {
         val snakeBrain = SnakeBrain(
             Options(
                 inputLength = 2,
-                layerShapes = listOf(Pair(5, 2), Pair(4, 5)),
+                layerShapes = listOf(listOf(5, 2), listOf(4, 5)),
                 hiddenLayerActivationFunction = ActivationFunction.LINEAR,
                 providedWeightsAndBiases = ProvidedWeightsAndBiases(
                     weights = listOf(
@@ -250,7 +250,7 @@ class SnakeBrainTest {
     fun `crossOver test 1`() {
         val options = Options(
             inputLength = 2,
-            layerShapes = listOf(Pair(5, 2), Pair(4, 5)),
+            layerShapes = listOf(listOf(5, 2), listOf(4, 5)),
             hiddenLayerActivationFunction = ActivationFunction.LINEAR,
             providedWeightsAndBiases = null
         )
@@ -294,7 +294,7 @@ class SnakeBrainTest {
 
         val options = Options(
             inputLength = 2,
-            layerShapes = listOf(Pair(10000, 2), Pair(4, 10000)),
+            layerShapes = listOf(listOf(10000, 2), listOf(4, 10000)),
             hiddenLayerActivationFunction = ActivationFunction.LINEAR,
             providedWeightsAndBiases = null
         )

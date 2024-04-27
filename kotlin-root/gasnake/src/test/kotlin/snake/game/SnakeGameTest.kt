@@ -1,8 +1,6 @@
 package snake.game
 
 import com.example.snake.game.*
-import com.example.snake.game.typing.Direction
-import com.example.snake.game.typing.SnakeAction
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -173,16 +171,7 @@ class SnakeGameTest {
             )
         }
     }
-
-    @Test
-    fun `static clone test`() {
-        val snakeGame = SnakeGame(Options(worldWidth = 3, worldHeight = 3, providedInitialStatus = null))
-        val snakeGameClone = SnakeGame.clone(snakeGame)
-
-        Assertions.assertNotSame(snakeGame, snakeGameClone)
-        Assertions.assertEquals(snakeGame, snakeGameClone)
-    }
-
+    
     @Test
     fun `static cloneGameRecord test`() {
         val gameRecord = GameRecord(
