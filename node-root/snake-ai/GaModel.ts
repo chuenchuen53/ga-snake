@@ -4,7 +4,6 @@ import InputLayer from "./InputLayer";
 import CalcUtils from "./CalcUtils";
 import SnakeBrain from "./SnakeBrain";
 import MultiThreadGames from "./MultiThreadGames";
-import { StopWatch } from "./StopWatch";
 import type { ISnakeBrain, LayerShape } from "./SnakeBrain";
 import type { ActivationFunction, BaseStats } from "./CalcUtils";
 import type { GameRecord } from "snake-game/SnakeGame";
@@ -123,9 +122,6 @@ export default class GaModel implements IGaModel {
   private readonly _maxPossibleSnakeLength: number;
   private readonly multiThreadGames: MultiThreadGames;
 
-  private playGameStopWatch: StopWatch = new StopWatch();
-  private evolveStopWatch: StopWatch = new StopWatch();
-
   constructor(option: Options, numOfThreads: number) {
     this.worldHeight = option.worldHeight;
     this.worldWidth = option.worldWidth;
@@ -221,7 +217,6 @@ export default class GaModel implements IGaModel {
   public async evolve(): Promise<EvolveResult> {
     if (this._evolving) throw Error("Evolve is still running.");
 
-    this.evolveStopWatch.start();
     this._generation++;
     this._evolving = true;
     const startTime = new Date().getTime();
@@ -253,11 +248,6 @@ export default class GaModel implements IGaModel {
     const timeSpent = new Date().getTime() - startTime;
     this._evolving = false;
 
-    this.evolveStopWatch.stop();
-    const playingTime = this.playGameStopWatch.totalTimeSpent;
-    const evolvingTime = this.evolveStopWatch.totalTimeSpent;
-    console.log(`Generation ${generation}: playing time: ${playingTime}ms, evolving time: ${evolvingTime}ms, ratio: ${(playingTime / evolvingTime).toFixed(2)}`);
-
     return { generation, bestIndividual, timeSpent, overallStats };
   }
 
@@ -267,10 +257,8 @@ export default class GaModel implements IGaModel {
   }
 
   private async evaluate(): Promise<void> {
-    this.playGameStopWatch.start();
     const promises = this.population.map((p) => this.multiThreadGames.playGames(this.worldWidth, this.worldHeight, this.trialTimes, p.snakeBrain.toPlainObject()));
     const result = await Promise.all(promises);
-    this.playGameStopWatch.stop();
 
     for (let i = 0; i < this.population.length; i++) {
       const p = this.population[i];
