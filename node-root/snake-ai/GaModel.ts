@@ -134,7 +134,7 @@ export default class GaModel implements IGaModel {
     this.mutationAmount = option.gaConfig.mutationAmount;
     this.trialTimes = option.gaConfig.trialTimes;
 
-    const inputLayerLength = InputLayer.inputLayerLength;
+    const inputLayerLength = InputLayer.INPUT_LAYER_LENGTH;
     const layerShapes = GaModel.generateLayerShape(inputLayerLength, ...this.hiddenLayersLength, SnakeBrain.OUTPUT_LAYER_LENGTH);
 
     if (option.providedInfo) {

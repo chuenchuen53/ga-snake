@@ -46,11 +46,11 @@ export const slopeMap16: RelativePosition[] = [
 ];
 
 export default class InputLayer {
-  public static readonly inputLayerLength = 25;
+  public static readonly INPUT_LAYER_LENGTH = 25;
 
   private readonly template: number[];
-  private readonly numOfBoardCell: number;
   private readonly game: SnakeGame;
+  private readonly numOfBoardCell: number;
 
   constructor(game: SnakeGame) {
     this.game = game;
@@ -65,7 +65,7 @@ export default class InputLayer {
     // 20-23 is snake portion
     // 24 is snakeLength/(worldWidth*worldHeight)
     this.template = Array(slopeMap4.length * 3 + 4 + 4 + 4 + 1).fill(0);
-    if (this.template.length !== InputLayer.inputLayerLength) {
+    if (this.template.length !== InputLayer.INPUT_LAYER_LENGTH) {
       throw new Error("inputLayerLength is wrong set in class InputLayer");
     }
   }
