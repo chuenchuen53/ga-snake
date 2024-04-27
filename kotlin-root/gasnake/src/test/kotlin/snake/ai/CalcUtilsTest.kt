@@ -1,7 +1,7 @@
 package snake.ai
 
 import com.example.snake.ai.ActivationFunction
-import com.example.snake.ai.CalcUtils
+import com.example.snake.utils.CalcUtils
 import org.junit.jupiter.api.Assertions.*
 import kotlin.test.Test
 

@@ -1,7 +1,11 @@
 package com.example.snake.ai.ga
 
-import com.example.snake.ai.*
+import com.example.snake.ai.ActivationFunction
+import com.example.snake.ai.InputLayer
+import com.example.snake.ai.ProvidedWeightsAndBiases
+import com.example.snake.ai.SnakeBrain
 import com.example.snake.game.SnakeGame
+import com.example.snake.utils.CalcUtils
 import kotlin.math.pow
 
 class GaModel(options: Options) {

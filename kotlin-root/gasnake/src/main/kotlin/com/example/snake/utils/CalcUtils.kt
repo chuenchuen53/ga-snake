@@ -1,5 +1,7 @@
-package com.example.snake.ai
+package com.example.snake.utils
 
+import com.example.snake.ai.ActivationFunction
+import com.example.snake.ai.BaseStats
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.math.tanh
