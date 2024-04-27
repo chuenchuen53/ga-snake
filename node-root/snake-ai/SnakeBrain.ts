@@ -35,10 +35,14 @@ export default class SnakeBrain implements ISnakeBrain {
     3: Direction.RIGHT,
   }) satisfies Record<number, Direction>;
 
-  private static readonly MIN_WEIGHT = -1;
-  private static readonly MAX_WEIGHT = 1;
-  private static readonly MIN_BIAS = -1;
-  private static readonly MAX_BIAS = 1;
+  private static readonly MIN_WEIGHT = -10;
+  private static readonly MAX_WEIGHT = 10;
+  private static readonly MIN_BIAS = -10;
+  private static readonly MAX_BIAS = 10;
+  private static readonly MIN_RANDOM_WEIGHT = -1;
+  private static readonly MAX_RANDOM_WEIGHT = 1;
+  private static readonly MIN_RANDOM_BIAS = -1;
+  private static readonly MAX_RANDOM_BIAS = 1;
 
   public static crossOverNumber(a: number, b: number): number {
     return Math.random() < 0.5 ? a : b;
@@ -160,12 +164,12 @@ export default class SnakeBrain implements ISnakeBrain {
     const template: number[][] = Array(row)
       .fill(null)
       .map(() => Array(col).fill(null));
-    return template.map((x) => x.map((_) => Utils.randomUniform(SnakeBrain.MIN_WEIGHT, SnakeBrain.MAX_WEIGHT)));
+    return template.map((x) => x.map((_) => Utils.randomUniform(SnakeBrain.MIN_RANDOM_WEIGHT, SnakeBrain.MAX_RANDOM_WEIGHT)));
   }
 
   private generateRandomLayerBias(layerShape: LayerShape): number[] {
     const [row, _] = layerShape;
     const template: number[] = Array(row).fill(null);
-    return template.map((_) => Utils.randomUniform(SnakeBrain.MIN_BIAS, SnakeBrain.MAX_BIAS));
+    return template.map((_) => Utils.randomUniform(SnakeBrain.MIN_RANDOM_BIAS, SnakeBrain.MAX_RANDOM_BIAS));
   }
 }

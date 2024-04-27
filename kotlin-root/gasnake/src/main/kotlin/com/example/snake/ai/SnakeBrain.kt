@@ -28,10 +28,14 @@ data class SnakeBrainData(
 class SnakeBrain(options: Options) {
     companion object {
         const val OUTPUT_LAYER_LENGTH = 4
-        const val MIN_WEIGHT = -1.0
-        const val MAX_WEIGHT = 1.0
-        const val MIN_BIAS = -1.0
-        const val MAX_BIAS = 1.0
+        const val MIN_WEIGHT = -10.0
+        const val MAX_WEIGHT = 10.0
+        const val MIN_BIAS = -10.0
+        const val MAX_BIAS = 10.0
+        const val MIN_RANDOM_WEIGHT = -1.0
+        const val MAX_RANDOM_WEIGHT = 1.0
+        const val MIN_RANDOM_BIAS = -1.0
+        const val MAX_RANDOM_BIAS = 1.0
 
         fun crossOverNumber(a: Double, b: Double): Double {
             return if (Random.nextBoolean()) a else b
@@ -147,11 +151,11 @@ class SnakeBrain(options: Options) {
 
     private fun generateRandomLayerWeight(layerShape: List<Int>): List<DoubleArray> {
         val (row, col) = layerShape
-        return List(row) { DoubleArray(col) { Random.nextDouble(MIN_WEIGHT, MAX_WEIGHT) } }
+        return List(row) { DoubleArray(col) { Random.nextDouble(MIN_RANDOM_WEIGHT, MAX_RANDOM_WEIGHT) } }
     }
 
     private fun generateRandomLayerBias(layerShape: List<Int>): DoubleArray {
         val (row, _) = layerShape
-        return DoubleArray(row) { Random.nextDouble(MIN_BIAS, MAX_BIAS) }
+        return DoubleArray(row) { Random.nextDouble(MIN_RANDOM_BIAS, MAX_RANDOM_BIAS) }
     }
 }
