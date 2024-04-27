@@ -17,14 +17,14 @@ val setting = Setting(
         worldHeight = 20,
         snakeBrainConfig = SnakeBrainConfig(
             hiddenLayersLength = listOf(16, 8),
-            hiddenLayerActivationFunction = ActivationFunction.LINEAR
+            hiddenLayerActivationFunction = ActivationFunction.RELU
         ),
         gaConfig = GaConfig(
             populationSize = 2000,
             surviveRate = 0.5,
             populationMutationRate = 0.2,
             geneMutationRate = 0.5,
-            mutationAmount = 0.2,
+            mutationAmount = 0.25,
             trialTimes = 1
         )
     )

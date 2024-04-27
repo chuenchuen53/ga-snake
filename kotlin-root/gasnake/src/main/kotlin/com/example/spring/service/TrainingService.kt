@@ -1,6 +1,6 @@
 package com.example.spring.service
 
-import com.example.spring.request.InitModelRequest
+import com.example.snake.ai.ga.Options
 import com.example.spring.response.PollingInfoResponse
 import com.example.spring.response.shared.ModelInfo
 import com.example.spring.utils.event.EventEmitter
@@ -11,10 +11,10 @@ interface TrainingService {
     val backupPopulationInProgress: Boolean
     val emitter: EventEmitter
 
-    fun initModel(options: InitModelRequest.Options)
+    fun initModel(options: Options)
 
     fun resumeModel(modelId: String, generation: Int)
-    
+
     fun evolve(times: Int)
 
     fun stopEvolve()

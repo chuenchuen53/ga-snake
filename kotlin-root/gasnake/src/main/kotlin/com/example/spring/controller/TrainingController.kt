@@ -26,7 +26,7 @@ class TrainingController(
     private val service: TrainingService,
 ) {
     companion object {
-        const val pollingTimeOut = 30000L
+        const val POLLING_TIME_OUT = 30000L
     }
 
     @PostMapping("/init-model")
@@ -137,7 +137,7 @@ class TrainingController(
 
         val deferred = CompletableDeferred<PollingInfoResponse>()
 
-        OnceEventListener(service.emitter, pollingTimeOut) {
+        OnceEventListener(service.emitter, POLLING_TIME_OUT) {
             val info = service.pollingInfo(
                 currentEvolvingResultHistoryGeneration,
                 currentPopulationHistoryGeneration

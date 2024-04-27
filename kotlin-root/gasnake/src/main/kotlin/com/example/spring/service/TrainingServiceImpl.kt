@@ -5,7 +5,6 @@ import com.example.spring.entity.EvolveResultEntity
 import com.example.spring.entity.GaModelEntity
 import com.example.spring.exception.BadRequestException
 import com.example.spring.repo.*
-import com.example.spring.request.InitModelRequest
 import com.example.spring.response.PollingInfoResponse
 import com.example.spring.response.shared.EvolveResultWithId
 import com.example.spring.response.shared.ModelInfo
@@ -57,29 +56,8 @@ class TrainingServiceImpl : TrainingService {
         emitter.emit()
     }
 
-    override fun initModel(options: InitModelRequest.Options) {
-        val model = GaModel(
-            options = Options(
-                worldWidth = options.worldWidth,
-                worldHeight = options.worldHeight,
-                snakeBrainConfig = SnakeBrainConfig(
-                    options.snakeBrainConfig.hiddenLayersLength,
-                    options.snakeBrainConfig.hiddenLayerActivationFunction
-                ),
-                gaConfig = GaConfig(
-                    options.gaConfig.populationSize,
-                    options.gaConfig.surviveRate,
-                    options.gaConfig.populationMutationRate,
-                    options.gaConfig.geneMutationRate,
-                    options.gaConfig.mutationAmount,
-                    options.gaConfig.trialTimes
-                ),
-                providedInfo = if (options.providedInfo != null) ProvidedInfo(
-                    generation = options.providedInfo.generation,
-                    snakeBrains = options.providedInfo.snakeBrains
-                ) else null
-            )
-        )
+    override fun initModel(options: Options) {
+        val model = GaModel(options)
 
         val modelData = model.exportModel()
         val now = java.util.Date()
@@ -119,14 +97,14 @@ class TrainingServiceImpl : TrainingService {
         val individualEntities = individualRepo.findAllById(populationEntity.population)
         val snakeBrainDataList = individualEntities.map { it.snakeBrain }
 
-        val gaOptions = InitModelRequest.Options(
+        val gaOptions = Options(
             worldWidth = gaModelEntity.worldWidth,
             worldHeight = gaModelEntity.worldHeight,
-            snakeBrainConfig = InitModelRequest.Options.SnakeBrainConfig(
+            snakeBrainConfig = SnakeBrainConfig(
                 gaModelEntity.hiddenLayersLength,
                 gaModelEntity.hiddenLayerActivationFunction
             ),
-            gaConfig = InitModelRequest.Options.GaConfig(
+            gaConfig = GaConfig(
                 gaModelEntity.populationSize,
                 gaModelEntity.surviveRate,
                 gaModelEntity.populationMutationRate,
@@ -134,7 +112,7 @@ class TrainingServiceImpl : TrainingService {
                 gaModelEntity.mutationAmount,
                 gaModelEntity.trialTimes
             ),
-            providedInfo = InitModelRequest.Options.ProvidedInfo(
+            providedInfo = ProvidedInfo(
                 generation = generation,
                 snakeBrains = snakeBrainDataList
             )
@@ -151,8 +129,9 @@ class TrainingServiceImpl : TrainingService {
 
         val query = Query().addCriteria(Criteria.where("id").`is`(currentModelId))
         val update = Update()
-        update.set("updatedAt", java.util.Date())
-            .set("evolveResultHistory", insertedEvolveResultIds)
+            .set(GaModelEntity::updatedAt.name, java.util.Date())
+            .set(GaModelEntity::evolveResultHistory.name, insertedEvolveResultIds)
+
         mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
 
         val evolveResultWithIdList = insertedEvolveResultEntities.map {
@@ -213,8 +192,9 @@ class TrainingServiceImpl : TrainingService {
                 )
 
                 val query = Query().addCriteria(Criteria.where("id").`is`(nonNullCurrentModelId))
-                val update = Update().set("updatedAt", java.util.Date())
-                    .push("populationHistory", savedEntity.id)
+                val update = Update()
+                    .set(GaModelEntity::updatedAt.name, java.util.Date())
+                    .push(GaModelEntity::populationHistory.name, savedEntity.id)
                 mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
 
                 populationHistoryCache.add(PopulationHistory(savedEntity.id.toString(), model.generation))
@@ -339,7 +319,7 @@ class TrainingServiceImpl : TrainingService {
                     id = ObjectId(),
                     generation = evolveResult.generation,
                     bestIndividual = evolveResult.bestIndividual,
-                    timeSpent = evolveResult.timeSpent.toLong(), // todo
+                    timeSpent = evolveResult.timeSpent,
                     overallStats = evolveResult.overallStats,
                     createdAt = now,
                     updatedAt = now,
@@ -348,9 +328,9 @@ class TrainingServiceImpl : TrainingService {
 
                 val query = Query().addCriteria(Criteria.where("id").`is`(nonNullCurrentModelId))
                 val update = Update()
-                    .set("updatedAt", java.util.Date())
-                    .set("generation", evolveResult.generation)
-                    .push("evolveResultHistory", entity.id)
+                    .set(GaModelEntity::updatedAt.name, java.util.Date())
+                    .set(GaModelEntity::generation.name, evolveResult.generation)
+                    .push(GaModelEntity::evolveResultHistory.name, entity.id)
                 mongoTemplate.findAndModify(query, update, GaModelEntity::class.java)
 
                 val evolveResultWithId = EvolveResultWithId(
