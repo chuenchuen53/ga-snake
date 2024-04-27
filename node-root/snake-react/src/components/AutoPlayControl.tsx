@@ -26,16 +26,17 @@ export function AutoPlayControl({ gameOver, nextMove }: AProps) {
     setAutoPlaying(false);
   };
 
-  const startAutoPlay = (providedValue?: number) => {
+  const startAutoPlay = () => {
     if (gameOver) return;
     if (timeId.current === 0) {
       timeId.current = window.setInterval(() => {
         try {
           nextMove();
+          if (value >= 480) nextMove();
         } catch (e) {
           stopAutoPlay();
         }
-      }, 1000 / (providedValue ?? value));
+      }, 1000 / value);
       setAutoPlaying(true);
     }
   };

@@ -8,13 +8,20 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hook";
 import { setOpenResumeModal } from "../../redux/slice/trainedModelsSlice";
 import { resumeModelThunk, setSuspendDidMountGetCurrentModelInfo } from "../../redux/slice/trainingSlice";
+import { openSnackBar } from "../../redux/slice/loadingSlice";
 import type { ResumeModelPayload } from "../../redux/slice/trainedModelsSlice";
 
 export const ResumeModal = () => {
   const openResumeModal = useAppSelector((state) => state.trainedModels.openResumeModal);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const currentModelId = useAppSelector((state) => state.training.currentModelInfo?._id);
   const resumeModel = (payload: ResumeModelPayload) => {
+    if (currentModelId) {
+      dispatch(openSnackBar({ message: "Please stop the current model before resuming another one.", severity: "info" }));
+      return;
+    }
+
     dispatch(setOpenResumeModal(null));
     dispatch(setSuspendDidMountGetCurrentModelInfo(true));
     navigate("/training");
