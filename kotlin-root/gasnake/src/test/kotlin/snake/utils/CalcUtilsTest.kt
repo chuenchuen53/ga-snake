@@ -1,4 +1,4 @@
-package snake.ai
+package snake.utils
 
 import com.example.snake.ai.ActivationFunction
 import com.example.snake.utils.CalcUtils

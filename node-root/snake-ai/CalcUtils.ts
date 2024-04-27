@@ -38,10 +38,10 @@ export default class CalcUtils {
     return CalcUtils.addition(CalcUtils.multiplication(W, X), B);
   }
 
-  public static computeMultipleLayer(Ws: number[][][], x: number[], Bs: number[][], hiddenLayerActivationFunction: ActivationFunction): number[] {
+  public static computeMultipleLayer(Ws: number[][][], X: number[], Bs: number[][], hiddenLayerActivationFunction: ActivationFunction): number[] {
     const numOfLayer = Ws.length;
 
-    let layerOutput = x;
+    let layerOutput = X;
     // hidden layer
     for (let i = 0; i < numOfLayer - 1; i++) {
       layerOutput = CalcUtils.hiddenLayerActivation(CalcUtils.computeOneLayer(Ws[i], layerOutput, Bs[i]), hiddenLayerActivationFunction);

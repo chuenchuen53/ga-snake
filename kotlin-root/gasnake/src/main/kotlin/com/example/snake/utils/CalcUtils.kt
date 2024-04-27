@@ -34,11 +34,11 @@ object CalcUtils {
 
     fun computeMultipleLayer(
         Ws: List<List<DoubleArray>>,
-        x: DoubleArray,
+        X: DoubleArray,
         Bs: List<DoubleArray>,
         hiddenLayerActivationFunction: ActivationFunction
     ): DoubleArray {
-        var layerOutput = x
+        var layerOutput = X
         // hidden layer
         for (i in 0 until Ws.size - 1) {
             layerOutput =
@@ -60,17 +60,11 @@ object CalcUtils {
         }
     }
 
-    fun minOfArray(arr: DoubleArray): Double {
-        return arr.minOrNull() ?: throw IllegalArgumentException("Array is empty")
-    }
+    fun minOfArray(arr: DoubleArray): Double = arr.minOrNull() ?: throw IllegalArgumentException("Array is empty")
 
-    fun maxOfArray(arr: DoubleArray): Double {
-        return arr.maxOrNull() ?: throw IllegalArgumentException("Array is empty")
-    }
+    fun maxOfArray(arr: DoubleArray): Double = arr.maxOrNull() ?: throw IllegalArgumentException("Array is empty")
 
-    fun meanOfArray(arr: DoubleArray): Double {
-        return arr.average()
-    }
+    fun meanOfArray(arr: DoubleArray): Double = arr.average()
 
     fun sdOfArray(arr: DoubleArray): Double {
         val mean = meanOfArray(arr)
@@ -104,5 +98,4 @@ object CalcUtils {
         median = medianOfArray(arr),
         upperQuartile = upperQuartileOfArray(arr)
     )
-
 }
