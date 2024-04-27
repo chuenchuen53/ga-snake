@@ -30,16 +30,21 @@ class GaModel(options: Options) {
             return moveScore - cyclicPenalty + lengthScore
         }
 
-        fun spinRouletteWheel(options: List<Individual>): Individual {
-            val totalScore = options.sumOf { it.fitness }
-            var randomNum = Math.random() * totalScore
-            for (option in options) {
-                if (randomNum < option.fitness) {
-                    return option
-                }
-                randomNum -= option.fitness
+        fun calculateCumulativeSum(values: List<Double>): List<Double> {
+            val prefixSum = mutableListOf<Double>()
+            var sum = 0.0
+            for (x in values) {
+                sum += x
+                prefixSum.add(sum)
             }
-            return options.last()
+            return prefixSum
+        }
+
+        fun spinRouletteWheel(candidates: List<Individual>, prefixSum: List<Double>): Individual {
+            val totalScore = prefixSum.last()
+            val randomNum = Math.random() * totalScore
+            val index = CalcUtils.binarySearch(prefixSum, randomNum)
+            return candidates[index]
         }
     }
 
@@ -212,18 +217,15 @@ class GaModel(options: Options) {
     }
 
     private fun crossover() {
+        val prefixSum = calculateCumulativeSum(population.map { it.fitness })
+
         population.forEach {
             if (it.survive) return@forEach
 
-            val parent1 = pickParent(it)
-            val parent2 = pickParent(it, parent1)
+            val parent1 = spinRouletteWheel(population, prefixSum)
+            val parent2 = spinRouletteWheel(population, prefixSum)
             it.snakeBrain.crossOver(parent1.snakeBrain, parent2.snakeBrain)
         }
-    }
-
-    private fun pickParent(child: Individual, anotherParent: Individual? = null): Individual {
-        val filteredPopulation = population.filter { it !== child && it !== anotherParent }
-        return spinRouletteWheel(filteredPopulation)
     }
 
     private fun mutate() {

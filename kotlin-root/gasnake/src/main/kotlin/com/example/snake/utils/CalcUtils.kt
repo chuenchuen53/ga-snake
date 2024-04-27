@@ -98,4 +98,16 @@ object CalcUtils {
         median = medianOfArray(arr),
         upperQuartile = upperQuartileOfArray(arr)
     )
+
+    fun binarySearch(prefixSum: List<Double>, value: Double): Int {
+        var low = 0
+        var high = prefixSum.size - 1
+        while (low < high) {
+            val mid = low + (high - low) / 2
+            if (prefixSum[mid] >= value) high = mid
+            else low = mid + 1
+        }
+        return low
+    }
+
 }

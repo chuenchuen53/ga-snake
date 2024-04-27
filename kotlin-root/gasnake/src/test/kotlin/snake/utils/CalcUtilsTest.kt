@@ -196,4 +196,20 @@ class CalcUtilsTest {
             { assertEquals(0.46510193, CalcUtils.upperQuartileOfArray(statsSampleArr2)) }
         )
     }
+
+    @Test
+    fun testBinarySearch() {
+        val values = listOf(10.0, 20.0, 30.0, 40.0, 50.0)
+
+        assertEquals(0, CalcUtils.binarySearch(values, 5.0))
+        assertEquals(0, CalcUtils.binarySearch(values, 10.0))
+        assertEquals(1, CalcUtils.binarySearch(values, 15.0))
+        assertEquals(1, CalcUtils.binarySearch(values, 20.0))
+        assertEquals(2, CalcUtils.binarySearch(values, 25.0))
+        assertEquals(2, CalcUtils.binarySearch(values, 30.0))
+        assertEquals(3, CalcUtils.binarySearch(values, 40.0))
+        assertEquals(4, CalcUtils.binarySearch(values, 45.0))
+        assertEquals(4, CalcUtils.binarySearch(values, 50.0))
+        assertEquals(4, CalcUtils.binarySearch(values, 55.0))
+    }
 }

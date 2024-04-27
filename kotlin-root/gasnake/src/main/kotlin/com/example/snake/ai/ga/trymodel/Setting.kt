@@ -10,7 +10,7 @@ data class Setting(
     val gaPlayerConfig: Options
 )
 
-val setting = com.example.snake.ai.ga.trymodel.Setting(
+val setting = Setting(
     evolveTimes = 2000,
     gaPlayerConfig = Options(
         worldWidth = 20,
@@ -20,7 +20,7 @@ val setting = com.example.snake.ai.ga.trymodel.Setting(
             hiddenLayerActivationFunction = ActivationFunction.LINEAR
         ),
         gaConfig = GaConfig(
-            populationSize = 5000,
+            populationSize = 2000,
             surviveRate = 0.5,
             populationMutationRate = 0.2,
             geneMutationRate = 0.5,

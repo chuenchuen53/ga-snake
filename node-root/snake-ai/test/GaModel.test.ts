@@ -13,6 +13,21 @@ describe("GaModel test suite", () => {
       { fitnessArr: [79, 50, 35, 18, 94, 20, 15] },
     ];
 
+    const cumulativeSums = [
+      [15, 35, 129, 147, 182],
+      [1000, 1500, 1700, 1800],
+      [123, 2345, 2723, 80813],
+      [15, 35, 129, 147, 182, 232, 311],
+      [79, 129, 164, 182, 276, 296, 311],
+    ];
+
+    it.each(cumulativeSums)("calculateCumulativeSum should produce expected cumulative sum for given values", () => {
+      testCases.forEach((testCase, index) => {
+        const result = GaModel.calculateCumulativeSum(testCase.fitnessArr);
+        expect(result).toEqual(cumulativeSums[index]);
+      });
+    });
+
     it.each(testCases)("should produce expected ratio for given fitnessArr", ({ fitnessArr }) => {
       const snakeBrain = new SnakeBrain({
         inputLength: 10,
@@ -34,8 +49,9 @@ describe("GaModel test suite", () => {
 
       const count = fitnessArr.map(() => 0);
       const times = 100000;
+      const cumulativeSumList = GaModel.calculateCumulativeSum(fitnessArr);
       for (let i = 0; i < times; i++) {
-        const result = GaModel.spinRouletteWheel(population);
+        const result = GaModel.spinRouletteWheel(population, cumulativeSumList);
         count[fitnessArr.indexOf(result.fitness)]++;
       }
 

@@ -115,4 +115,18 @@ export default class CalcUtils {
       upperQuartile: CalcUtils.upperQuartileOfArray(arr),
     };
   }
+
+  public static binarySearch(prefixSum: number[], value: number): number {
+    let low = 0;
+    let high = prefixSum.length - 1;
+    while (low < high) {
+      const mid = low + Math.floor((high - low) / 2);
+      if (prefixSum[mid] >= value) {
+        high = mid;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return low;
+  }
 }

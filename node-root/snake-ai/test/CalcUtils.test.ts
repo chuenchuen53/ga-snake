@@ -108,4 +108,19 @@ describe("CalcUtils", () => {
     expect(CalcUtils.upperQuartileOfArray(statsSampleArr1)).toBeCloseTo(487);
     expect(CalcUtils.upperQuartileOfArray(statsSampleArr2)).toBeCloseTo(0.46510193);
   });
+
+  it("testBinarySearch", () => {
+    const values = [10.0, 20.0, 30.0, 40.0, 50.0];
+
+    expect(CalcUtils.binarySearch(values, 5.0)).toBe(0);
+    expect(CalcUtils.binarySearch(values, 10.0)).toBe(0);
+    expect(CalcUtils.binarySearch(values, 15.0)).toBe(1);
+    expect(CalcUtils.binarySearch(values, 20.0)).toBe(1);
+    expect(CalcUtils.binarySearch(values, 25.0)).toBe(2);
+    expect(CalcUtils.binarySearch(values, 30.0)).toBe(2);
+    expect(CalcUtils.binarySearch(values, 40.0)).toBe(3);
+    expect(CalcUtils.binarySearch(values, 45.0)).toBe(4);
+    expect(CalcUtils.binarySearch(values, 50.0)).toBe(4);
+    expect(CalcUtils.binarySearch(values, 55.0)).toBe(4);
+  });
 });

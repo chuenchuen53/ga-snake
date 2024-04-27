@@ -92,16 +92,21 @@ export default class GaModel implements IGaModel {
     return moveScore - cyclicPenalty + lengthScore;
   }
 
-  public static spinRouletteWheel(candidates: Individual[]): Individual {
-    const totalScore = candidates.reduce((acc, option) => acc + option.fitness, 0);
-    let randomNum = Math.random() * totalScore;
-    for (let i = 0; i < candidates.length; i++) {
-      if (randomNum < candidates[i].fitness) {
-        return candidates[i];
-      }
-      randomNum -= candidates[i].fitness;
+  public static calculateCumulativeSum(values: number[]): number[] {
+    const prefixSum: number[] = [];
+    let sum = 0.0;
+    for (const x of values) {
+      sum += x;
+      prefixSum.push(sum);
     }
-    return candidates[candidates.length - 1];
+    return prefixSum;
+  }
+
+  public static spinRouletteWheel(candidates: Individual[], prefixSum: number[]): Individual {
+    const totalScore = prefixSum[prefixSum.length - 1];
+    const randomNum = Math.random() * totalScore;
+    const index = CalcUtils.binarySearch(prefixSum, randomNum);
+    return candidates[index];
   }
 
   public readonly worldWidth: number;
@@ -281,19 +286,15 @@ export default class GaModel implements IGaModel {
   }
 
   private crossover() {
-    this.population.forEach((p, childIdx) => {
-      if (this.population[childIdx].survive) return;
+    const prefixSum = GaModel.calculateCumulativeSum(this.population.map((individual) => individual.fitness));
 
-      const parent1 = this.pickParent(childIdx);
-      const parent2 = this.pickParent(childIdx, parent1);
-      p.snakeBrain.crossOver(parent1.snakeBrain, parent2.snakeBrain);
+    this.population.forEach((individual) => {
+      if (individual.survive) return;
+
+      const parent1 = GaModel.spinRouletteWheel(this.population, prefixSum);
+      const parent2 = GaModel.spinRouletteWheel(this.population, prefixSum);
+      individual.snakeBrain.crossOver(parent1.snakeBrain, parent2.snakeBrain);
     });
-  }
-
-  private pickParent(childIdx: number, anotherParent?: Individual): Individual {
-    const anotherParentIdx = anotherParent ? this.population.findIndex((p) => p === anotherParent) : -1;
-    const filteredPopulation = this.population.filter((p, idx) => idx !== childIdx && idx !== anotherParentIdx);
-    return GaModel.spinRouletteWheel(filteredPopulation);
   }
 
   private mutate() {

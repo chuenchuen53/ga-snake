@@ -13,7 +13,7 @@
     "prebuild": "rimraf build",
     "build": "tsc --project tsconfig.build.json",
     "postbuild": "copyfiles -u 1 scripts/**/*.json build/scripts",
-    "tryModel": "pnpm run build && node ./build/scripts/tryModel.js",
+    "try": "pnpm run build && node ./build/scripts/tryModel.js",
     "benchmark-single": "node ./build/scripts/performanceTest/singleThread.js",
     "benchmark-multi": "node ./build/scripts/performanceTest/multiThread.js"
   },

@@ -18,6 +18,22 @@ class GaModelTest {
         listOf(79, 50, 35, 18, 94, 20, 15)
     )
 
+    private val cumulativeSums = listOf(
+        listOf(15, 35, 129, 147, 182),
+        listOf(1000, 1500, 1700, 1800),
+        listOf(123, 2345, 2723, 80813),
+        listOf(15, 35, 129, 147, 182, 232, 311),
+        listOf(79, 129, 164, 182, 276, 296, 311),
+    )
+
+    @Test
+    fun `calculateCumulativeSum should produce expected cumulative sum for given values`() {
+        testCases.forEachIndexed { index, values ->
+            val result = GaModel.calculateCumulativeSum(values.map { it.toDouble() })
+            assertEquals(cumulativeSums[index].map { it.toDouble() }, result)
+        }
+    }
+
     @Test
     fun `spinRouletteWheel should produce expected ratio for given fitnessArr`() {
         testCases.forEach { fitnessArr ->
@@ -45,8 +61,9 @@ class GaModelTest {
 
             val count = fitnessArr.map { 0 }.toMutableList()
             val times = 100000
+            val cumulativeSumList = GaModel.calculateCumulativeSum(fitnessArr.map { it.toDouble() })
             for (i in 0 until times) {
-                val result = GaModel.spinRouletteWheel(population)
+                val result = GaModel.spinRouletteWheel(population, cumulativeSumList)
                 count[fitnessArr.indexOf(result.fitness.toInt())]++
             }
 
