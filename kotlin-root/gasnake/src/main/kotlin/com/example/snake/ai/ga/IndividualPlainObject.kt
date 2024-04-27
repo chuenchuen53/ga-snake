@@ -3,11 +3,12 @@ package com.example.snake.ai.ga
 import com.example.snake.ai.SnakeBrainData
 import com.example.snake.game.GameRecord
 
+// snakeLength, moves are calculated by average of trial games, so they are Double
 data class IndividualPlainObject(
     val snakeBrain: SnakeBrainData,
-    var snakeLength: Double,
-    var moves: Double,
-    var fitness: Double,
-    var survive: Boolean,
-    var gameRecord: GameRecord? = null
+    val snakeLength: Double,
+    val moves: Double,
+    val fitness: Double,
+    val survive: Boolean,
+    val gameRecord: GameRecord? = null
 )

@@ -92,16 +92,16 @@ export default class GaModel implements IGaModel {
     return moveScore - cyclicPenalty + lengthScore;
   }
 
-  public static spinRouletteWheel(options: Individual[]): Individual {
-    const totalScore = options.reduce((acc, option) => acc + option.fitness, 0);
+  public static spinRouletteWheel(candidates: Individual[]): Individual {
+    const totalScore = candidates.reduce((acc, option) => acc + option.fitness, 0);
     let randomNum = Math.random() * totalScore;
-    for (let i = 0; i < options.length; i++) {
-      if (randomNum < options[i].fitness) {
-        return options[i];
+    for (let i = 0; i < candidates.length; i++) {
+      if (randomNum < candidates[i].fitness) {
+        return candidates[i];
       }
-      randomNum -= options[i].fitness;
+      randomNum -= candidates[i].fitness;
     }
-    return options[options.length - 1];
+    return candidates[candidates.length - 1];
   }
 
   public readonly worldWidth: number;
