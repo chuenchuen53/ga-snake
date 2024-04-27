@@ -5,6 +5,8 @@ import com.example.snake.ai.Options
 import com.example.snake.ai.ProvidedWeightsAndBiases
 import com.example.snake.ai.SnakeBrain
 import com.example.snake.ai.SnakeBrainData
+import com.example.snake.ai.multithread.MultiThreadGames
+import com.example.snake.game.SnakeGame
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -30,14 +32,16 @@ suspend fun main() {
         )
     )
 
-    val multiThreadGames = com.example.snake.ai.multithread.MultiThreadGames()
+    val multiThreadGames = MultiThreadGames()
 
     val games = 10000
+    val snakeGame = List(games) { SnakeGame(com.example.snake.game.Options(20, 20, null)) }
     val snakeBrains = List(games) { snakeBrain }
+    val gameAndBrainList = snakeGame.zip(snakeBrains)
     val scores = mutableListOf<Int>()
 
     val execTime = measureTimeMillis {
-        val workerResults = multiThreadGames.playManyGames(20, 20, 1, snakeBrains)
+        val workerResults = multiThreadGames.playManyGames(1, gameAndBrainList)
         scores.addAll(workerResults.map { it.snakeLengthArr.average().toInt() })
     }
 

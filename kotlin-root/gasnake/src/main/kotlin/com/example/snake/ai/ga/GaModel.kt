@@ -82,6 +82,13 @@ class GaModel(options: Options) {
             this.generation = generation
             population = snakeBrains.map { x ->
                 Individual(
+                    snakeGame = SnakeGame(
+                        options = com.example.snake.game.Options(
+                            worldWidth = worldWidth,
+                            worldHeight = worldHeight,
+                            providedInitialStatus = null,
+                        )
+                    ),
                     snakeBrain = SnakeBrain(
                         options = com.example.snake.ai.Options(
                             inputLength = x.inputLength,
@@ -101,6 +108,13 @@ class GaModel(options: Options) {
             generation = -1
             population = MutableList(populationSize) {
                 Individual(
+                    snakeGame = SnakeGame(
+                        options = com.example.snake.game.Options(
+                            worldWidth = worldWidth,
+                            worldHeight = worldHeight,
+                            providedInitialStatus = null,
+                        )
+                    ),
                     snakeBrain = SnakeBrain(
                         com.example.snake.ai.Options(
                             inputLength = inputLayerLength,
@@ -125,7 +139,7 @@ class GaModel(options: Options) {
         maxPossibleSnakeLength = worldHeight * worldWidth
     }
 
-    fun exportModel(): com.example.snake.ai.ga.GaModelData = com.example.snake.ai.ga.GaModelData(
+    fun exportModel(): GaModelData = GaModelData(
         worldWidth = worldWidth,
         worldHeight = worldHeight,
         hiddenLayersLength = hiddenLayersLength,
@@ -191,10 +205,8 @@ class GaModel(options: Options) {
 
     private suspend fun evaluate() {
         val results = multiThreadGames.playManyGames(
-            worldWidth,
-            worldHeight,
             trialTimes,
-            population.map { it.snakeBrain }
+            population.map { Pair(it.snakeGame, it.snakeBrain) }
         )
 
         for (i in population.indices) {
