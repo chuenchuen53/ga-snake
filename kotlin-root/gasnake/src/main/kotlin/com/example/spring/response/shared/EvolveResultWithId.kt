@@ -7,6 +7,6 @@ data class EvolveResultWithId(
     val _id: String,
     val generation: Int,
     val bestIndividual: IndividualPlainObject,
-    val timeSpent: Double,
+    val timeSpent: Long,
     val overallStats: OverallStats
 )

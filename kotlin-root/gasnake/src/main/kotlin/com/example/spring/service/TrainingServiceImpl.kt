@@ -160,7 +160,7 @@ class TrainingServiceImpl : TrainingService {
                 _id = it.id.toString(),
                 generation = it.generation,
                 bestIndividual = it.bestIndividual,
-                timeSpent = it.timeSpent.toDouble(),
+                timeSpent = it.timeSpent,
                 overallStats = it.overallStats
             )
         }
@@ -241,7 +241,7 @@ class TrainingServiceImpl : TrainingService {
                 _id = it.id.toString(),
                 generation = it.generation,
                 bestIndividual = it.bestIndividual,
-                timeSpent = it.timeSpent.toDouble(),
+                timeSpent = it.timeSpent,
                 overallStats = it.overallStats
             )
         }

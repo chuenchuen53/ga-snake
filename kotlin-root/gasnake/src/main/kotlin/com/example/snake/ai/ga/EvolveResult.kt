@@ -6,7 +6,7 @@ import com.example.snake.ai.BaseStats
 data class EvolveResult(
     val generation: Int,
     val bestIndividual: IndividualPlainObject,
-    val timeSpent: Double,
+    val timeSpent: Long,
     val overallStats: OverallStats
 )
 

@@ -191,7 +191,7 @@ class GaModel(options: Options) {
             moves = CalcUtils.statsOfArray(population.map { it.moves }.toDoubleArray())
         )
 
-        val timeSpent = (System.currentTimeMillis() - startTime).toDouble()
+        val timeSpent = System.currentTimeMillis() - startTime
         _evolving = false
 
         return EvolveResult(
