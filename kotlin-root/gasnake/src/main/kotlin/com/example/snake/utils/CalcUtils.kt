@@ -3,9 +3,14 @@ package com.example.snake.ai
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.math.tanh
+import kotlin.random.Random
 
 
 object CalcUtils {
+    fun randomUniform(min: Double, max: Double): Double = Random.nextDouble(min, max)
+
+    fun randomBool(prob: Double): Boolean = Random.nextDouble() < prob
+
     fun hiddenLayerActivation(x: DoubleArray, type: ActivationFunction): DoubleArray = when (type) {
         ActivationFunction.LINEAR -> x
         ActivationFunction.TANH -> DoubleArray(x.size) { tanh(x[it]) }

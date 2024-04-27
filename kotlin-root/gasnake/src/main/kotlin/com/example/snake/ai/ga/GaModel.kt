@@ -2,7 +2,6 @@ package com.example.snake.ai.ga
 
 import com.example.snake.ai.*
 import com.example.snake.game.SnakeGame
-import com.example.snake.game.Utils
 import kotlin.math.pow
 
 class GaModel(options: Options) {
@@ -266,7 +265,7 @@ class GaModel(options: Options) {
             // prevent the best 5% from mutating
             if (index < best5PercentIndex) return@forEachIndexed
 
-            if (Utils.randomBool(mutationRateForRand)) {
+            if (CalcUtils.randomBool(mutationRateForRand)) {
                 individual.snakeBrain.mutate(geneMutationRate, mutationAmount)
             }
         }

@@ -1,7 +1,6 @@
 package com.example.snake.ai
 
 import com.example.snake.game.Direction
-import com.example.snake.game.Utils
 import kotlin.random.Random
 
 data class ProvidedWeightsAndBiases(
@@ -119,14 +118,14 @@ class SnakeBrain(options: Options) {
 
             for (row in weight.indices) {
                 for (col in weight[row].indices) {
-                    if (Utils.randomBool(mutationRate)) {
-                        val newValue = weight[row][col] + Utils.randomUniform(-mutationAmount, mutationAmount)
+                    if (CalcUtils.randomBool(mutationRate)) {
+                        val newValue = weight[row][col] + CalcUtils.randomUniform(-mutationAmount, mutationAmount)
                         weight[row][col] = CalcUtils.minmax(MIN_WEIGHT, newValue, MAX_WEIGHT)
                     }
                 }
 
-                if (Utils.randomBool(mutationRate)) {
-                    val newValue = bias[row] + Utils.randomUniform(-mutationAmount, mutationAmount)
+                if (CalcUtils.randomBool(mutationRate)) {
+                    val newValue = bias[row] + CalcUtils.randomUniform(-mutationAmount, mutationAmount)
                     bias[row] = CalcUtils.minmax(MIN_BIAS, newValue, MAX_BIAS)
                 }
             }
