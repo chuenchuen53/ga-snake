@@ -24,22 +24,20 @@ data class SnakeBrainData(
     val biases: List<DoubleArray>
 )
 
-
 class SnakeBrain(options: Options) {
     companion object {
         const val OUTPUT_LAYER_LENGTH = 4
-        const val MIN_WEIGHT = -10.0
-        const val MAX_WEIGHT = 10.0
-        const val MIN_BIAS = -10.0
-        const val MAX_BIAS = 10.0
-        const val MIN_RANDOM_WEIGHT = -1.0
-        const val MAX_RANDOM_WEIGHT = 1.0
-        const val MIN_RANDOM_BIAS = -1.0
-        const val MAX_RANDOM_BIAS = 1.0
 
-        fun crossOverNumber(a: Double, b: Double): Double {
-            return if (Random.nextBoolean()) a else b
-        }
+        private const val MIN_WEIGHT = -10.0
+        private const val MAX_WEIGHT = 10.0
+        private const val MIN_BIAS = -10.0
+        private const val MAX_BIAS = 10.0
+        private const val MIN_RANDOM_WEIGHT = -1.0
+        private const val MAX_RANDOM_WEIGHT = 1.0
+        private const val MIN_RANDOM_BIAS = -1.0
+        private const val MAX_RANDOM_BIAS = 1.0
+
+        fun crossOverNumber(a: Double, b: Double): Double = if (Random.nextBoolean()) a else b
     }
 
     val inputLength: Int = options.inputLength
@@ -52,9 +50,8 @@ class SnakeBrain(options: Options) {
         if (!validateLayerShapes()) throw IllegalArgumentException("Invalid layer shapes")
 
         if (options.providedWeightsAndBiases != null) {
-            // todo check immutability problem
-            weights = options.providedWeightsAndBiases.weights
-            biases = options.providedWeightsAndBiases.biases
+            weights = options.providedWeightsAndBiases.weights.map { x -> x.map { y -> y.clone() } }
+            biases = options.providedWeightsAndBiases.biases.map { it.clone() }
             if (!validateWeightsAndBiases()) throw IllegalArgumentException("Invalid provided weight and bias")
         } else {
             weights = layerShapes.map { generateRandomLayerWeight(it) }
@@ -94,7 +91,7 @@ class SnakeBrain(options: Options) {
     fun compute(input: DoubleArray): Direction {
         val output = CalcUtils.computeMultipleLayer(weights, input, biases, hiddenLayerActivationFunction)
         val index = CalcUtils.indexOfMaxValueInArray(output)
-        return Direction.inverseDirectionMap(index)
+        return Direction.getDirectionFromValue(index)
     }
 
     fun crossOver(a: SnakeBrain, b: SnakeBrain) {

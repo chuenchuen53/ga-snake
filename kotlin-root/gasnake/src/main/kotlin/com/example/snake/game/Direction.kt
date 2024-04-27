@@ -15,7 +15,7 @@ enum class Direction(val value: Int) {
         }
 
     companion object {
-        fun inverseDirectionMap(value: Int): Direction = when (value) {
+        fun getDirectionFromValue(value: Int): Direction = when (value) {
             0 -> UP
             1 -> DOWN
             2 -> LEFT

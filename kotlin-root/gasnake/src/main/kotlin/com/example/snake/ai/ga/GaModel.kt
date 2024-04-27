@@ -82,7 +82,7 @@ class GaModel(options: Options) {
         mutationAmount = options.gaConfig.mutationAmount
         trialTimes = options.gaConfig.trialTimes
 
-        val inputLayerLength = InputLayer.inputLayerLength
+        val inputLayerLength = InputLayer.INPUT_LAYER_LENGTH
         val layerShapes = GaModel.generateLayerShape(
             inputLayerLength,
             *hiddenLayersLength.toIntArray(),

@@ -6,16 +6,16 @@ import com.example.snake.game.SnakeGame
 
 data class RelativePosition(val dx: Int, val dy: Int) {
     companion object {
-        val UP = RelativePosition(0, -1)
-        val DOWN = RelativePosition(0, 1)
-        val LEFT = RelativePosition(-1, 0)
-        val RIGHT = RelativePosition(1, 0)
+        private val UP = RelativePosition(0, -1)
+        private val DOWN = RelativePosition(0, 1)
+        private val LEFT = RelativePosition(-1, 0)
+        private val RIGHT = RelativePosition(1, 0)
 
         val slopeMap4 = listOf(DOWN, RIGHT, UP, LEFT)
     }
 }
 
-class InputLayer(val game: SnakeGame) {
+class InputLayer(game: SnakeGame) {
     companion object {
         // total length is 25
         // 0-3: is food in slope map position relative to snake head
@@ -26,7 +26,7 @@ class InputLayer(val game: SnakeGame) {
         // 20-23 is snake portion
         // 24 is snakeLength/(worldWidth*worldHeight)
         // slopeMap4.length * 3 + 4 + 4 + 4 + 1
-        const val inputLayerLength = 25
+        const val INPUT_LAYER_LENGTH = 25
 
         val currentDirectionUp = doubleArrayOf(1.0, 0.0, 0.0, 0.0)
         val currentDirectionDown = doubleArrayOf(0.0, 1.0, 0.0, 0.0)
@@ -34,12 +34,12 @@ class InputLayer(val game: SnakeGame) {
         val currentDirectionRight = doubleArrayOf(0.0, 0.0, 0.0, 1.0)
     }
 
-    val numOfBoardCell = game.worldWidth * game.worldHeight
-    val template = DoubleArray(inputLayerLength)
-    val snakePortionHelper = SnakePortionHelper()
+    private val game = game
+    private val numOfBoardCell = game.worldWidth * game.worldHeight
+    private val snakePortionHelper = SnakePortionHelper()
 
     fun compute(): DoubleArray {
-        val result = template.clone()
+        val result = DoubleArray(INPUT_LAYER_LENGTH)
 
         val foodSnakeOutOfBound = foodSnakeOutOfBoundValue(RelativePosition.slopeMap4)
         val foodSnakeOutOfBoundStartIndex = 0
@@ -107,46 +107,24 @@ class InputLayer(val game: SnakeGame) {
         return snakePortionHelper.simpleComputeResult()
     }
 
-    fun getSnakeLengthWorldRatio(): Double {
-        return game.snake.length.toDouble() / numOfBoardCell
-    }
+    fun getSnakeLengthWorldRatio(): Double = game.snake.length.toDouble() / numOfBoardCell
 
+    // todo: not unit test
     inner class SnakePortionHelper() {
         // snapshot update will loop through whole width and height
         // assume the snake length less than this value will not benefit from snapshot
         val lengthThreshold = game.worldWidth + game.worldHeight
 
-        var snapShotResetCount = game.resetCount
-        var snapShotMoves = game.moves
-        var snapShotHead = game.snake.head
-        var snapShotTail = game.snake.tail
-        var snapShotTopCount = 0
-        var snapShotLeftCount = 0
-        val occupiedMatrix = Array(game.worldHeight) { BooleanArray(game.worldWidth) }
+        private var snapShotResetCount = game.resetCount
+        private var snapShotMoves = game.moves
+        private var snapShotHead = game.snake.head
+        private var snapShotTail = game.snake.tail
+        private var snapShotTopCount = 0
+        private var snapShotLeftCount = 0
+        private val occupiedMatrix = Array(game.worldHeight) { BooleanArray(game.worldWidth) }
 
         init {
-            initOccupiedMatrix()
-        }
-
-        fun recomputeSnapshot() {
-            snapShotResetCount = game.resetCount
-            snapShotMoves = game.moves
-            snapShotHead = game.snake.head
-            snapShotTail = game.snake.tail
-            snapShotTopCount = 0
-            snapShotLeftCount = 0
-            initOccupiedMatrix()
-        }
-
-        fun initOccupiedMatrix() {
-            occupiedMatrix.forEach { row -> row.fill(false) }
-            val (snakeHeadX, snakeHeadY) = snapShotHead
-            for (pos in game.snake.positions) {
-                val (x, y) = pos
-                if (y < snakeHeadY) snapShotTopCount++
-                if (x < snakeHeadX) snapShotLeftCount++
-                occupiedMatrix[y][x] = true
-            }
+            initOccupiedMatrixAndTopCountLeftCount()
         }
 
         fun simpleComputeResult(): DoubleArray {
@@ -200,6 +178,28 @@ class InputLayer(val game: SnakeGame) {
             val rightResult = rightCount.toDouble() / numOfBoardCell
 
             return doubleArrayOf(topResult, bottomResult, leftResult, rightResult)
+        }
+
+        private fun recomputeSnapshot() {
+            snapShotResetCount = game.resetCount
+            snapShotMoves = game.moves
+            snapShotHead = game.snake.head
+            snapShotTail = game.snake.tail
+            initOccupiedMatrixAndTopCountLeftCount()
+        }
+
+        private fun initOccupiedMatrixAndTopCountLeftCount() {
+            snapShotTopCount = 0
+            snapShotLeftCount = 0
+            occupiedMatrix.forEach { row -> row.fill(false) }
+
+            val (snakeHeadX, snakeHeadY) = snapShotHead
+            for (pos in game.snake.positions) {
+                val (x, y) = pos
+                if (y < snakeHeadY) snapShotTopCount++
+                if (x < snakeHeadX) snapShotLeftCount++
+                occupiedMatrix[y][x] = true
+            }
         }
 
         private fun updateSnapshot() {
