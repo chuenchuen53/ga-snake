@@ -143,7 +143,7 @@ export default class InputLayer {
   }
 
   public snakePortionValue(): number[] {
-    const snakeHead = this.game.snake.positions[0];
+    const snakeHead = this.game.snake.head;
 
     const [topCount, bottomCount]: [number, number] = this.game.snake.positions.reduce(
       (acc, pos) => {

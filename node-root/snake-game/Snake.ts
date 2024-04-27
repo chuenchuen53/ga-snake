@@ -96,6 +96,10 @@ export default class Snake implements ISnake {
     return this.positions[0];
   }
 
+  public get tail(): Position {
+    return this.positions[this.length - 1];
+  }
+
   public get length(): number {
     return this.positions.length;
   }
@@ -111,10 +115,12 @@ export default class Snake implements ISnake {
    */
   public checkEatSelfAfterMove(position: Position): boolean {
     // ignore the tail as it will move
-    const lastIndex = this.length - 1;
-    return this.positions[lastIndex].isEqual(position) ? false : this.positionInSnake(position);
+    return this.tail.isEqual(position) ? false : this.positionInSnake(position);
   }
 
+  /**
+   * return null position if snake will be out of bounds
+   */
   public getHeadPositionAndDirectionAfterMoveBySnakeAction(action: SnakeAction): PositionAndDirection {
     const { x: x0, y: y0 } = this.head;
     const { direction, positionChange } = Snake.actionMap[this.direction][action];

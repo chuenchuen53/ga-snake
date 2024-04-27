@@ -123,7 +123,7 @@ export default class SnakeGame implements ISnakeGame {
       this.initialSnakePosition = { ...options.providedInitialStatus.initialSnakePosition };
       this.initialSnakeDirection = options.providedInitialStatus.initialSnakeDirection;
       this.initialFoodPosition = { ...options.providedInitialStatus.initialFoodPosition };
-      this.moveRecord = options.providedInitialStatus.moveRecord;
+      this.moveRecord = options.providedInitialStatus.moveRecord.slice();
     } else {
       this.snake = this.getInitSnake();
       this.food = this.getRandomFoodPosition();
@@ -191,18 +191,6 @@ export default class SnakeGame implements ISnakeGame {
 
   public indexInAllPositions(x: number, y: number): number {
     return x + this.worldWidth * y;
-  }
-
-  public encodeMoveRecord(direction: Direction, newFoodPos?: Position): number {
-    const encodedDirection = SnakeGame.directionMap[direction];
-
-    if (newFoodPos) {
-      const newFoodPosIn1D = this.indexInAllPositions(newFoodPos.x, newFoodPos.y);
-      // add 1 to avoid 0
-      return 10 * (newFoodPosIn1D + 1) + encodedDirection;
-    }
-
-    return encodedDirection;
   }
 
   public reset() {
@@ -325,6 +313,18 @@ export default class SnakeGame implements ISnakeGame {
     this.moveRecord.push(encodedMove);
   }
 
+  private encodeMoveRecord(direction: Direction, newFoodPos?: Position): number {
+    const encodedDirection = SnakeGame.directionMap[direction];
+
+    if (newFoodPos) {
+      const newFoodPosIn1D = this.indexInAllPositions(newFoodPos.x, newFoodPos.y);
+      // add 1 to avoid 0
+      return 10 * (newFoodPosIn1D + 1) + encodedDirection;
+    }
+
+    return encodedDirection;
+  }
+
   private updateMaxTurnOfNoFood(): void {
     const snakeLength = this.snake.positions.length;
     if (snakeLength < 0.2 * (this.worldWidth * this.worldHeight)) {
@@ -337,7 +337,7 @@ export default class SnakeGame implements ISnakeGame {
   }
 
   private getInitSnake() {
-    const randPosition = new Position(Math.floor(this.worldWidth / 2), Math.floor(this.worldHeight / 2));
+    const randPosition = new Position(Math.floor(this.worldHeight / 2), Math.floor(this.worldWidth / 2));
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- it will always find the position
     const position = this.allPositions.find((p) => p.isEqual(randPosition))!;
     const direction = Utils.randomItemFromEnum(Direction);
