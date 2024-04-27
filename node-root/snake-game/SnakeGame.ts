@@ -71,24 +71,6 @@ export default class SnakeGame implements ISnakeGame {
     3: Direction.RIGHT,
   } satisfies Record<number, Direction>;
 
-  public static clone(snakeGame: SnakeGame): SnakeGame {
-    return new SnakeGame({
-      worldWidth: snakeGame.worldWidth,
-      worldHeight: snakeGame.worldHeight,
-      providedInitialStatus: {
-        snake: snakeGame.snake.toPlainObject(),
-        food: snakeGame.food.toPlainObject(),
-        gameOver: snakeGame.gameOver,
-        moves: snakeGame.moves,
-        movesForNoFood: snakeGame.movesForNoFood,
-        initialSnakePosition: { ...snakeGame.initialSnakePosition },
-        initialSnakeDirection: snakeGame.initialSnakeDirection,
-        initialFoodPosition: { ...snakeGame.initialFoodPosition },
-        moveRecord: snakeGame.moveRecord.slice(),
-      },
-    });
-  }
-
   public static cloneGameRecord(gameRecord: GameRecord): GameRecord {
     return {
       worldWidth: gameRecord.worldWidth,

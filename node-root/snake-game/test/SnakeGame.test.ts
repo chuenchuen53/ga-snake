@@ -63,15 +63,6 @@ const allPositions2DPlainObjectFor3x3World = [
 ];
 
 describe("test suite for SnakeGame", () => {
-  it("static clone test", () => {
-    const snakeGame = new SnakeGame({ worldWidth: 3, worldHeight: 3 });
-    const snakeGameClone = SnakeGame.clone(snakeGame);
-
-    expect(snakeGameClone === snakeGame).toBe(false);
-    expect((snakeGameClone as unknown) instanceof SnakeGame).toBe(true);
-    expect(snakeGameClone).toStrictEqual(snakeGame);
-  });
-
   it("static cloneGameRecord", () => {
     const gameRecord: GameRecord = {
       worldWidth: 10,
