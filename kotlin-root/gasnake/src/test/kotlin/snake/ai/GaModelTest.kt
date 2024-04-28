@@ -5,6 +5,7 @@ import com.example.snake.ai.Options
 import com.example.snake.ai.SnakeBrain
 import com.example.snake.ai.ga.GaModel
 import com.example.snake.ai.ga.Individual
+import com.example.snake.game.SnakeGame
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -37,6 +38,13 @@ class GaModelTest {
     @Test
     fun `spinRouletteWheel should produce expected ratio for given fitnessArr`() {
         testCases.forEach { fitnessArr ->
+            val snakeGame = SnakeGame(
+                options = com.example.snake.game.Options(
+                    worldWidth = 20,
+                    worldHeight = 20,
+                    providedInitialStatus = null
+                )
+            )
             val snakeBrain = SnakeBrain(
                 Options(
                     inputLength = 10,
@@ -50,6 +58,7 @@ class GaModelTest {
             )
             val population = fitnessArr.map { fitness ->
                 Individual(
+                    snakeGame = snakeGame,
                     snakeBrain = snakeBrain,
                     fitness = fitness.toDouble(),
                     snakeLength = 0.0,
