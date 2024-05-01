@@ -14,6 +14,7 @@ interface Props {
   hiddenLayersLength: number[];
   hiddenLayerActivationFunction: string;
   populationSize: number;
+  surviveRate: number;
   populationMutationRate: number;
   geneMutationRate: number;
   mutationAmount: number;
@@ -53,7 +54,7 @@ const ParamTable = ({ header, rows }: ParamTableProps) => {
 
 const gameParamsKeys: (keyof Props)[] = ["worldWidth", "worldHeight"];
 const snakeBrainParamsKeys: (keyof Props)[] = ["hiddenLayersLength", "hiddenLayerActivationFunction"];
-const gaModelParamsKeys: (keyof Props)[] = ["populationSize", "populationMutationRate", "geneMutationRate", "mutationAmount", "trialTimes", "generation"];
+const gaModelParamsKeys: (keyof Props)[] = ["populationSize", "surviveRate", "populationMutationRate", "geneMutationRate", "mutationAmount", "trialTimes", "generation"];
 
 export const ModelSetting = (props: Props) => {
   const gameParamsRows = gameParamsKeys.map((key) => [key, props[key]]);

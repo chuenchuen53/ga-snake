@@ -28,6 +28,7 @@ export const GaModelDetail = ({ modelInfo: m }: Props) => {
             hiddenLayersLength={m.hiddenLayersLength}
             hiddenLayerActivationFunction={m.hiddenLayerActivationFunction}
             populationSize={m.populationSize}
+            surviveRate={m.surviveRate}
             populationMutationRate={m.populationMutationRate}
             geneMutationRate={m.geneMutationRate}
             mutationAmount={m.mutationAmount}

@@ -18,7 +18,7 @@ export const setting: Setting = {
     gaConfig: {
       populationSize: 2000,
       surviveRate: 0.5,
-      populationMutationRate: 0.1,
+      populationMutationRate: 0.2,
       geneMutationRate: 0.5,
       mutationAmount: 0.2,
       trialTimes: 1,
