@@ -2,16 +2,16 @@ package com.example.snake.utils
 
 import com.example.snake.ai.ActivationFunction
 import com.example.snake.ai.BaseStats
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.math.tanh
-import kotlin.random.Random
 
 
 object CalcUtils {
-    fun randomUniform(min: Double, max: Double): Double = Random.nextDouble(min, max)
+    fun randomUniform(min: Double, max: Double): Double = ThreadLocalRandom.current().nextDouble(min, max)
 
-    fun randomBool(prob: Double): Boolean = Random.nextDouble() < prob
+    fun randomBool(prob: Double): Boolean = ThreadLocalRandom.current().nextDouble() < prob
 
     fun hiddenLayerActivation(x: DoubleArray, type: ActivationFunction): DoubleArray = when (type) {
         ActivationFunction.LINEAR -> x

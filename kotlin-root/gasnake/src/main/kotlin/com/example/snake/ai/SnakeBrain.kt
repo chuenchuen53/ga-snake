@@ -2,7 +2,8 @@ package com.example.snake.ai
 
 import com.example.snake.game.Direction
 import com.example.snake.utils.CalcUtils
-import kotlin.random.Random
+import java.util.concurrent.ThreadLocalRandom
+
 
 data class ProvidedWeightsAndBiases(
     val weights: List<List<DoubleArray>>,
@@ -37,7 +38,7 @@ class SnakeBrain(options: Options) {
         private const val MIN_RANDOM_BIAS = -1.0
         private const val MAX_RANDOM_BIAS = 1.0
 
-        fun crossOverNumber(a: Double, b: Double): Double = if (Random.nextBoolean()) a else b
+        fun crossOverNumber(a: Double, b: Double): Double = if (ThreadLocalRandom.current().nextBoolean()) a else b
     }
 
     val inputLength: Int = options.inputLength
@@ -148,11 +149,15 @@ class SnakeBrain(options: Options) {
 
     private fun generateRandomLayerWeight(layerShape: List<Int>): List<DoubleArray> {
         val (row, col) = layerShape
-        return List(row) { DoubleArray(col) { Random.nextDouble(MIN_RANDOM_WEIGHT, MAX_RANDOM_WEIGHT) } }
+        return List(row) {
+            DoubleArray(col) {
+                ThreadLocalRandom.current().nextDouble(MIN_RANDOM_WEIGHT, MAX_RANDOM_WEIGHT)
+            }
+        }
     }
 
     private fun generateRandomLayerBias(layerShape: List<Int>): DoubleArray {
         val (row, _) = layerShape
-        return DoubleArray(row) { Random.nextDouble(MIN_RANDOM_BIAS, MAX_RANDOM_BIAS) }
+        return DoubleArray(row) { ThreadLocalRandom.current().nextDouble(MIN_RANDOM_BIAS, MAX_RANDOM_BIAS) }
     }
 }
