@@ -105,7 +105,7 @@ export default class SnakeGame implements ISnakeGame {
     this.allPositions2D = new Array(this.worldHeight);
 
     for (let y = 0; y < this.worldHeight; y++) {
-      this.allPositions2D[y] = new Array(this.worldHeight);
+      this.allPositions2D[y] = new Array(this.worldWidth);
       for (let x = 0; x < this.worldWidth; x++) {
         const position = new Position(x, y);
         this.allPositions[y * this.worldWidth + x] = position;
@@ -337,7 +337,7 @@ export default class SnakeGame implements ISnakeGame {
   }
 
   private getInitSnake() {
-    const randPosition = new Position(Math.floor(this.worldHeight / 2), Math.floor(this.worldWidth / 2));
+    const randPosition = new Position(Math.floor(this.worldWidth / 2), Math.floor(this.worldHeight / 2));
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- it will always find the position
     const position = this.allPositions.find((p) => p.isEqual(randPosition))!;
     const direction = Utils.randomItemFromEnum(Direction);

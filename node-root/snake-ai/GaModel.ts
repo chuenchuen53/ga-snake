@@ -298,7 +298,7 @@ export default class GaModel implements IGaModel {
   }
 
   private mutate() {
-    const best5PercentIndex = Math.floor(this._numberOfSurvival * 0.05);
+    const best5PercentIndex = Math.floor(this.populationSize * 0.05);
 
     // e.g. assume populationMutationRate be 0.5, population size be 100, target mutation is 50
     // protect the best 5% from mutating -> 95 * 0.5 / 0.95 = 50
