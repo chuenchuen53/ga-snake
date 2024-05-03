@@ -8,6 +8,7 @@ import com.example.snake.ai.multithread.MultiThreadGames
 import com.example.snake.game.SnakeGame
 import com.example.snake.utils.CalcUtils
 import kotlin.math.pow
+import kotlin.random.Random
 
 class GaModel(options: Options) {
     companion object {
@@ -42,7 +43,7 @@ class GaModel(options: Options) {
 
         fun spinRouletteWheel(candidates: List<Individual>, prefixSum: List<Double>): Individual {
             val totalScore = prefixSum.last()
-            val randomNum = Math.random() * totalScore
+            val randomNum = Random.nextDouble() * totalScore
             val index = CalcUtils.binarySearch(prefixSum, randomNum)
             return candidates[index]
         }
@@ -231,17 +232,15 @@ class GaModel(options: Options) {
     private fun crossover() {
         val prefixSum = calculateCumulativeSum(population.map { it.fitness })
 
-        population.forEach {
-            if (it.survive) return@forEach
-
+        for (i in numberOfSurvival..<populationSize) {
             val parent1 = spinRouletteWheel(population, prefixSum)
             val parent2 = spinRouletteWheel(population, prefixSum)
-            it.snakeBrain.crossOver(parent1.snakeBrain, parent2.snakeBrain)
+            population[i].snakeBrain.crossOver(parent1.snakeBrain, parent2.snakeBrain)
         }
     }
 
     private fun mutate() {
-        val best5PercentIndex = (numberOfSurvival * 0.05).toInt()
+        val best5PercentIndex = (populationSize * 0.05).toInt()
 
         // e.g. assume populationMutationRate be 0.5, population size be 100, target mutation is 50
         // protect the best 5% from mutating -> 95 * 0.5 / 0.95 = 50
@@ -251,12 +250,10 @@ class GaModel(options: Options) {
         // where p is population size, x is population mutation rate, r is target mutation rate
         val mutationRateForRand = populationMutationRate / 0.95
 
-        population.forEachIndexed { index, individual ->
-            // prevent the best 5% from mutating
-            if (index < best5PercentIndex) return@forEachIndexed
-
+        // prevent the best 5% from mutating
+        for (i in best5PercentIndex..<populationSize) {
             if (CalcUtils.randomBool(mutationRateForRand)) {
-                individual.snakeBrain.mutate(geneMutationRate, mutationAmount)
+                population[i].snakeBrain.mutate(geneMutationRate, mutationAmount)
             }
         }
     }
